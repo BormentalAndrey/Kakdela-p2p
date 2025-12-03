@@ -1,10 +1,8 @@
 name: Unpack and Commit Project
 
-# можно запустить вручную из Actions -> Run workflow
 on:
   workflow_dispatch:
 
-# даём действие право писать в содержимое репозитория
 permissions:
   contents: write
 
@@ -12,56 +10,42 @@ jobs:
   unpack:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (with auth)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: true
           fetch-depth: 0
 
-      - name: Ensure unzip available
+      - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Ensure zip exists
+      - name: Check ZIP exists
         run: |
-          ZIP="kakdela_p2p_full.zip"
-          if [ ! -f "$ZIP" ]; then
-            echo "ZIP file '$ZIP' not found in repo root. Place it and re-run workflow."
-            ls -la
+          if [ ! -f "kakdela_p2p_full.zip" ]; then
+            echo "ZIP not found!"
             exit 1
           fi
-          echo "Found $ZIP"
 
-      - name: Unzip archive into temp folder
+      - name: Unzip into temp folder
         run: |
-          ZIP="kakdela_p2p_full.zip"
-          TMPDIR="tmp_unzip"
-          rm -rf "$TMPDIR"
-          mkdir -p "$TMPDIR"
-          unzip -o "$ZIP" -d "$TMPDIR"
-          echo "Unzipped to $TMPDIR"
-          ls -la "$TMPDIR" | sed -n '1,40p'
+          rm -rf temp_unzip
+          mkdir temp_unzip
+          unzip -o kakdela_p2p_full.zip -d temp_unzip
 
-      - name: Copy files to repository root (overwrite)
+      - name: Move files to root
         run: |
-          TMPDIR="tmp_unzip"
-          # copy including dotfiles; overwrite existing
-          shopt -s dotglob || true
-          cp -r "$TMPDIR"/* ./
-          # remove tmp
-          rm -rf "$TMPDIR"
-          echo "Copied files to repo root"
+          shopt -s dotglob
+          cp -r temp_unzip/* ./
+          rm -rf temp_unzip
 
-      - name: Optional: remove zip from repo root
+      - name: (Optional) keep ZIP
         run: |
-          # Uncomment to remove zip after unpack:
-          # git rm -f kakdela_p2p_full.zip || true
-          echo "ZIP remains in repo root. If you want to delete it automatically, uncomment git rm line."
+          echo "ZIP kept. Remove manually if needed."
 
-      - name: Commit & push changes
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Unpacked project from kakdela_p2p_full.zip (Action)" || echo "No changes to commit"
-          # push using checkout credentials (GITHUB_TOKEN)
-          git push origin HEAD:main || git push
+          git commit -m "Unpacked ZIP" || echo "No changes"
+          git push
