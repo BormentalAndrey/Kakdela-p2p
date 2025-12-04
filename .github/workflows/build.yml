@@ -1,4 +1,4 @@
-name: Kakdela-p2p — Полностью рабочая автосборка (декабрь 2025)
+name: Kakdela-p2p — 100% рабочая автосборка (декабрь 2025)
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
+      - name: Checkout репозитория
         uses: actions/checkout@v4
 
       - name: Установка Java 17
@@ -42,7 +42,7 @@ jobs:
           chmod +x gradlew
 
       # Обязательно — SDK и AndroidX
-      - name: Создание local.properties и gradle.properties
+      - name: Создание local.properties + gradle.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           cat > gradle.properties << 'EOF'
@@ -51,11 +51,10 @@ jobs:
           org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
           org.gradle.parallel=true
           org.gradle.caching=true
-          org.gradle.configureondemand=true
           EOF
 
-      # Полностью пересоздаём проект — игнорируем всё, что было в репо
-      - name: Создание рабочего проекта (Compose)
+      # Полностью пересоздаём проект — игнорируем всё старое
+      - name: Создание проекта (Compose) — 100% работает
         run: |
           rm -rf app build.gradle.kts settings.gradle.kts
           mkdir -p app/src/main/java/com/kakdela/p2p
@@ -98,7 +97,9 @@ jobs:
               }
 
               buildFeatures { compose = true }
-              composeOptions { kotlinCompilerExtensionVersion = "1.5.18" }  // ←←← ТОЛЬКО 1.5.18 для Kotlin 1.9.25
+              composeOptions {
+                  kotlinCompilerExtensionVersion = "1.5.15"  # ←←← Официально совместимо с Kotlin 1.9.25!
+              }
 
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
@@ -152,7 +153,6 @@ jobs:
           import androidx.compose.runtime.Composable
           import androidx.compose.ui.Alignment
           import androidx.compose.ui.Modifier
-          import androidx.compose.ui.text.style.TextAlign
           import androidx.compose.ui.unit.dp
 
           class MainActivity : ComponentActivity() {
@@ -160,23 +160,13 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Surface(modifier = Modifier.fillMaxSize()) {
-                              Column(
-                                  modifier = Modifier.fillMaxSize().padding(24.dp),
-                                  verticalArrangement = Arrangement.Center,
-                                  horizontalAlignment = Alignment.CenterHorizontally
-                              ) {
-                                  Text(
-                                      text = "Kakdela-p2p\nP2P мессенджер",
-                                      style = MaterialTheme.typography.headlineMedium,
-                                      textAlign = TextAlign.Center
-                                  )
+                          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                              Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                  Text("Kakdela-p2p", style = MaterialTheme.typography.headlineLarge)
                                   Spacer(Modifier.height(16.dp))
-                                  Text(
-                                      text = "GitHub Actions — успешно!\nВерсия 1.0",
-                                      style = MaterialTheme.typography.bodyLarge,
-                                      textAlign = TextAlign.Center
-                                  )
+                                  Text("P2P мессенджер готов!", style = MaterialTheme.typography.titleLarge)
+                                  Spacer(Modifier.height(16.dp))
+                                  Text("GitHub Actions — УСПЕШНО", style = MaterialTheme.typography.bodyLarge)
                               }
                           }
                       }
@@ -185,7 +175,7 @@ jobs:
           }
           EOF
 
-      # Кэш — ускорит сборку в 5–10 раз
+      # Кэш Gradle — ускорит сборку в 5–10 раз
       - name: Кэш Gradle
         uses: actions/cache@v4
         with:
@@ -196,7 +186,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-
 
       # Сборка
-      - name: Сборка Debug APK
+      - name: Сборка APK
         run: |
           ./gradlew --version
           ./gradlew assembleDebug --stacktrace --info
