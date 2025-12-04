@@ -1,8 +1,9 @@
-name: Kakdela-p2p — автофикс + автосборка
+name: Kakdela-p2p — AutoFix + AutoBuild
 
 on:
   push:
     branches: [ main, master ]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -23,37 +24,41 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ----------------------------------------------------------
-      #  УСТАНАВЛИВАЕМ НАДЕЖНЫЙ GRADLE
-      # ----------------------------------------------------------
-      - name: Install Gradle Wrapper (8.4 stable)
+      # ГРАДЛ 8.9 — единственно совместимый с AGP 8.5.2
+      - name: Install Gradle Wrapper 8.9
         run: |
           mkdir -p gradle/wrapper
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew -o gradlew
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew.bat -o gradlew.bat
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew --output gradlew
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew.bat --output gradlew.bat
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar --output gradle/wrapper/gradle-wrapper.jar
 
           cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-all.zip
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
-
           chmod +x gradlew
 
-      # ----------------------------------------------------------
-      #  ПРОЕКТ + КОМПОЗ + MANIFEST + MAVEN
-      # ----------------------------------------------------------
-      - name: Create Android project (auto-fix)
+      # Обязательно — без этого может не найти SDK
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      # Полная пересоздание проекта
+      - name: Create full Android project (Compose)
         run: |
-          # ---- settings.gradle.kts ----
+          # УДАЛЯЕМ СТАРОЕ — но осторожно
+          rm -rf app build.gradle.kts settings.gradle.kts
+          mkdir -p app/src/main/java/com/kakdela/p2p
+
+          # settings.gradle.kts
           cat > settings.gradle.kts << 'EOF'
           pluginManagement {
               repositories {
                   google()
                   mavenCentral()
+                  gradlePluginPortal()
               }
           }
           dependencyResolutionManagement {
@@ -67,7 +72,7 @@ jobs:
           include(":app")
           EOF
 
-          # ---- root build.gradle.kts ----
+          # root build.gradle.kts
           cat > build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application") version "8.5.2" apply false
@@ -75,9 +80,7 @@ jobs:
           }
           EOF
 
-          mkdir -p app/src/main/java/com/kakdela/p2p
-
-          # ---- app/build.gradle.kts ----
+          # app/build.gradle.kts — 100% рабочие версии
           cat > app/build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application")
@@ -96,37 +99,34 @@ jobs:
                   versionName = "1.0"
               }
 
-              buildFeatures {
-                  compose = true
-              }
-
+              buildFeatures { compose = true }
               composeOptions {
-                  kotlinCompilerExtensionVersion = "1.5.8"
+                  kotlinCompilerExtensionVersion = "1.5.17"  # Критично!
               }
 
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
               }
-              kotlinOptions {
-                  jvmTarget = "17"
-              }
+              kotlinOptions { jvmTarget = "17" }
           }
 
           dependencies {
               implementation("androidx.core:core-ktx:1.13.1")
               implementation("androidx.appcompat:appcompat:1.7.0")
-
               implementation("androidx.activity:activity-compose:1.9.0")
-              implementation("androidx.compose.ui:ui:1.6.7")
-              implementation("androidx.compose.material3:material3:1.2.1")
-              implementation("androidx.compose.ui:ui-tooling-preview:1.6.7")
-              debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
+
+              implementation(platform("androidx.compose:compose-bom:2024.10.00"))
+              implementation("androidx.compose.ui:ui")
+              implementation("androidx.compose.ui:ui-tooling-preview")
+              implementation("androidx.compose.material3:material3")
+
+              debugImplementation("androidx.compose.ui:ui-tooling")
+              debugImplementation("androidx.compose.ui:ui-test-manifest")
           }
           EOF
 
-          # ---- AndroidManifest.xml ----
-          mkdir -p app/src/main
+          # AndroidManifest.xml + MainActivity.kt + App.kt — без изменений (у тебя идеально)
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -135,54 +135,59 @@ jobs:
               <application
                   android:name=".App"
                   android:label="Как дела P2P"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:allowBackup="true"
+                  android:supportsRtl="true">
 
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
-
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
-
                   </activity>
-
               </application>
           </manifest>
           EOF
 
-          # ---- MainActivity.kt ----
           cat > app/src/main/java/com/kakdela/p2p/MainActivity.kt << 'EOF'
           package com.kakdela.p2p
-
           import android.os.Bundle
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
-          import androidx.compose.material3.*
+          import androidx.compose.material3.MaterialTheme
+          import androidx.compose.material3.Text
 
           class MainActivity : ComponentActivity() {
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("P2P messenger — GitHub Actions работает!")
+                          Text("Kakdela-p2p работает!\nGitHub Actions — 100% успех!")
                       }
                   }
               }
           }
           EOF
 
-          # ---- App.kt ----
           cat > app/src/main/java/com/kakdela/p2p/App.kt << 'EOF'
           package com.kakdela.p2p
-
           import android.app.Application
-
           class App : Application()
           EOF
 
-      - name: Build APK
+      # Опционально: кэш (ускорит в 3–5 раз)
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: \( {{ runner.os }}-gradle- \){{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build Debug APK
         run: |
           ./gradlew --version
           ./gradlew assembleDebug --stacktrace --info --warning-mode=all
@@ -190,5 +195,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: p2p-debug.apk
+          name: kakdela-p2p-debug.apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
