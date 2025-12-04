@@ -1,31 +1,38 @@
-name: Unpack ZIP to repository
+name: Unpack ZIP
 
 on:
   workflow_dispatch:
 
 jobs:
-  unzip:
+  unpack:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install unzip
-        run: sudo apt-get install -y unzip
+      - name: Check ZIP exists
+        run: |
+          if [ ! -f "KakDelaP2P_Full.zip" ]; then
+            echo "ZIP not found!"
+            exit 1
+          fi
 
-      - name: Unzip archive
-        run: unzip -o KakDelaP2P_Full.zip -d unzipped
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      - name: Unzip
+        run: unzip -o KakDelaP2P_Full.zip -d extracted
 
       - name: Move files
         run: |
-          cp -r unzipped/* ./
-          rm -rf unzipped
+          cp -r extracted/* ./
+          rm -rf extracted
 
       - name: Delete ZIP
         run: rm KakDelaP2P_Full.zip
 
-      - name: Commit changes
+      - name: Commit and push
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
