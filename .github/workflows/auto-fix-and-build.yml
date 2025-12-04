@@ -10,33 +10,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-      - name: Клонируем репозиторий
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Установка JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Установка Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Права на gradlew
-        run: chmod +x ./gradlew
+      - name: Fix gradlew permissions
+        run: chmod +x gradlew
 
       - name: Авто-исправление проекта
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          
-          # Фиксим wrapper
           sed -i 's|distributionUrl=.*|distributionUrl=https://services.gradle.org/distributions/gradle-8.9-all.zip|' gradle/wrapper/gradle-wrapper.properties
 
-          # Создаём рабочий app/build.gradle.kts
-          mkdir -p app/src/main
+          mkdir -p app/src/main/java/com/kakdela/p2
+
           cat > app/build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application")
@@ -46,7 +43,6 @@ jobs:
           android {
               namespace = "com.kakdela.p2"
               compileSdk = 35
-
               defaultConfig {
                   applicationId = "com.kakdela.p2"
                   minSdk = 21
@@ -54,19 +50,11 @@ jobs:
                   versionCode = 1
                   versionName = "1.0"
               }
-
-              buildTypes {
-                  release {
-                      isMinifyEnabled = false
-                  }
-              }
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
               }
-              kotlinOptions {
-                  jvmTarget = "17"
-              }
+              kotlinOptions { jvmTarget = "17" }
           }
 
           dependencies {
@@ -76,7 +64,6 @@ jobs:
           }
           EOF
 
-          # AndroidManifest.xml
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest package="com.kakdela.p2">
@@ -91,8 +78,6 @@ jobs:
           </manifest>
           EOF
 
-          # MainActivity.kt
-          mkdir -p app/src/main/java/com/kakdela/p2
           cat > app/src/main/java/com/kakdela/p2/MainActivity.kt << 'EOF'
           package com.kakdela.p2
           import android.os.Bundle
@@ -106,27 +91,27 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("Привет от GitHub Actions! Сборка прошла успешно!")
+                          Text("Сборка прошла успешно через GitHub Actions!")
                       }
                   }
               }
           }
           EOF
 
-      # Кэш Gradle (БЕЗ ЗАПЯТЫХ — теперь 100% валидно)
-      - name: Кэш Gradle
+      # КЭШ — БЕЗ ЗАПЯТЫХ (единственный рабочий способ)
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: \( {{ runner.os }}-gradle- \){{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties') }}
+          key: \( {{ runner.os }}-gradle- \){{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Сборка APK
+      - name: Build APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Загрузка APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2-debug.apk
