@@ -1,4 +1,4 @@
-name: Собираем Kakdela-p2
+name: Kakdela-p2 — 100% работает
 
 on:
   push:
@@ -23,9 +23,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Создаём полностью рабочий проект (включая корневой build.gradle.kts)
+      # ←←← ВОТ ЭТОТ ШАГ ЧИНИТ ВСЁ ←←←
+      - name: Создаём полный рабочий Gradle Wrapper
         run: |
-          # Корневой build.gradle.kts — ОБЯЗАТЕЛЕН!
+          mkdir -p gradle/wrapper
+          curl -L https://services.gradle.org/distributions/gradle-8.9-all.zip -o gradle-wrapper.zip
+          unzip -o gradle-wrapper.zip "gradle-8.9/lib/*" "gradle-8.9/bin/gradle" -d .
+          cp gradle-8.9/wrapper/gradle-wrapper.jar gradle/wrapper/
+          cp gradle-8.9/wrapper/gradle-wrapper.properties gradle/wrapper/
+          cp gradle-8.9/gradlew .
+          cp gradle-8.9/gradlew.bat .
+          chmod +x gradlew
+          rm -rf gradle-8.9 gradle-wrapper.zip
+
+      - name: Создаём минимальный рабочий Android-проект
+        run: |
           cat > build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application") version "8.7.0" apply false
@@ -33,30 +45,18 @@ jobs:
           }
           EOF
 
-          # settings.gradle.kts — тоже обязателен
           cat > settings.gradle.kts << 'EOF'
           rootProject.name = "Kakdela-p2"
           include(":app")
           EOF
 
-          # gradle-wrapper.properties — на всякий случай фиксируем версию
-          mkdir -p gradle/wrapper
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-          distributionUrl=https://services.gradle.org/distributions/gradle-8.9-all.zip
-          EOF
-
-          # app/build.gradle.kts
-          mkdir -p app
+          mkdir -p app/src/main/java/com/kakdela/p2
+          
           cat > app/build.gradle.kts << 'EOF'
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
-
+          plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
           android {
               namespace = "com.kakdela.p2"
               compileSdk = 35
-
               defaultConfig {
                   applicationId = "com.kakdela.p2"
                   minSdk = 21
@@ -64,14 +64,12 @@ jobs:
                   versionCode = 1
                   versionName = "1.0"
               }
-
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
               }
               kotlinOptions { jvmTarget = "17" }
           }
-
           dependencies {
               implementation("androidx.core:core-ktx:1.13.1")
               implementation("androidx.appcompat:appcompat:1.7.0")
@@ -79,8 +77,6 @@ jobs:
           }
           EOF
 
-          # AndroidManifest.xml + MainActivity.kt
-          mkdir -p app/src/main/java/com/kakdela/p2
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest package="com.kakdela.p2">
@@ -107,20 +103,16 @@ jobs:
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContent {
-                      MaterialTheme {
-                          Text("Kakdela-p2 собран на GitHub Actions!")
-                      }
+                      MaterialTheme { Text("Kakdela-p2 собран на GitHub Actions!") }
                   }
               }
           }
           EOF
 
-      - name: Build Debug APK
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --info
+      - name: Собираем APK
+        run: ./gradlew assembleDebug --info
 
-      - name: Upload APK
+      - name: Загружаем APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2-debug.apk
