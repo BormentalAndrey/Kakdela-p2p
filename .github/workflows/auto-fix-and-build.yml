@@ -24,34 +24,31 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ГАРАНТИРОВАННАЯ установка Gradle Wrapper
+      # УСТАНАВЛИВАЕМ СТАБИЛЬНУЮ РАБОЧУЮ ВЕРСИЮ GRADLE
       - name: Установка Gradle Wrapper
         run: |
           mkdir -p gradle/wrapper
-          
-          # Скачиваем напрямую с официального репозитория Gradle
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew --output gradlew
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew.bat --output gradlew.bat
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar --output gradle/wrapper/gradle-wrapper.jar
-          
-          # ПИШЕМ ПРАВИЛЬНЫЙ gradle-wrapper.properties ПРИНУДИТЕЛЬНО
+
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew --output gradlew
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew.bat --output gradlew.bat
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar --output gradle/wrapper/gradle-wrapper.jar
+
           cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-all.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
-          
+
           chmod +x gradlew
 
-      # Создаём проект
       - name: Создание проекта
         run: |
           cat > build.gradle.kts << 'EOF'
           plugins {
-              id("com.android.application") version "8.7.0" apply false
-              id("org.jetbrains.kotlin.android") version "2.0.20" apply false
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.25" apply false
           }
           EOF
 
@@ -93,13 +90,15 @@ jobs:
               implementation("androidx.core:core-ktx:1.13.1")
               implementation("androidx.appcompat:appcompat:1.7.0")
               implementation("com.google.android.material:material:1.12.0")
+              implementation("androidx.activity:activity-compose:1.9.0")
+              implementation("androidx.compose.material3:material3:1.2.1")
           }
           EOF
 
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest package="com.kakdela.p2">
-              <application android:label="Kakdela-p2">
+              <application android:label="Как дела?">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN"/>
@@ -123,20 +122,18 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("Kakdela-p2 собран на GitHub Actions! УРА!")
+                          Text("Как дела? — Работает на GitHub Actions!")
                       }
                   }
               }
           }
           EOF
 
-      # Сборка с полной отладкой — теперь ты увидишь настоящую ошибку, если она будет
       - name: Сборка APK
         run: |
           ./gradlew --version
           ./gradlew assembleDebug --stacktrace --info --warning-mode=all
 
-      # Загрузка APK
       - name: Загрузка APK
         uses: actions/upload-artifact@v4
         with:
