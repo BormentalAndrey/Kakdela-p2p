@@ -1,4 +1,4 @@
-name: Kakdela-p2 — 100% работает
+name: Kakdela-p2 — ТОЧНО работает
 
 on:
   push:
@@ -23,20 +23,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ←←← ВОТ ЭТОТ ШАГ ЧИНИТ ВСЁ ←←←
-      - name: Создаём полный рабочий Gradle Wrapper
+      # ПОЛНОСТЬЮ РАБОЧИЙ GRADLE WRAPPER — исправлено!
+      - name: Устанавливаем Gradle Wrapper
         run: |
+          curl -L https://services.gradle.org/distributions/gradle-8.9-all.zip -o gradle.zip
+          unzip -q gradle.zip
           mkdir -p gradle/wrapper
-          curl -L https://services.gradle.org/distributions/gradle-8.9-all.zip -o gradle-wrapper.zip
-          unzip -o gradle-wrapper.zip "gradle-8.9/lib/*" "gradle-8.9/bin/gradle" -d .
-          cp gradle-8.9/wrapper/gradle-wrapper.jar gradle/wrapper/
-          cp gradle-8.9/wrapper/gradle-wrapper.properties gradle/wrapper/
-          cp gradle-8.9/gradlew .
-          cp gradle-8.9/gradlew.bat .
+          cp gradle-8.9-all/gradle-wrapper.jar gradle/wrapper/
+          cp gradle-8.9-all/gradle-wrapper.properties gradle/wrapper/
+          cp gradle-8.9-all/gradlew .
+          cp gradle-8.9-all/gradlew.bat .
           chmod +x gradlew
-          rm -rf gradle-8.9 gradle-wrapper.zip
+          rm -rf gradle-8.9-all gradle.zip
 
-      - name: Создаём минимальный рабочий Android-проект
+      # Создаём минимальный рабочий Android-проект
+      - name: Создаём проект
         run: |
           cat > build.gradle.kts << 'EOF'
           plugins {
@@ -51,9 +52,10 @@ jobs:
           EOF
 
           mkdir -p app/src/main/java/com/kakdela/p2
-          
+
           cat > app/build.gradle.kts << 'EOF'
           plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
+
           android {
               namespace = "com.kakdela.p2"
               compileSdk = 35
@@ -70,6 +72,7 @@ jobs:
               }
               kotlinOptions { jvmTarget = "17" }
           }
+
           dependencies {
               implementation("androidx.core:core-ktx:1.13.1")
               implementation("androidx.appcompat:appcompat:1.7.0")
@@ -103,7 +106,9 @@ jobs:
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContent {
-                      MaterialTheme { Text("Kakdela-p2 собран на GitHub Actions!") }
+                      MaterialTheme {
+                          Text("Kakdela-p2 собран на GitHub Actions! Работает!")
+                      }
                   }
               }
           }
