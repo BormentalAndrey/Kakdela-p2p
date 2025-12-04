@@ -1,0 +1,1 @@
+rootProject.name = "KakDelaP2P_Full"\ninclude(":app")\n
