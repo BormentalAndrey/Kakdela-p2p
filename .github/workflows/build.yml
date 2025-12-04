@@ -1,0 +1,73 @@
+name: Auto Build Android App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # ОС для сборки (Linux для скорости)
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4  # Клонирует репозиторий
+
+    - name: Set up JDK 17  # Java для Android (актуальная версия)
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew  # Делаем gradlew исполняемым
+      run: chmod +x gradlew
+
+    - name: Unpack ZIP if present (optional, based on your project)  # Расширение вашего unpack-логика; адаптируйте под нужный ZIP
+      run: |
+        if [ -f "source.zip" ]; then  # Предполагаем ZIP в корне; замените на реальный
+          unzip source.zip -d .
+          git add .
+          git commit -m "Unpacked and committed updates" || echo "No changes to commit"
+        fi
+
+    - name: Cache Gradle dependencies  # Кэшируем зависимости для ускорения
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: \( {{ runner.os }}-gradle- \){{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Run tests  # Unit-тесты
+      run: ./gradlew test
+
+    - name: Build Debug APK  # Сборка debug-версии
+      run: ./gradlew assembleDebug
+
+    - name: Build Release AAB (optional, for production)  # AAB для Google Play; требует signing config в build.gradle
+      run: ./gradlew bundleRelease
+      env:
+        SIGNING_KEY: ${{ secrets.SIGNING_KEY }}  # Добавьте секреты в GitHub Settings для подписи
+
+    - name: Upload APK artifact  # Загружаем APK как артефакт (скачиваемый)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug.apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Upload AAB artifact (if built)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release.aab
+        path: app/build/outputs/bundle/release/app-release.aab
+
+    - name: Notify on failure (optional)
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Интеграция с Slack, если нужно
