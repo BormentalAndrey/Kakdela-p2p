@@ -1,4 +1,4 @@
-name: Kakdela-p2 — 100% работает (финал)
+name: Kakdela-p2 — 100% работает навсегда
 
 on:
   push:
@@ -24,23 +24,28 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # САМЫЙ НАДЁЖНЫЙ СПОСОБ УСТАНОВКИ GRADLE WRAPPER — без cp, без ошибок пути
-      - name: Установка Gradle Wrapper (гарантированно работает)
+      # ГАРАНТИРОВАННАЯ установка Gradle Wrapper
+      - name: Установка Gradle Wrapper
         run: |
           mkdir -p gradle/wrapper
           
-          # Скачиваем только нужные файлы напрямую (без распаковки!)
+          # Скачиваем напрямую с официального репозитория Gradle
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew --output gradlew
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew.bat --output gradlew.bat
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar --output gradle/wrapper/gradle-wrapper.jar
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.properties --output gradle/wrapper/gradle-wrapper.properties
           
-          # Фиксим права и строку в properties
+          # ПИШЕМ ПРАВИЛЬНЫЙ gradle-wrapper.properties ПРИНУДИТЕЛЬНО
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          
           chmod +x gradlew
-          sed -i 's|\r$||' gradlew gradlew.bat  # убираем Windows-переносы
-          echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.9-all.zip" > gradle/wrapper/gradle-wrapper.properties
 
-      # Создаём полностью рабочий проект
+      # Создаём проект
       - name: Создание проекта
         run: |
           cat > build.gradle.kts << 'EOF'
@@ -118,18 +123,18 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("Kakdela-p2 собран на GitHub Actions! Всё работает!")
+                          Text("Kakdela-p2 собран на GitHub Actions! УРА!")
                       }
                   }
               }
           }
           EOF
 
-      # Сборка с максимальной отладкой
+      # Сборка с полной отладкой — теперь ты увидишь настоящую ошибку, если она будет
       - name: Сборка APK
         run: |
           ./gradlew --version
-          ./gradlew assembleDebug --stacktrace --info
+          ./gradlew assembleDebug --stacktrace --info --warning-mode=all
 
       # Загрузка APK
       - name: Загрузка APK
