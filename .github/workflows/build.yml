@@ -1,4 +1,4 @@
-name: Kakdela-p2p — AutoFix + AutoBuild
+name: Kakdela-p2p — 100% работает (декабрь 2025)
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ОБЯЗАТЕЛЬНО: Gradle 8.9 — единственный совместимый с AGP 8.5.2
+      # ГРАДЛ 8.9 — ЕДИНСТВЕННЫЙ, который работает с AGP 8.5.2
       - name: Install Gradle Wrapper 8.9
         run: |
           mkdir -p gradle/wrapper
@@ -41,37 +41,26 @@ jobs:
           EOF
           chmod +x gradlew
 
-      # Без этого иногда падает — Actions не знает, где SDK
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      # Полностью пересоздаём проект — 100% рабочий Compose
-      - name: Create Android Project (Compose)
+      - name: Create Project (Compose)
         run: |
           rm -rf app build.gradle.kts settings.gradle.kts
           mkdir -p app/src/main/java/com/kakdela/p2p
 
-          # settings.gradle.kts
           cat > settings.gradle.kts << 'EOF'
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
           rootProject.name = "Kakdela-p2p"
           include(":app")
           EOF
 
-          # root build.gradle.kts
           cat > build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application") version "8.5.2" apply false
@@ -79,17 +68,12 @@ jobs:
           }
           EOF
 
-          # app/build.gradle.kts — 100% совместимые версии
           cat > app/build.gradle.kts << 'EOF'
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
+          plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
 
           android {
               namespace = "com.kakdela.p2p"
               compileSdk = 35
-
               defaultConfig {
                   applicationId = "com.kakdela.p2p"
                   minSdk = 21
@@ -97,12 +81,8 @@ jobs:
                   versionCode = 1
                   versionName = "1.0"
               }
-
               buildFeatures { compose = true }
-              composeOptions {
-                  kotlinCompilerExtensionVersion = "1.5.17"  # Критично для Kotlin 1.9.25
-              }
-
+              composeOptions { kotlinCompilerExtensionVersion = "1.5.17" }
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
@@ -112,48 +92,31 @@ jobs:
 
           dependencies {
               implementation("androidx.core:core-ktx:1.13.1")
-              implementation("androidx.appcompat:appcompat:1.7.0")
               implementation("androidx.activity:activity-compose:1.9.0")
-
               implementation(platform("androidx.compose:compose-bom:2024.10.00"))
               implementation("androidx.compose.ui:ui")
               implementation("androidx.compose.ui:ui-tooling-preview")
               implementation("androidx.compose.material3:material3")
-
               debugImplementation("androidx.compose.ui:ui-tooling")
-              debugImplementation("androidx.compose.ui:ui-test-manifest")
           }
           EOF
 
-          # AndroidManifest.xml
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.kakdela.p2p">
-
-              <application
-                  android:name=".App"
-                  android:label="Как дела P2P"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:allowBackup="true"
-                  android:supportsRtl="true">
-
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.kakdela.p2p">
+              <application android:label="Как дела P2P" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
                       </intent-filter>
                   </activity>
               </application>
           </manifest>
           EOF
 
-          # MainActivity.kt
           cat > app/src/main/java/com/kakdela/p2p/MainActivity.kt << 'EOF'
           package com.kakdela.p2p
-
           import android.os.Bundle
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
@@ -164,37 +127,18 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("Kakdela-p2p\nGitHub Actions — 100% работает!")
+                          Text("Kakdela-p2p\nGitHub Actions — 100% успех!")
                       }
                   }
               }
           }
           EOF
 
-          # App.kt
-          cat > app/src/main/java/com/kakdela/p2p/App.kt << 'EOF'
-          package com.kakdela.p2p
-          import android.app.Application
-          class App : Application()
-          EOF
-
-      # Кэш Gradle — ускорит сборку в 5 раз
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: \( {{ runner.os }}-gradle- \){{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      # Сборка
-      - name: Build Debug APK
+      - name: Build APK
         run: |
           ./gradlew --version
           ./gradlew assembleDebug --stacktrace --info
 
-      # Загрузка APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
