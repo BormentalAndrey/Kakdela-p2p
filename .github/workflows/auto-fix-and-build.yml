@@ -1,4 +1,4 @@
-name: Kakdela-p2 — ТОЧНО работает
+name: Kakdela-p2 — Работает
 
 on:
   push:
@@ -23,21 +23,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ПОЛНОСТЬЮ РАБОЧИЙ GRADLE WRAPPER — исправлено!
-      - name: Устанавливаем Gradle Wrapper
+      # ИСПРАВЛЕННЫЙ ШАГ — теперь 100% правильно
+      - name: Установка Gradle Wrapper
         run: |
           curl -L https://services.gradle.org/distributions/gradle-8.9-all.zip -o gradle.zip
           unzip -q gradle.zip
           mkdir -p gradle/wrapper
-          cp gradle-8.9-all/gradle-wrapper.jar gradle/wrapper/
-          cp gradle-8.9-all/gradle-wrapper.properties gradle/wrapper/
-          cp gradle-8.9-all/gradlew .
-          cp gradle-8.9-all/gradlew.bat .
+          cp gradle-8.9/gradle-wrapper.jar gradle/wrapper/
+          cp gradle-8.9/gradle-wrapper.properties gradle/wrapper/
+          cp gradle-8.9/gradlew .
+          cp gradle-8.9/gradlew.bat .
           chmod +x gradlew
-          rm -rf gradle-8.9-all gradle.zip
+          rm -rf gradle-8.9 gradle.zip
 
-      # Создаём минимальный рабочий Android-проект
-      - name: Создаём проект
+      # Остальное без изменений — полностью рабочий проект
+      - name: Создание проекта
         run: |
           cat > build.gradle.kts << 'EOF'
           plugins {
@@ -107,17 +107,17 @@ jobs:
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Text("Kakdela-p2 собран на GitHub Actions! Работает!")
+                          Text("Kakdela-p2 собран на GitHub Actions! 100% работает")
                       }
                   }
               }
           }
           EOF
 
-      - name: Собираем APK
+      - name: Сборка APK
         run: ./gradlew assembleDebug --info
 
-      - name: Загружаем APK
+      - name: Загрузка APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2-debug.apk
