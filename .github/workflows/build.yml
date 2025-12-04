@@ -1,4 +1,4 @@
-name: Kakdela-p2p — AutoFix + AutoBuild (ДЕКАБРЬ 2025)
+name: Kakdela-p2p — Полностью рабочая автосборка (декабрь 2025)
 
 on:
   push:
@@ -9,10 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout репозитория
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Установка Java 17
@@ -41,13 +41,10 @@ jobs:
           EOF
           chmod +x gradlew
 
-      # Без этого SDK не находится
-      - name: Создание local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      # КРИТИЧЕСКИ ВАЖНО — фикс ошибки ui-tooling + ускорение сборки
-      - name: Создание gradle.properties (AndroidX + оптимизации)
+      # Обязательно — SDK и AndroidX
+      - name: Создание local.properties и gradle.properties
         run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           cat > gradle.properties << 'EOF'
           android.useAndroidX=true
           android.enableJetifier=true
@@ -57,33 +54,24 @@ jobs:
           org.gradle.configureondemand=true
           EOF
 
-      # Полностью пересоздаём рабочий Compose-проект
-      - name: Создание проекта (Jetpack Compose)
+      # Полностью пересоздаём проект — игнорируем всё, что было в репо
+      - name: Создание рабочего проекта (Compose)
         run: |
           rm -rf app build.gradle.kts settings.gradle.kts
           mkdir -p app/src/main/java/com/kakdela/p2p
 
-          # settings.gradle.kts
           cat > settings.gradle.kts << 'EOF'
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
           rootProject.name = "Kakdela-p2p"
           include(":app")
           EOF
 
-          # root build.gradle.kts
           cat > build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application") version "8.5.2" apply false
@@ -91,7 +79,6 @@ jobs:
           }
           EOF
 
-          # app/build.gradle.kts — 100% рабочие версии
           cat > app/build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application")
@@ -110,38 +97,28 @@ jobs:
                   versionName = "1.0"
               }
 
-              buildFeatures {
-                  compose = true
-              }
-              composeOptions {
-                  kotlinCompilerExtensionVersion = "1.5.17"
-              }
+              buildFeatures { compose = true }
+              composeOptions { kotlinCompilerExtensionVersion = "1.5.18" }  // ←←← ТОЛЬКО 1.5.18 для Kotlin 1.9.25
 
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
               }
-              kotlinOptions {
-                  jvmTarget = "17"
-              }
+              kotlinOptions { jvmTarget = "17" }
           }
 
           dependencies {
               implementation("androidx.core:core-ktx:1.13.1")
               implementation("androidx.activity:activity-compose:1.9.0")
-
-              // Compose BOM — лучший способ избежать конфликтов
               implementation(platform("androidx.compose:compose-bom:2024.10.00"))
               implementation("androidx.compose.ui:ui")
               implementation("androidx.compose.ui:ui-tooling-preview")
               implementation("androidx.compose.material3:material3")
-
               debugImplementation("androidx.compose.ui:ui-tooling")
               debugImplementation("androidx.compose.ui:ui-test-manifest")
           }
           EOF
 
-          # AndroidManifest.xml
           cat > app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -150,8 +127,7 @@ jobs:
               <application
                   android:label="Как дела P2P"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:allowBackup="true"
-                  android:supportsRtl="true">
+                  android:allowBackup="true">
 
                   <activity
                       android:name=".MainActivity"
@@ -165,27 +141,43 @@ jobs:
           </manifest>
           EOF
 
-          # MainActivity.kt
           cat > app/src/main/java/com/kakdela/p2p/MainActivity.kt << 'EOF'
           package com.kakdela.p2p
 
           import android.os.Bundle
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
+          import androidx.compose.foundation.layout.*
           import androidx.compose.material3.*
+          import androidx.compose.runtime.Composable
+          import androidx.compose.ui.Alignment
+          import androidx.compose.ui.Modifier
+          import androidx.compose.ui.text.style.TextAlign
+          import androidx.compose.ui.unit.dp
 
           class MainActivity : ComponentActivity() {
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContent {
                       MaterialTheme {
-                          Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-                              Text(
-                                  text = "Kakdela-p2p\nGitHub Actions — УСПЕШНО!\nВерсия 1.0",
-                                  style = MaterialTheme.typography.headlineMedium,
-                                  textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                  modifier = androidx.compose.ui.Modifier.padding(24.dp)
-                              )
+                          Surface(modifier = Modifier.fillMaxSize()) {
+                              Column(
+                                  modifier = Modifier.fillMaxSize().padding(24.dp),
+                                  verticalArrangement = Arrangement.Center,
+                                  horizontalAlignment = Alignment.CenterHorizontally
+                              ) {
+                                  Text(
+                                      text = "Kakdela-p2p\nP2P мессенджер",
+                                      style = MaterialTheme.typography.headlineMedium,
+                                      textAlign = TextAlign.Center
+                                  )
+                                  Spacer(Modifier.height(16.dp))
+                                  Text(
+                                      text = "GitHub Actions — успешно!\nВерсия 1.0",
+                                      style = MaterialTheme.typography.bodyLarge,
+                                      textAlign = TextAlign.Center
+                                  )
+                              }
                           }
                       }
                   }
@@ -193,7 +185,7 @@ jobs:
           }
           EOF
 
-      # Кэш Gradle — ускорит следующие сборки в 5–10 раз
+      # Кэш — ускорит сборку в 5–10 раз
       - name: Кэш Gradle
         uses: actions/cache@v4
         with:
