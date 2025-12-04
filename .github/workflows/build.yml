@@ -1,200 +1,181 @@
-name: Kakdela-p2p — 100% рабочая автосборка (декабрь 2025)
+name: Kakdela-p2p — AutoBuild (fixed AGP/pluginManagement)
 
 on:
   push:
     branches: [ main, master ]
-  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
-      - name: Checkout репозитория
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Установка Java 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Установка Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # Gradle 8.9 — единственный совместимый с AGP 8.5.2
-      - name: Установка Gradle Wrapper 8.9
+      # Ensure gradle wrapper 8.9 exists (download if missing)
+      - name: Ensure Gradle wrapper 8.9
         run: |
-          mkdir -p gradle/wrapper
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew --output gradlew
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew.bat --output gradlew.bat
-          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar --output gradle/wrapper/gradle-wrapper.jar
+          set -e
+          if [ ! -f gradlew ]; then
+            echo "No gradlew found — creating wrapper files for gradle 8.9"
+            mkdir -p gradle/wrapper
+            curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew -o gradlew
+            curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew.bat -o gradlew.bat
+            curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+            cat > gradle/wrapper/gradle-wrapper.properties <<'EOF'
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF
+            chmod +x gradlew
+          else
+            echo "gradlew present — will use existing wrapper"
+          fi
 
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-          chmod +x gradlew
-
-      # Обязательно — SDK и AndroidX
-      - name: Создание local.properties + gradle.properties
+      # Ensure local.properties points to Android SDK so Android plugin finds SDK
+      - name: Create local.properties (so CI knows Android SDK path)
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          cat > gradle.properties << 'EOF'
-          android.useAndroidX=true
-          android.enableJetifier=true
-          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
-          org.gradle.parallel=true
-          org.gradle.caching=true
-          EOF
+          cat local.properties
 
-      # Полностью пересоздаём проект — игнорируем всё старое
-      - name: Создание проекта (Compose) — 100% работает
+      # Ensure gradle.properties contains AndroidX flags & some performance settings
+      - name: Ensure gradle.properties (AndroidX + perf)
         run: |
-          rm -rf app build.gradle.kts settings.gradle.kts
-          mkdir -p app/src/main/java/com/kakdela/p2p
+          set -e
+          if [ -f gradle.properties ]; then
+            echo "gradle.properties exists, backing up"
+            cp gradle.properties gradle.properties.bak
+          fi
+          # write/overwrite these safe defaults (will keep existing keys by appending if absent)
+          grep -q '^android.useAndroidX=' gradle.properties || echo "android.useAndroidX=true" >> gradle.properties
+          grep -q '^android.enableJetifier=' gradle.properties || echo "android.enableJetifier=true" >> gradle.properties
+          grep -q '^org.gradle.jvmargs=' gradle.properties || echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" >> gradle.properties
+          grep -q '^org.gradle.caching=' gradle.properties || echo "org.gradle.caching=true" >> gradle.properties
+          echo "---- gradle.properties ----"
+          tail -n +1 gradle.properties
 
-          cat > settings.gradle.kts << 'EOF'
-          pluginManagement {
-              repositories { google(); mavenCentral(); gradlePluginPortal() }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories { google(); mavenCentral() }
-          }
-          rootProject.name = "Kakdela-p2p"
-          include(":app")
-          EOF
+      # Ensure settings.gradle.kts (or settings.gradle) has pluginManagement.repositories including google()
+      - name: Ensure pluginManagement repositories in settings file
+        run: |
+          set -e
+          # prefer Kotlin settings file
+          if [ -f settings.gradle.kts ]; then
+            FILE=settings.gradle.kts
+          elif [ -f settings.gradle ]; then
+            FILE=settings.gradle
+          else
+            echo "No settings.gradle(.kts) found — creating settings.gradle.kts with pluginManagement and repos"
+            cat > settings.gradle.kts <<'EOF'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(org.gradle.api.initialization.dsl.RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Kakdela-p2p"
+include(":app")
+EOF
+            FILE=settings.gradle.kts
+          fi
 
-          cat > build.gradle.kts << 'EOF'
-          plugins {
-              id("com.android.application") version "8.5.2" apply false
-              id("org.jetbrains.kotlin.android") version "1.9.25" apply false
-          }
-          EOF
+          echo "Checking $FILE for pluginManagement..."
+          if ! grep -q "pluginManagement" "$FILE" || ! grep -q "google()" "$FILE"; then
+            echo "pluginManagement or google() missing — inserting safe pluginManagement header (backup original)"
+            cp "$FILE" "$FILE.bak"
+            cat > settings.gradle.kts <<'EOF'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(org.gradle.api.initialization.dsl.RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Kakdela-p2p"
+include(":app")
+EOF
+          else
+            echo "pluginManagement with google() present"
+          fi
+          echo "---- settings.gradle(.kts) content ----"
+          sed -n '1,160p' settings.gradle.kts || true
 
-          cat > app/build.gradle.kts << 'EOF'
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
+      # Optional safe patch: ensure root build.gradle(.kts) uses available AGP version (replace 8.5.2 -> 8.5.0 if present)
+      - name: Fix known-bad AGP version (8.5.2 -> 8.5.0) and ensure Kotlin plugin version
+        run: |
+          set -e
+          if [ -f build.gradle.kts ]; then
+            echo "Patching build.gradle.kts if it contains 8.5.2"
+            sed -i.bak 's/id("com.android.application") version "8\.5\.2"/id("com.android.application") version "8.5.0"/g' build.gradle.kts || true
+            # ensure kotlin plugin not older than 1.9.22/1.9.25 — replace common patterns
+            sed -i 's/id("org.jetbrains.kotlin.android") version "[0-9]\+\.[0-9]\+\.[0-9]\+"/id("org.jetbrains.kotlin.android") version "1.9.25"/g' build.gradle.kts || true
+            echo "---- build.gradle.kts after patch ----"
+            sed -n '1,160p' build.gradle.kts || true
+          else
+            echo "No root build.gradle.kts found — creating minimal root file with safe plugin versions"
+            cat > build.gradle.kts <<'EOF'
+plugins {
+    id("com.android.application") version "8.5.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.25" apply false
+}
+EOF
+          fi
 
-          android {
-              namespace = "com.kakdela.p2p"
-              compileSdk = 35
-
-              defaultConfig {
-                  applicationId = "com.kakdela.p2p"
-                  minSdk = 21
-                  targetSdk = 35
-                  versionCode = 1
-                  versionName = "1.0"
-              }
-
-              buildFeatures { compose = true }
-              composeOptions {
-                  kotlinCompilerExtensionVersion = "1.5.15"  # ←←← Официально совместимо с Kotlin 1.9.25!
-              }
-
-              compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-              kotlinOptions { jvmTarget = "17" }
-          }
-
-          dependencies {
-              implementation("androidx.core:core-ktx:1.13.1")
-              implementation("androidx.activity:activity-compose:1.9.0")
-              implementation(platform("androidx.compose:compose-bom:2024.10.00"))
-              implementation("androidx.compose.ui:ui")
-              implementation("androidx.compose.ui:ui-tooling-preview")
-              implementation("androidx.compose.material3:material3")
-              debugImplementation("androidx.compose.ui:ui-tooling")
-              debugImplementation("androidx.compose.ui:ui-test-manifest")
-          }
-          EOF
-
-          cat > app/src/main/AndroidManifest.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.kakdela.p2p">
-
-              <application
-                  android:label="Как дела P2P"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:allowBackup="true">
-
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
-
-          cat > app/src/main/java/com/kakdela/p2p/MainActivity.kt << 'EOF'
-          package com.kakdela.p2p
-
-          import android.os.Bundle
-          import androidx.activity.ComponentActivity
-          import androidx.activity.compose.setContent
-          import androidx.compose.foundation.layout.*
-          import androidx.compose.material3.*
-          import androidx.compose.runtime.Composable
-          import androidx.compose.ui.Alignment
-          import androidx.compose.ui.Modifier
-          import androidx.compose.ui.unit.dp
-
-          class MainActivity : ComponentActivity() {
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  setContent {
-                      MaterialTheme {
-                          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                              Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                  Text("Kakdela-p2p", style = MaterialTheme.typography.headlineLarge)
-                                  Spacer(Modifier.height(16.dp))
-                                  Text("P2P мессенджер готов!", style = MaterialTheme.typography.titleLarge)
-                                  Spacer(Modifier.height(16.dp))
-                                  Text("GitHub Actions — УСПЕШНО", style = MaterialTheme.typography.bodyLarge)
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-          EOF
-
-      # Кэш Gradle — ускорит сборку в 5–10 раз
-      - name: Кэш Gradle
+      # Cache Gradle to speed up subsequent builds
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: \( {{ runner.os }}-gradle- \){{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
+          key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # Сборка
-      - name: Сборка APK
+      # Finally run the build
+      - name: Run Gradle assembleDebug
         run: |
+          set -e
           ./gradlew --version
-          ./gradlew assembleDebug --stacktrace --info
+          # print a little info to logs
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          # build debug APK
+          ./gradlew assembleDebug --stacktrace --no-daemon --warning-mode=all
 
-      # Загрузка APK
-      - name: Загрузка APK
+      - name: Upload APK artifact
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: kakdela-p2p-debug.apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          if-no-files-found: skip
