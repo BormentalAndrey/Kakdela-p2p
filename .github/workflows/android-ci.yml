@@ -10,13 +10,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}        # путь к keystore, если есть
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
     steps:
-      # 1️⃣ Получаем код
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Проверяем структуру репозитория
-      - name: List all files in repo
+      # 2️⃣ Проверка структуры проекта
+      - name: List repo files
         run: ls -R
 
       # 3️⃣ Проверяем gradlew
@@ -27,7 +33,7 @@ jobs:
             chmod +x ./gradlew
             ./gradlew --version
           else
-            echo "Error: gradlew not found!"
+            echo "gradlew not found!"
             exit 1
           fi
 
@@ -38,40 +44,41 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # 5️⃣ Кэшируем Gradle для ускорения сборки
+      # 5️⃣ Кэш Gradle
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper/
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-
 
-      # 6️⃣ Устанавливаем правильную версию Gradle через wrapper
-      - name: Ensure Gradle Wrapper 8.3
+      # 6️⃣ Устанавливаем Gradle 8.3 через wrapper
+      - name: Ensure Gradle 8.3
         run: ./gradlew wrapper --gradle-version 8.3 --distribution-type all
 
-      # 7️⃣ Собираем Debug APK
+      # 7️⃣ Build Debug APK
       - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      # 8️⃣ Build Release APK (с подписью, если keystore задан)
+      - name: Build Release APK
+        if: env.KEYSTORE_PATH != ''
         run: |
-          if [ -f "settings.gradle" ] || [ -f "settings.gradle.kts" ]; then
-            echo "Building APK..."
-            ./gradlew assembleDebug --stacktrace
-          else
-            echo "Error: No settings.gradle found!"
-            exit 1
-          fi
+          echo "Signing config:"
+          echo "KEYSTORE_PATH=$KEYSTORE_PATH"
+          ./gradlew assembleRelease --stacktrace
 
-      # 8️⃣ Проверяем, какие APK создались
+      # 9️⃣ Смотрим все APK
       - name: List APK outputs
-        run: ls -R app/build/outputs/ || echo "No outputs yet"
+        run: ls -R app/build/outputs/
 
-      # 9️⃣ Загружаем все APK как артефакт
+      # 🔟 Загружаем все APK как артефакты
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-debug-apk
+          name: Kakdela-p2p-apks
           path: app/build/outputs/**/*.apk
           if-no-files-found: warn
