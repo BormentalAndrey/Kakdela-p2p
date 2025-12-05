@@ -1,35 +1,54 @@
 name: Build Kakdela APK
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # 1. Скачиваем код
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # 2. Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
+      # 3. Разрешения для gradlew
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+      # 4. Показываем структуру модуля app
+      - name: Show app module structure
+        run: |
+          echo "=== APP STRUCTURE ==="
+          ls -R app || echo "App folder not found!"
 
-      # Выводим ВСЕ APK чтобы точно видеть создаются ли они
-      - name: List all APK files
-        run: find . -type f -name "*.apk" -print || echo "Нет APK файлов"
+      # 5. Показываем все Gradle задачи (важно!)
+      - name: Show Gradle tasks
+        run: ./gradlew tasks --all
 
-      # ГАРАНТИРОВАННО загружаем любой apk
-      - name: Upload APK
+      # 6. Сборка APK с максимальным логированием
+      - name: Build Debug APK (verbose)
+        run: ./gradlew :app:assembleDebug --info --stacktrace
+
+      # 7. Ищем все APK по проекту
+      - name: Find all APK files
+        run: |
+          echo "=== SEARCHING FOR APKs ==="
+          find . -type f -name "*.apk" -print || echo "No APK found!"
+
+      # 8. Загружаем ВСЕ APK
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-debug-apk
+          name: Kakdela-p2p-apk
           path: |
-            **/outputs/apk/**/*.apk
+            **/build/outputs/apk/**/*.apk
           if-no-files-found: error
