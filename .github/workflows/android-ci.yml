@@ -18,18 +18,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ← КЭШ ПОЛНОСТЬЮ УБРАН — ЧТОБЫ НЕ ПАДАЛО НИКОГДА
-      # (добавим потом, когда APK будет)
-
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      - name: List APK files (проверка)
-        run: ls -la app/build/outputs/apk/debug/ || echo "Папка пустая!"
+      # Выводим ВСЕ APK чтобы точно видеть создаются ли они
+      - name: List all APK files
+        run: find . -type f -name "*.apk" -print || echo "Нет APK файлов"
 
+      # ГАРАНТИРОВАННО загружаем любой apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2p-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: warn
+          path: |
+            **/outputs/apk/**/*.apk
+          if-no-files-found: error
