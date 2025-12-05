@@ -11,19 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}        # путь к keystore, если есть
+      # Если есть keystore для release, добавь в Secrets
+      KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       # 1️⃣ Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2️⃣ Проверка структуры проекта
-      - name: List repo files
-        run: ls -R
+      # 2️⃣ Проверяем структуру проекта
+      - name: List repo structure
+        run: |
+          echo "Root folder:"
+          ls -la
+          echo "App folder:"
+          ls -la app
+          echo "Settings file:"
+          ls -la settings.gradle.kts
 
       # 3️⃣ Проверяем gradlew
       - name: Check gradlew
@@ -59,21 +65,20 @@ jobs:
       - name: Ensure Gradle 8.3
         run: ./gradlew wrapper --gradle-version 8.3 --distribution-type all
 
-      # 7️⃣ Build Debug APK
+      # 7️⃣ Сборка Debug APK (с логами)
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --info
 
-      # 8️⃣ Build Release APK (с подписью, если keystore задан)
+      # 8️⃣ Сборка Release APK (если keystore задан)
       - name: Build Release APK
         if: env.KEYSTORE_PATH != ''
-        run: |
-          echo "Signing config:"
-          echo "KEYSTORE_PATH=$KEYSTORE_PATH"
-          ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace --info
 
-      # 9️⃣ Смотрим все APK
+      # 9️⃣ Проверяем, какие APK создались
       - name: List APK outputs
-        run: ls -R app/build/outputs/
+        run: |
+          echo "Listing APK outputs:"
+          find app/build/outputs/ -type f -name "*.apk" || echo "No APKs found"
 
       # 🔟 Загружаем все APK как артефакты
       - name: Upload APKs
