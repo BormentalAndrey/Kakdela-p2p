@@ -1,54 +1,37 @@
-name: Build Kakdela APK
+name: Android CI
 
 on:
   push:
+    branches: [ main, develop, feature/* ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-upload-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
-      # 1. Скачиваем код
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: 17
+          distribution: temurin
 
-      # 3. Разрешения для gradlew
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 4. Показываем структуру модуля app
-      - name: Show app module structure
-        run: |
-          echo "=== APP STRUCTURE ==="
-          ls -R app || echo "App folder not found!"
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
 
-      # 5. Показываем все Gradle задачи (важно!)
-      - name: Show Gradle tasks
-        run: ./gradlew tasks --all
-
-      # 6. Сборка APK с максимальным логированием
-      - name: Build Debug APK (verbose)
-        run: ./gradlew :app:assembleDebug --info --stacktrace
-
-      # 7. Ищем все APK по проекту
-      - name: Find all APK files
-        run: |
-          echo "=== SEARCHING FOR APKs ==="
-          find . -type f -name "*.apk" -print || echo "No APK found!"
-
-      # 8. Загружаем ВСЕ APK
-      - name: Upload APKs
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-apk
+          name: kakdela-debug-apk
           path: |
-            **/build/outputs/apk/**/*.apk
+            app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 14
