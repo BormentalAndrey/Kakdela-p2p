@@ -73,4 +73,14 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+// Шифрование (NaCl)
+    implementation("com.goterl:lazysodium-android:5.1.0")
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
+
+// WebSocket для сигнального сервера
+    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+
+// Для работы с файлами
+    implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.fragment:fragment-ktx:1.8.4")
 }
