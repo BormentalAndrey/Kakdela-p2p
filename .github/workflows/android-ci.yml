@@ -1,6 +1,10 @@
 name: Build Kakdela APK
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -18,22 +22,14 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ← КОПИЯ ИЗ PHASE1 — БЕЗ КЭША (чтобы не падало)
-      # (добавим позже)
-
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      # ← КОПИЯ ИЗ PHASE1 — ПРОВЕРКА ФАЙЛОВ (покажет APK в логах)
-      - name: Check APK files
-        run: |
-          echo "=== APK FOLDER ==="
-          ls -la app/build/outputs/apk/debug/ || echo "No APK folder!"
-          echo "=== END ==="
+      - name: Check APK
+        run: ls -la app/build/outputs/apk/debug/ || echo "No APK!"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2p-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: warn
