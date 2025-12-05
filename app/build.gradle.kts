@@ -17,19 +17,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (project.hasProperty("KEYSTORE_PATH")) {
+                storeFile = file(project.property("KEYSTORE_PATH"))
+                storePassword = project.property("KEYSTORE_PASSWORD") as String
+                keyAlias = project.property("KEY_ALIAS") as String
+                keyPassword = project.property("KEY_PASSWORD") as String
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
             isMinifyEnabled = false
-            // ← КОПИЯ ИЗ PHASE1 — ПРИНУДИТЕЛЬНО APK
-            applicationVariants.all { variant ->
-                variant.outputs.each { output ->
-                    output.outputFileName = "app-debug.apk"
+            // Задаём имя APK для debug
+            this@debug.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    val outputImpl = output as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+                    outputImpl.outputFileName = "app-debug.apk"
                 }
             }
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
