@@ -18,8 +18,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      # ← ВОТ ЭТА СТРОКА — ГЛАВНАЯ ПРАВКА
+      - name: Build APK (force)
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
