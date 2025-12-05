@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Если есть keystore для release, добавь в Secrets
+      # Keystore для Release, добавь в Secrets
       KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -21,7 +21,7 @@ jobs:
       # 1️⃣ Checkout repository
       - uses: actions/checkout@v4
 
-      # 2️⃣ Проверяем структуру проекта
+      # 2️⃣ Проверка структуры проекта
       - name: List repo structure
         run: |
           echo "Root folder:"
@@ -65,11 +65,11 @@ jobs:
       - name: Ensure Gradle 8.3
         run: ./gradlew wrapper --gradle-version 8.3 --distribution-type all
 
-      # 7️⃣ Сборка Debug APK (с логами)
+      # 7️⃣ Build Debug APK с логами
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace --info
 
-      # 8️⃣ Сборка Release APK (если keystore задан)
+      # 8️⃣ Build Release APK с логами (если keystore указан)
       - name: Build Release APK
         if: env.KEYSTORE_PATH != ''
         run: ./gradlew assembleRelease --stacktrace --info
