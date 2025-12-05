@@ -1,37 +1,16 @@
-name: Build Kakdela APK
+# gradle.properties (как в phase1 — включает APK)
+org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+org.gradle.caching=true
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+android.useAndroidX=true
+android.enableJetifier=true
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
-
-      - name: Find APKs
-        run: find . -type f -name "*.apk"
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: kakdela-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
+# ← КОПИЯ ИЗ PHASE1 — ВКЛЮЧАЕТ APK
+android.bundle.enableUncompressedNativeLibs=false
+android.defaults.buildfeatures.buildconfig=true
+android.defaults.buildfeatures.aidl=true
+android.defaults.buildfeatures.renderscript=true
+android.defaults.buildfeatures.resvalues=true
+android.defaults.buildfeatures.shaders=true
+kotlin.code.style=official
