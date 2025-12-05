@@ -18,12 +18,25 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ← ВОТ ЭТА СТРОКА — ГЛАВНАЯ ПРАВКА
-      - name: Build APK (force)
+      # ← ИСПРАВЛЕННЫЙ КЭШ (без запятой!)
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: \( {{ runner.os }}-gradle- \){{ hashFiles('**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      # ← ПРИНУДИТЕЛЬНО APK (даже если AAB по умолчанию)
+      - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
+
+      # ← ПРОВЕРКА: что создалось
+      - name: List APK files
+        run: ls -la app/build/outputs/apk/debug/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Kakdela-p2p-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
