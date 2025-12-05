@@ -1,7 +1,3 @@
-#!/bin/sh
-if command -v gradle >/dev/null 2>&1; then
-  exec gradle "$@"
-else
-  echo "Gradle CLI not found. Please run 'gradle wrapper' locally or install Gradle."
-  exit 1
-fi
+#!/usr/bin/env sh
+# Placeholder gradlew script - open project in Android Studio to use Gradle wrapper
+echo "This is a placeholder gradlew script. Open project in Android Studio or add Gradle wrapper."
