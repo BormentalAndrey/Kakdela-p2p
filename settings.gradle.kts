@@ -1,1 +1,2 @@
-rootProject.name = "KakDelaP2P_Full"\ninclude(":app")\n
+rootProject.name = "Kakdela-p2p"
+include(":app")
