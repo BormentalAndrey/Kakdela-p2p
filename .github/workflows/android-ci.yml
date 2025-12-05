@@ -1,6 +1,5 @@
 name: Build & Upload APK
 
-# Запускается при любом пуше в main или при Pull Request
 on:
   push:
     branches: [ main ]
@@ -13,22 +12,19 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # 1. Забираем весь код из репозитория
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Делаем gradlew исполняемым (обязательно на Linux)
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 3. Устанавливаем Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 4. Кэшируем Gradle (ускоряет сборку в 3–5 раз)
+      # ← ИСПРАВЛЕННЫЙ КЭШ (запятая убрана!)
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -36,14 +32,11 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: \( {{ runner.os }}-gradle- \){{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          restore-keys: ${{ runner.os }}-gradle-
 
-      # 5. Собираем Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace --info
 
-      # 6. Загружаем APK как артефакт (чтобы можно было скачать)
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -51,7 +44,5 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      # 7. (Опционально) Выводим размер APK
       - name: Show APK size
-        run: |
-          ls -lh app/build/outputs/apk/debug/app-debug.apk || echo "APK not found"
+        run: ls -lh app/build/outputs/apk/debug/app-debug.apk
