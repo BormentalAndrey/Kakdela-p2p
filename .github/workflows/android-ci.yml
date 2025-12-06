@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -20,32 +20,39 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Download Gradle 8.3 manually
-      - name: Download Gradle 8.3
+      # Создаём рабочий gradlew и скачиваем Gradle
+      - name: Generate gradlew
         run: |
-          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle-8.3-bin.zip
-          unzip -q gradle-8.3-bin.zip -d gradle
-          export PATH="$PWD/gradle/gradle-8.3/bin:$PATH"
+          mkdir -p gradle/wrapper
+          # скачиваем gradle 8.3
+          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle-8.3.zip
+          unzip -q gradle-8.3.zip -d gradle/gradle-8.3
+          rm gradle-8.3.zip
 
-      # Make a minimal gradlew script
-      - name: Create gradlew script
-        run: |
+          # создаём gradlew
           echo '#!/usr/bin/env sh' > gradlew
-          echo 'export PATH="$PWD/gradle/gradle-8.3/bin:$PATH"' >> gradlew
+          echo 'DIR=$(dirname "$0")' >> gradlew
+          echo 'export PATH="$DIR/gradle/gradle-8.3/gradle-8.3/bin:$PATH"' >> gradlew
           echo 'gradle "$@"' >> gradlew
           chmod +x gradlew
 
-      # Build Debug APK
+          # создаём gradlew.bat для Windows
+          echo '@echo off' > gradlew.bat
+          echo 'set DIR=%~dp0' >> gradlew.bat
+          echo 'set PATH=%DIR%gradle\gradle-8.3\gradle-8.3\bin;%PATH%' >> gradlew.bat
+          echo 'gradle %*' >> gradlew.bat
+
+      # Собираем Debug APK
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      # List APKs
+      # Листинг APK
       - name: List APK outputs
         run: find app/build/outputs/ -type f -name "*.apk"
 
-      # Upload APKs
-      - name: Upload APKs
+      # Загружаем APK как артефакт
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-apks
+          name: Kakdela-p2p-apk
           path: app/build/outputs/**/*.apk
