@@ -11,45 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Клонируем репозиторий
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 3. Генерируем Gradle wrapper прямо на CI
-      - name: Generate Gradle wrapper
+      # Download Gradle 8.3 manually
+      - name: Download Gradle 8.3
         run: |
-          chmod +x gradlew || true
-          ./gradlew wrapper --gradle-version 8.3 --distribution-type all || true
+          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle-8.3-bin.zip
+          unzip -q gradle-8.3-bin.zip -d gradle
+          export PATH="$PWD/gradle/gradle-8.3/bin:$PATH"
 
-      # 4. Делаем gradlew исполняемым
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      # Make a minimal gradlew script
+      - name: Create gradlew script
+        run: |
+          echo '#!/usr/bin/env sh' > gradlew
+          echo 'export PATH="$PWD/gradle/gradle-8.3/bin:$PATH"' >> gradlew
+          echo 'gradle "$@"' >> gradlew
+          chmod +x gradlew
 
-      # 5. Сборка Debug APK
+      # Build Debug APK
       - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace --info
+        run: ./gradlew :app:assembleDebug --stacktrace
 
-      # 6. Сборка Release APK (если нужен keystore)
-      - name: Build Release APK
-        run: ./gradlew :app:assembleRelease --stacktrace --info
-        env:
-          KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
-      # 7. Список APK для дебага
+      # List APKs
       - name: List APK outputs
         run: find app/build/outputs/ -type f -name "*.apk"
 
-      # 8. Загружаем артефакты
+      # Upload APKs
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
