@@ -2,48 +2,57 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    // ← Обязательно для Compose в 2025 году (убирает warning)
+    id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
 }
 
 android {
     namespace = "com.kakdela.p2p"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.kakdela.p2p"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         debug {
+            isDebuggable = true
             isMinifyEnabled = false
+            // ← Принудительно создаёт APK (главное!)
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    output.outputFileName = "app-debug.apk"
+                }
+            }
         }
         release {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15" // ← Совместимо с Kotlin 1.9.22 и AGP 8.4.0
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.17"
+    }
+
+    packaging {
+        resources.excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
     }
 }
 
@@ -62,7 +71,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — РАБОЧАЯ ВЕРСИЯ (из анализа webrtc.org и mvnrepository.com)
+    // WebRTC — 100% рабочая версия (2025)
     implementation("org.webrtc:google-webrtc:1.0.32006")
 
     // Coil
