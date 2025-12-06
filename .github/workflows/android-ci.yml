@@ -22,7 +22,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ← КЭШ УБРАН — ЧТОБЫ НЕ ПАДАЛО (добавим позже)
+      # ← КЭШ УБРАН — ЧТОБЫ НЕ ПАДАЛО
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
