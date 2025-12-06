@@ -9,48 +9,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-
-      # Создаём рабочий gradlew и скачиваем Gradle
-      - name: Generate gradlew
+      - name: Generate working Gradle wrapper
         run: |
           mkdir -p gradle/wrapper
-          # скачиваем gradle 8.3
-          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle-8.3.zip
-          unzip -q gradle-8.3.zip -d gradle/gradle-8.3
-          rm gradle-8.3.zip
-
-          # создаём gradlew
+          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle/gradle-8.3.zip
+          unzip -q gradle/gradle-8.3.zip -d gradle/gradle-8.3
+          rm gradle/gradle-8.3.zip
           echo '#!/usr/bin/env sh' > gradlew
-          echo 'DIR=$(dirname "$0")' >> gradlew
+          echo 'DIR=$(cd "$(dirname "$0")" && pwd)' >> gradlew
           echo 'export PATH="$DIR/gradle/gradle-8.3/gradle-8.3/bin:$PATH"' >> gradlew
           echo 'gradle "$@"' >> gradlew
           chmod +x gradlew
-
-          # создаём gradlew.bat для Windows
           echo '@echo off' > gradlew.bat
           echo 'set DIR=%~dp0' >> gradlew.bat
           echo 'set PATH=%DIR%gradle\gradle-8.3\gradle-8.3\bin;%PATH%' >> gradlew.bat
           echo 'gradle %*' >> gradlew.bat
-
-      # Собираем Debug APK
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
-
-      # Листинг APK
       - name: List APK outputs
         run: find app/build/outputs/ -type f -name "*.apk"
-
-      # Загружаем APK как артефакт
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
