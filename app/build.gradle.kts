@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")   // ← ЭТА СТРОКА БЫЛА ПРОПУЩЕНА!
+    id("kotlin-kapt")
 }
 
 android {
@@ -34,7 +34,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.5"
+        kotlinCompilerExtensionVersion = "1.5.15" // ← Совместимо с Kotlin 1.9.22 и AGP 8.4.0
     }
 
     compileOptions {
@@ -48,29 +48,32 @@ android {
 }
 
 dependencies {
+
+    // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.3")
+
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    // ← ВОТ ЭТА СТРОКА — Material3, без неё тема не найдётся!
     implementation("androidx.compose.material3:material3")
-    
-    // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
+    // WebRTC (Google)
     implementation("org.webrtc:google-webrtc:1.0.32019")
 
     // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
     // Тесты
     testImplementation("junit:junit:4.13.2")
