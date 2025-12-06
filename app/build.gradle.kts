@@ -64,7 +64,7 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
 
     // WebRTC
-    implementation("org.webrtc:google-webrtc:1.0.33067")
+    implementation("org.webrtc:google-webrtc:1.0.32019")
 
     // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
