@@ -17,11 +17,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug AAB (это главная строка)
+      - name: Build Debug APK (это главная строка)
         run: ./gradlew :app:bundleDebug
 
-      - name: Upload AAB
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-debug.aab
-          path: app/build/outputs/bundle/debug/app.aab
+          name: Kakdela-debug.apk
+          path: app/build/outputs/bundle/debug/app.apk
