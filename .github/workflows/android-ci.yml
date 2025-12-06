@@ -9,35 +9,34 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - name: Generate working Gradle wrapper
-        run: |
-          mkdir -p gradle/wrapper
-          curl -L https://services.gradle.org/distributions/gradle-8.3-bin.zip -o gradle/gradle-8.3.zip
-          unzip -q gradle/gradle-8.3.zip -d gradle/gradle-8.3
-          rm gradle/gradle-8.3.zip
-          echo '#!/usr/bin/env sh' > gradlew
-          echo 'DIR=$(cd "$(dirname "$0")" && pwd)' >> gradlew
-          echo 'export PATH="$DIR/gradle/gradle-8.3/gradle-8.3/bin:$PATH"' >> gradlew
-          echo 'gradle "$@"' >> gradlew
-          chmod +x gradlew
-          echo '@echo off' > gradlew.bat
-          echo 'set DIR=%~dp0' >> gradlew.bat
-          echo 'set PATH=%DIR%gradle\gradle-8.3\gradle-8.3\bin;%PATH%' >> gradlew.bat
-          echo 'gradle %*' >> gradlew.bat
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # ← КЭШ УБРАН — ЧТОБЫ НЕ ПАДАЛО (добавим позже)
+
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
-      - name: List APK outputs
-        run: find app/build/outputs/ -type f -name "*.apk"
+
+      # ← ПРОВЕРКА ПАПКИ APK (покажет в логах, создался ли файл)
+      - name: Check APK files
+        run: |
+          echo "=== APK FOLDER CONTENTS ==="
+          ls -la app/build/outputs/apk/debug/ || echo "No APK folder!"
+          echo "=== END ==="
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-apk
-          path: app/build/outputs/**/*.apk
+          name: Kakdela-p2p-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
