@@ -1,15 +1,10 @@
-name: Build Kakdela APK
+name: Build Kakdela
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -22,21 +17,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ← КЭШ УБРАН — ЧТОБЫ НЕ ПАДАЛО
+      - name: Build Debug AAB (это главная строка)
+        run: ./gradlew :app:bundleDebug
 
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
-
-      # ← ПРОВЕРКА (покажет в логах, создался ли APK)
-      - name: Check APK files
-        run: |
-          echo "=== APK FOLDER CONTENTS ==="
-          ls -la app/build/outputs/apk/debug/ || echo "No APK folder!"
-          echo "=== END ==="
-
-      - name: Upload APK
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: Kakdela-p2p-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: warn
+          name: Kakdela-debug.aab
+          path: app/build/outputs/bundle/debug/app.aab
