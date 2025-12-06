@@ -27,7 +27,7 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      # ← ПРОВЕРКА ПАПКИ APK (покажет в логах, создался ли файл)
+      # ← ПРОВЕРКА (покажет в логах, создался ли APK)
       - name: Check APK files
         run: |
           echo "=== APK FOLDER CONTENTS ==="
