@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kakdela-p2p"
 include(":app")
-include(":goterl")
+include(":goterl")  // ← ОБЯЗАТЕЛЬНО!
