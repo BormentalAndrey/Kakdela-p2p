@@ -1,4 +1,13 @@
+// Top-level build file
 plugins {
     id("com.android.application") version "8.4.0" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.25" apply false
+    // kapt убрали — он не нужен
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
