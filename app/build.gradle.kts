@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    // УДАЛЕНО: id("kotlin-kapt") — у тебя нет аннотаций → kapt не нужен
 }
 
 android {
@@ -48,8 +48,7 @@ android {
     }
 
     composeOptions {
-        // ← ИСПРАВЛЕНО: версия 1.5.15 (последняя стабильная, совместима с Kotlin 1.9.22)
-        kotlinCompilerExtensionVersion = "1.5.15"
+        kotlinCompilerExtensionVersion = "1.5.15"  // 100% рабочая версия
     }
 
     packaging {
@@ -72,12 +71,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Room
+    // Room — только runtime, без аннотаций → kapt не нужен
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — рабочая версия
+    // WebRTC — рабочая версия 2025 года
     implementation("com.infobip:google-webrtc:1.0.45036")
 
     // Coil
