@@ -74,7 +74,7 @@ dependencies {
     // Room — только runtime, без аннотаций → kapt не нужен
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-
+    implementation(project(":goterl"))
     // WebRTC — рабочая версия 2025 года
     implementation("com.infobip:google-webrtc:1.0.45036")
 
