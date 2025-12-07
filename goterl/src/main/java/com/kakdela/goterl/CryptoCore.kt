@@ -2,7 +2,6 @@ package com.kakdela.goterl
 
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
-import com.goterl.lazysodium.SodiumConstants
 import com.goterl.lazysodium.utils.KeyPair
 
 object CryptoCore {
@@ -15,8 +14,8 @@ object CryptoCore {
         receiverPublicKey: ByteArray,
         senderSecretKey: ByteArray
     ): ByteArray {
-        val nonce = sodium.randomBytesBuf(SodiumConstants.CRYPTO_BOX_NONCEBYTES)
-        val encrypted = ByteArray(message.toByteArray().size + SodiumConstants.CRYPTO_BOX_MACBYTES)
+        val nonce = sodium.randomBytesBuf(sodium.cryptoBoxNonceBytes()) // используем метод библиотеки
+        val encrypted = ByteArray(message.toByteArray().size + sodium.cryptoBoxMacBytes())
 
         sodium.cryptoBoxEasy(
             encrypted,
@@ -35,12 +34,15 @@ object CryptoCore {
         senderPublicKey: ByteArray,
         receiverSecretKey: ByteArray
     ): String? {
-        if (encryptedData.size < SodiumConstants.CRYPTO_BOX_MACBYTES + SodiumConstants.CRYPTO_BOX_NONCEBYTES) return null
+        val nonceBytes = sodium.cryptoBoxNonceBytes()
+        val macBytes = sodium.cryptoBoxMacBytes()
 
-        val nonce = encryptedData.copyOfRange(0, SodiumConstants.CRYPTO_BOX_NONCEBYTES)
-        val ciphertext = encryptedData.copyOfRange(SodiumConstants.CRYPTO_BOX_NONCEBYTES, encryptedData.size)
+        if (encryptedData.size < macBytes + nonceBytes) return null
 
-        val decrypted = ByteArray(ciphertext.size - SodiumConstants.CRYPTO_BOX_MACBYTES)
+        val nonce = encryptedData.copyOfRange(0, nonceBytes)
+        val ciphertext = encryptedData.copyOfRange(nonceBytes, encryptedData.size)
+
+        val decrypted = ByteArray(ciphertext.size - macBytes)
 
         val result = sodium.cryptoBoxOpenEasy(
             decrypted,
