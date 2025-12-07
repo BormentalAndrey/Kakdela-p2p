@@ -9,24 +9,47 @@ object CryptoCore {
 
     fun generateKeyPair(): KeyPair = sodium.cryptoBoxKeypair()
 
-    fun encrypt(message: String, theirPublicKey: ByteArray, mySecretKey: ByteArray): ByteArray {
-        val nonce = sodium.randomBytesBuf(24)
-        val encrypted = ByteArray(message.length + sodium.cryptoBoxMacBytes())
+    fun encrypt(
+        message: String,
+        receiverPublicKey: ByteArray,
+        senderSecretKey: ByteArray
+    ): ByteArray {
+        val nonce = sodium.randomBytesBuf(sodium.cryptoBoxNoncebytes())
+        val encrypted = ByteArray(message.toByteArray().size + sodium.cryptoBoxMacbytes())
+
         sodium.cryptoBoxEasy(
-            encrypted, message.toByteArray(), message.length.toLong(),
-            nonce, theirPublicKey, mySecretKey
+            encrypted,
+            message.toByteArray(),
+            message.length.toLong(),
+            nonce,
+            receiverPublicKey,
+            senderSecretKey
         )
+
         return nonce + encrypted
     }
 
-    fun decrypt(encrypted: ByteArray, theirPublicKey: ByteArray, mySecretKey: ByteArray): String? {
-        if (encrypted.size < 40) return null
-        val nonce = encrypted.copyOf(24)
-        val cipher = encrypted.copyOfRange(24, encrypted.size)
-        val decrypted = ByteArray(cipher.size - sodium.cryptoBoxMacBytes())
+    fun decrypt(
+        encryptedData: ByteArray,
+        senderPublicKey: ByteArray,
+        receiverSecretKey: ByteArray
+    ): String? {
+        if (encryptedData.size < sodium.cryptoBoxMacbytes() + sodium.cryptoBoxNoncebytes()) return null
+
+        val nonce = encryptedData.copyOfRange(0, sodium.cryptoBoxNoncebytes())
+        val ciphertext = encryptedData.copyOfRange(sodium.cryptoBoxNoncebytes(), encryptedData.size)
+
+        val decrypted = ByteArray(ciphertext.size - sodium.cryptoBoxMacbytes())
+
         val result = sodium.cryptoBoxOpenEasy(
-            decrypted, cipher, cipher.size.toLong(), nonce, theirPublicKey, mySecretKey
+            decrypted,
+            ciphertext,
+            ciphertext.size.toLong(),
+            nonce,
+            senderPublicKey,
+            receiverSecretKey
         )
+
         return if (result) String(decrypted) else null
     }
 }
