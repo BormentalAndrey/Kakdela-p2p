@@ -1,20 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Современная тема Material3 без устаревших атрибутов -->
+    <!-- Современная тема Material3 2025 года (без устаревших атрибутов) -->
     <style name="Base.Theme.Kakdela" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Новые имена атрибутов (вместо colorPrimaryVariant) -->
+        <!-- Новые атрибуты вместо colorPrimary/colorSecondary -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/purple_700</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
-        
-        <!-- Фон приложения — твой неоновый грид -->
+
+        <!-- Твой неоновый фон -->
         <item name="android:windowBackground">@drawable/neon_grid</item>
-        
-        <!-- Цвет статус-бара -->
+
+        <!-- Прозрачный статус-бар -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <!-- Основная тема приложения -->
     <style name="Theme.Kakdela" parent="Base.Theme.Kakdela" />
 </resources>
