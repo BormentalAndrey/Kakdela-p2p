@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -47,23 +48,13 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17"
+        // ← ИСПРАВЛЕНО: версия 1.5.15 (последняя стабильная, совместима с Kotlin 1.9.22)
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     packaging {
         resources {
             excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
-        }
-    }
-
-    // Современный способ назвать APK (AGP 8.x)
-    androidComponents {
-        onVariants(selector().withBuildType("debug")) { variant ->
-            variant.outputs.forEach { output ->
-                if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
-                    output.outputFileName = "app-debug.apk"
-                }
-            }
         }
     }
 }
@@ -84,8 +75,9 @@ dependencies {
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — РАБОЧАЯ ВЕРСИЯ 2025 ГОДА (M120, из Maven Central)
+    // WebRTC — рабочая версия
     implementation("com.infobip:google-webrtc:1.0.45036")
 
     // Coil
