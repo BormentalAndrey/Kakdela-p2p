@@ -21,7 +21,7 @@ android {
         debug {
             isDebuggable = true
             isMinifyEnabled = false
-            // ← Принудительно создаёт app-debug.apk (для GitHub Actions)
+            // Принудительно создаёт APK
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
                     output.outputFileName = "app-debug.apk"
@@ -30,10 +30,7 @@ android {
         }
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -48,10 +45,12 @@ android {
 
     buildFeatures {
         compose = true
+        // ← Добавляем это вместо deprecated свойства
+        buildConfig = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17"  // Совместимо с Kotlin 1.9.22
+        kotlinCompilerExtensionVersion = "1.5.17"
     }
 
     packaging {
@@ -74,7 +73,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — 100% рабочая версия (из mvnrepository.com)
+    // WebRTC — рабочая версия
     implementation("org.webrtc:google-webrtc:1.0.32006")
 
     // Coil
