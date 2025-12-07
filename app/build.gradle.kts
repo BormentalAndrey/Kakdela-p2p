@@ -57,7 +57,7 @@ android {
         }
     }
 
-    // Современный способ назвать APK в AGP 8.x (без устаревшего applicationVariants)
+    // Современный способ назвать APK (AGP 8.x)
     androidComponents {
         onVariants(selector().withBuildType("debug")) { variant ->
             variant.outputs.forEach { output ->
@@ -87,16 +87,16 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — ЕДИНСТВЕННАЯ РАБОЧАЯ ВЕРСИЯ В 2025 ГОДУ
+    // WebRTC — РАБОЧАЯ ВЕРСИЯ 2025 ГОДА (M120, из Maven Central)
     implementation("com.infobip:google-webrtc:1.0.45036")
 
-    // Coil для картинок
+    // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Navigation Compose
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
-    // Тесты и отладка
+    // Тесты
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
