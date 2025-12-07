@@ -3,9 +3,11 @@ package com.kakdela.p2p
 import android.app.Application
 import com.kakdela.p2p.data.MessageDatabase
 
-class App : Application() {
+class KakdelaApplication : Application() {
+    lateinit var database: MessageDatabase
+
     override fun onCreate() {
         super.onCreate()
-        MessageDatabase.getInstance(this)
+        database = MessageDatabase.getInstance(this)
     }
 }
