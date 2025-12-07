@@ -15,10 +15,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
-                AppScreen()
-            }
-        }
+    KakdelaTheme {
+        // Твой основной экран
+        App()
+        // или NavGraph(), или что у тебя там
     }
 }
 
