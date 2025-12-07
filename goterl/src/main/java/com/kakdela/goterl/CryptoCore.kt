@@ -14,8 +14,8 @@ object CryptoCore {
         receiverPublicKey: ByteArray,
         senderSecretKey: ByteArray
     ): ByteArray {
-        val nonce = sodium.randomBytesBuf(sodium.cryptoBoxNonceBytes())
-        val encrypted = ByteArray(message.toByteArray().size + sodium.cryptoBoxMacBytes())
+        val nonce = sodium.randomBytesBuf(sodium.cryptoBoxNonceBytes())  // ← Большая B
+        val encrypted = ByteArray(message.toByteArray().size + sodium.cryptoBoxMacBytes())  // ← Большая B
 
         sodium.cryptoBoxEasy(
             encrypted,
@@ -34,12 +34,12 @@ object CryptoCore {
         senderPublicKey: ByteArray,
         receiverSecretKey: ByteArray
     ): String? {
-        if (encryptedData.size < sodium.cryptoBoxMacBytes() + sodium.cryptoBoxNonceBytes()) return null
+        if (encryptedData.size < sodium.cryptoBoxMacBytes() + sodium.cryptoBoxNonceBytes()) return null  // ← Большая B
 
-        val nonce = encryptedData.copyOfRange(0, sodium.cryptoBoxNonceBytes())
-        val ciphertext = encryptedData.copyOfRange(sodium.cryptoBoxNonceBytes(), encryptedData.size)
+        val nonce = encryptedData.copyOfRange(0, sodium.cryptoBoxNonceBytes())  // ← Большая B
+        val ciphertext = encryptedData.copyOfRange(sodium.cryptoBoxNonceBytes(), encryptedData.size)  // ← Большая B
 
-        val decrypted = ByteArray(ciphertext.size - sodium.cryptoBoxMacBytes())
+        val decrypted = ByteArray(ciphertext.size - sodium.cryptoBoxMacBytes())  // ← Большая B
 
         val result = sodium.cryptoBoxOpenEasy(
             decrypted,
