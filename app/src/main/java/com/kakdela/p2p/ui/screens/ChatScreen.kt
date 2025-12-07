@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +31,7 @@ fun ChatScreen() {
         mutableStateListOf(
             Message("Привет! Как дела?", false),
             Message("Всё отлично! А у тебя?", true),
-            Message("Тоже супер 🔥", false),
+            Message("Тоже супер", false),
             Message("Запустил свой P2P-мессенджер!", true),
         )
     }
@@ -87,9 +89,7 @@ fun MessageBubble(message: Message) {
                 MaterialTheme.colorScheme.surfaceVariant,
             shadowElevation = 4.dp
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp)
-            ) {
+            Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = message.text,
                     color = if (message.isFromMe) Color.White else MaterialTheme.colorScheme.onSurface,
@@ -110,10 +110,7 @@ fun MessageBubble(message: Message) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
-    Surface(
-        tonalElevation = 8.dp,
-        shadowElevation = 8.dp
-    ) {
+    Surface(tonalElevation = 8.dp, shadowElevation = 8.dp) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,20 +122,18 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
                 onValueChange = onTextChange,
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Сообщение...") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 shape = RoundedCornerShape(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
-                onClick = onSend,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onSend) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.Send,
+                    imageVector = Icons.Default.Send,
                     contentDescription = "Отправить",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -146,7 +141,3 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
         }
     }
 }
-
-// Добавь импорт для иконки Send
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
