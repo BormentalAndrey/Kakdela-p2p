@@ -6,7 +6,26 @@ plugins {
 android {
     namespace = "com.kakdela.goterl"
     compileSdk = 35
-    defaultConfig { minSdk = 24 }
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    // ✔ Выравниваем Java для Gradle/Javac
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    // ✔ Настраиваем Kotlin
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    // ✔ Принудительный JVM Toolchain (решает твою ошибку)
+    kotlin {
+        jvmToolchain(17)
+    }
 }
 
 dependencies {
