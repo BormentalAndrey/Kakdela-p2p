@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
 }
 
 android {
@@ -85,7 +84,6 @@ dependencies {
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
 
     // WebRTC — РАБОЧАЯ ВЕРСИЯ 2025 ГОДА (M120, из Maven Central)
     implementation("com.infobip:google-webrtc:1.0.45036")
