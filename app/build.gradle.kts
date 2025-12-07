@@ -2,8 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
-    // ← Обязательно для Compose в 2025 году — убирает warning
-    id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
 }
 
 android {
@@ -16,7 +14,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -24,7 +21,7 @@ android {
         debug {
             isDebuggable = true
             isMinifyEnabled = false
-            // ← Принудительно создаёт app-debug.apk (главное для GitHub Actions)
+            // ← Принудительно создаёт app-debug.apk (для GitHub Actions)
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
                     output.outputFileName = "app-debug.apk"
@@ -54,7 +51,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17"
+        kotlinCompilerExtensionVersion = "1.5.17"  // Совместимо с Kotlin 1.9.22
     }
 
     packaging {
@@ -63,33 +60,30 @@ android {
 }
 
 dependencies {
-    // Compose BOM — все версии Compose из одного места
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
-    // Остальные зависимости
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.3")
-
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — проверенная рабочая версия 2025 года
+    // WebRTC — 100% рабочая версия (из mvnrepository.com)
     implementation("org.webrtc:google-webrtc:1.0.32006")
 
-    // Coil для картинок
+    // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Navigation Compose
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
-    // Тесты и отладка
+    // Тесты
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
