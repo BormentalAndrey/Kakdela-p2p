@@ -28,6 +28,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
 }
 
 dependencies {
@@ -52,8 +60,8 @@ dependencies {
     // WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.5.4")
 
-    // Наш крипто-модуль
-    implementation(project(":goterl"))
+    // Крипто-модуль (export public API)
+    api(project(":goterl"))
 
     // Навигация
     implementation("androidx.navigation:navigation-compose:2.8.0")
