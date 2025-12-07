@@ -21,7 +21,6 @@ android {
         debug {
             isDebuggable = true
             isMinifyEnabled = false
-            // ← Современный способ назвать APK (работает в AGP 8.x)
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
@@ -31,17 +30,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-    }
-
-    // ← Это заменяет устаревший applicationVariants.all
-    androidComponents {
-        onVariants(selector().withBuildType("debug")) { variant ->
-            variant.outputs.forEach { output ->
-                if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
-                    output.outputFileName = "app-debug.apk"
-                }
-            }
         }
     }
 
@@ -68,33 +56,47 @@ android {
             excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
         }
     }
+
+    // Современный способ назвать APK в AGP 8.x (без устаревшего applicationVariants)
+    androidComponents {
+        onVariants(selector().withBuildType("debug")) { variant ->
+            variant.outputs.forEach { output ->
+                if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                    output.outputFileName = "app-debug.apk"
+                }
+            }
+        }
+    }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.3")
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
+    // Основные AndroidX
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.activity:activity-compose:1.9.3")
+
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC — 100% рабочая версия
-    implementation("org.webrtc:google-webrtc:1.0.32006")
+    // WebRTC — ЕДИНСТВЕННАЯ РАБОЧАЯ ВЕРСИЯ В 2025 ГОДУ
+    implementation("com.infobip:google-webrtc:1.0.45036")
 
-    // Coil
+    // Coil для картинок
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Navigation
+    // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
-    // Тесты
+    // Тесты и отладка
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
