@@ -7,6 +7,9 @@ import com.goterl.lazysodium.utils.KeyPair
 object CryptoCore {
     private val sodium = LazySodiumAndroid(SodiumAndroid())
 
+    private const val NONCE_BYTES = 24
+    private const val MAC_BYTES = 16
+
     fun generateKeyPair(): KeyPair = sodium.cryptoBoxKeypair()
 
     fun encrypt(
@@ -14,8 +17,8 @@ object CryptoCore {
         receiverPublicKey: ByteArray,
         senderSecretKey: ByteArray
     ): ByteArray {
-        val nonce = sodium.randomBytesBuf(sodium.cryptoBoxNonceBytes()) // используем метод библиотеки
-        val encrypted = ByteArray(message.toByteArray().size + sodium.cryptoBoxMacBytes())
+        val nonce = sodium.randomBytesBuf(NONCE_BYTES)
+        val encrypted = ByteArray(message.toByteArray().size + MAC_BYTES)
 
         sodium.cryptoBoxEasy(
             encrypted,
@@ -34,15 +37,12 @@ object CryptoCore {
         senderPublicKey: ByteArray,
         receiverSecretKey: ByteArray
     ): String? {
-        val nonceBytes = sodium.cryptoBoxNonceBytes()
-        val macBytes = sodium.cryptoBoxMacBytes()
+        if (encryptedData.size < MAC_BYTES + NONCE_BYTES) return null
 
-        if (encryptedData.size < macBytes + nonceBytes) return null
+        val nonce = encryptedData.copyOfRange(0, NONCE_BYTES)
+        val ciphertext = encryptedData.copyOfRange(NONCE_BYTES, encryptedData.size)
 
-        val nonce = encryptedData.copyOfRange(0, nonceBytes)
-        val ciphertext = encryptedData.copyOfRange(nonceBytes, encryptedData.size)
-
-        val decrypted = ByteArray(ciphertext.size - macBytes)
+        val decrypted = ByteArray(ciphertext.size - MAC_BYTES)
 
         val result = sodium.cryptoBoxOpenEasy(
             decrypted,
