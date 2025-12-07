@@ -1,5 +1,8 @@
 package com.kakdela.p2p.ui.chat
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import android.media.MediaRecorder
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
