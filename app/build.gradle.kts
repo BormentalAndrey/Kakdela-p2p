@@ -1,7 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp") // правильный и короткий вариант, работает точно так же
+    id("org.jetbrains.compose")     // ЭТА СТРОКА — ВСЁ, ЧТО НУЖНО
+    id("com.google.devtools.ksp")
 }
 
 android {
