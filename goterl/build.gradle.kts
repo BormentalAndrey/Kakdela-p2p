@@ -11,18 +11,23 @@ android {
         minSdk = 24
     }
 
-    // !!! ВЫРАВНИВАЕМ JAVA И KOTLIN !!!
+    // --- ВАЖНО --- одинаковая JVM для Kotlin и Java
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
+    }
+
+    // JVM Toolchain — рекомендует сам Gradle
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
 dependencies {
-    // Lazysodium already includes JNA — DO NOT ADD JNA MANUALLY
+    // Lazysodium уже содержит JNA — добавлять JNA НЕЛЬЗЯ
     implementation("com.goterl:lazysodium-android:5.1.0")
 }
