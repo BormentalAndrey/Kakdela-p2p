@@ -1,10 +1,11 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "com.kakdela.p2p"
+    namespace = "com.kakdela.p2p"id("com.google.devtools.ksp")
     compileSdk = 35
 
     defaultConfig {
@@ -14,7 +15,6 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
