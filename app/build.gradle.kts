@@ -17,8 +17,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -61,7 +59,6 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
-    // фикс проблемы Theme.Material3
     implementation(libs.google.material)
 
     implementation(libs.room.runtime)
@@ -73,10 +70,10 @@ dependencies {
     implementation(libs.java.websocket)
     implementation(libs.libsodium.jni)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
