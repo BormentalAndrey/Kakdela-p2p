@@ -1,11 +1,13 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")  // Add this for KSP (e.g., Room compiler)
+    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"  // NEW: Apply Compose Compiler Plugin (match Kotlin version)
+    // If using Version Catalogs: alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace = "com.kakdela.p2p"  // Add this if missing (required for AGP 7.0+)
+    namespace = "com.kakdela.p2p"
     compileSdk = 35
 
     defaultConfig {
@@ -16,7 +18,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // Add vectorDrawables/useSupportLibrary if needed for your app
     }
 
     buildTypes {
@@ -27,11 +28,10 @@ android {
                 "proguard-rules.pro"
             )
         }
-        // Add debug block if needed
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17  // Import JavaVersion below
+        sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
@@ -40,11 +40,14 @@ android {
     }
 
     buildFeatures {
-        compose = true  // Enable Jetpack Compose
+        compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"  // Match your Kotlin version (e.g., 1.9.20+ for Compose)
+    // REMOVED: composeOptions { kotlinCompilerExtensionVersion = ... } - No longer needed
+
+    // OPTIONAL: Compose Compiler config (e.g., for diagnostics)
+    composeCompiler {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
     }
 
     packaging {
@@ -55,23 +58,30 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    // Core AndroidX
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.activity:activity-compose:1.9.2")
+
+    // Compose BOM (update to latest stable)
+    val composeBom = platform("androidx.compose:compose-bom:2024.10.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    // Add your other dependencies here (e.g., Room)
+
+    // Room (example)
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")  // Now resolves with plugin applied
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
+    // Testing
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
