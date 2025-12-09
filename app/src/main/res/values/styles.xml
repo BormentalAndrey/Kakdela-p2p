@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Главная тема приложения (Material 3 + Compose) -->
-    <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Цвета темы – берутся автоматически из твоего KakdelaTheme -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+    <!-- Для старых систем (ниже 23) и для совместимости -->
+    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorSecondary">@color/md_theme_secondary</item>
     </style>
 
 </resources>
