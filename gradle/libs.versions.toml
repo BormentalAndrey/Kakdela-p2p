@@ -25,9 +25,14 @@ room-runtime = { module = "androidx.room:room-runtime", version = "2.6.1" }
 room-ktx = { module = "androidx.room:room-ktx", version = "2.6.1" }
 room-compiler = { module = "androidx.room:room-compiler", version = "2.6.1" }
 
-# ✔️ Исправлена версия WebRTC (32006 — не существует)
 webrtc = { module = "org.webrtc:google-webrtc", version = "1.0.32200" }
 
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.8.1" }
 java-websocket = { module = "org.java-websocket:Java-WebSocket", version = "1.5.6" }
-libsodium-jni = { module = "com.goterl:lazysodium-android", version = "5.1.
+libsodium-jni = { module = "com.goterl:lazysodium-android", version = "5.1.0" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
