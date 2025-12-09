@@ -9,7 +9,7 @@ coroutines = "1.8.1"
 lifecycle = "2.8.6"
 activity-compose = "1.9.2"
 java-websocket = "1.5.6"
-libsodium = "2.0.2"
+libsodium = "2.0.2"  # Latest stable on Maven Central
 material-icons = "1.6.8"
 
 [libraries]
@@ -32,9 +32,9 @@ webrtc = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc"
 
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
-# New: For skeleton code
+# Fixed: Correct groupId for libsodium-jni AAR (Maven Central)
 java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "java-websocket" }
-libsodium-jni = { module = "com.muquit.libsodiumjna:libsodium-jni-aar", version.ref = "libsodium" }
+libsodium-jni = { group = "com.github.joshjdevl.libsodiumjni", name = "libsodium-jni-aar", version.ref = "libsodium" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
