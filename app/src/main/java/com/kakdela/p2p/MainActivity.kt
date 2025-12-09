@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Главный экран — твой чат!
+                    // 🔥 Главный экран (UI полностью в Compose)
                     ChatScreen()
                 }
             }
