@@ -68,7 +68,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Google Material — если нужен (используется только в Compose вариантах)
+    // Google Material
     implementation(libs.google.material)
 
     // Room
@@ -88,9 +88,10 @@ dependencies {
     // Sodium encryption
     implementation(libs.libsodium.jni)
 
-    // Compose tooling (only in debug)
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    // ❗ JNA AAR — обязательно
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
 
-    // Compose test manifest (only in debug)
+    // Compose tooling (debug only)
+    debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
