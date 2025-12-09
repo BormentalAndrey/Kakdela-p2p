@@ -1,5 +1,3 @@
-import org.gradle.api.JavaVersion
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -34,8 +32,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        jvmToolchain(17)
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -43,38 +41,56 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17"
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
+
+    packaging {
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
 
+    // Compose BOM
     implementation(platform(libs.compose.bom))
+
+    // Jetpack Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
+    // Activity
+    implementation(libs.androidx.activity.compose)
+
+    // AndroidX Core + Lifecycle
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Google Material — если нужен (используется только в Compose вариантах)
     implementation(libs.google.material)
 
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    implementation(libs.webrtc)
+    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // WebRTC
+    implementation(libs.webrtc)
+
+    // WebSocket
     implementation(libs.java.websocket)
+
+    // Sodium encryption
     implementation(libs.libsodium.jni)
 
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // Compose tooling (only in debug)
+    debugImplementation("androidx.compose.ui:ui-tooling")
 
-    debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.compose.ui.test.manifest)
+    // Compose test manifest (only in debug)
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
