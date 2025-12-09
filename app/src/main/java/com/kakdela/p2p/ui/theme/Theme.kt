@@ -1,45 +1,48 @@
 package com.kakdela.p2p.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-// ---------------- Neon Palette ----------------
-
-val NeonPink = Color(0xFFFF00FF)
-val NeonCyan = Color(0xFF00FFFF)
-val NeonBlue = Color(0xFF00D4FF)
-val NeonPurple = Color(0xFF8A2BE2)
-val NeonGreen = Color(0xFF39FF14)
-
-val BackgroundDark = Color(0xFF0A0A0A)
-val SurfaceDark = Color(0xFF121212)
-val OnBackground = Color(0xFFE0E0E0)
-val OnSurface = Color(0xFFFFFFFF)
-
-// ---------------- Color Scheme ----------------
-
-private val DarkColorScheme = darkColorScheme(
+private val NeonColorScheme = darkColorScheme(
     primary = NeonCyan,
     secondary = NeonPink,
-    tertiary = NeonBlue,
-
+    tertiary = NeonPurple,
     background = BackgroundDark,
     surface = SurfaceDark,
+    onPrimary = BackgroundDark,
+    onSecondary = Color.Black,
     onBackground = OnBackground,
     onSurface = OnSurface,
+    surfaceVariant = Color(0xFF1E1E1E),
+    outline = NeonBlue
 )
 
 @Composable
-fun KakdelaTheme(
+fun KakdelaP2PTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = BackgroundDark.toArgb()
+            window.navigationBarColor = BackgroundDark.toArgb()
+            WindowCompat.getInsetsController(window, view)
+                .isAppearanceLightStatusBars = false
+        }
+    }
+
     MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography(),
-        shapes = Shapes(),
+        colorScheme = NeonColorScheme,
+        typography = Typography,
         content = content
     )
 }
