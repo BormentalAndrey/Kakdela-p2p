@@ -1,7 +1,15 @@
+pluginManagement {
+    repositories {
+        google()  // CRITICAL: For AGP resolution
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
+        google()  // CRITICAL: For AGP + AndroidX deps
         mavenCentral()
     }
 }
