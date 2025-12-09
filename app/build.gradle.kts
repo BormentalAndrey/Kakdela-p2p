@@ -9,23 +9,16 @@ plugins {
 
 android {
     namespace = "com.kakdela.p2p"
-    compileSdk = 35
+    compileSdk = 34  # Downgraded to match AGP 8.4.2 (avoids warning; upgrade AGP later)
 
     defaultConfig {
         applicationId = "com.kakdela.p2p"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34  # Match compileSdk
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // Enable native WebRTC libs
-        externalNativeBuild {
-            cmake {
-                cppFlags += ""
-            }
-        }
     }
 
     buildTypes {
@@ -48,17 +41,10 @@ android {
         compose = true
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-        }
-    }
+    // REMOVED: externalNativeBuild + packaging excludes (not needed for Stream WebRTC AAR)
 
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+    // Suppress SDK warning if it persists (optional)
+    // lintOptions { checkReleaseBuilds = false }
 }
 
 dependencies {
@@ -76,7 +62,9 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Updated WebRTC: Maintained, precompiled, in Maven Central
     implementation(libs.webrtc)
+
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation("junit:junit:4.13.2")
