@@ -1,31 +1,30 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.compose")     // ЭТА СТРОКА — ВСЁ, ЧТО НУЖНО
-    id("com.google.devtools.ksp")
+    id("org.jetbrains.compose")
 }
 
 android {
     namespace = "com.kakdela.p2p"
-    compileSdk = 35
+    compileSdk 35
 
     defaultConfig {
-        applicationId = "com.kakdela.p2p"
-        minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        applicationId "com.kakdela.p2p"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled false
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
@@ -33,11 +32,7 @@ android {
     }
 
     buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
+        compose true
     }
 }
 
