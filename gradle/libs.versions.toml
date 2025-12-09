@@ -1,6 +1,9 @@
 [versions]
 compose-bom = "2024.10.01"
 material = "1.12.0"
+android-gradle = "8.4.0"
+kotlin = "2.0.0"
+ksp = "2.0.0-1.0.22"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.13.1" }
@@ -11,13 +14,10 @@ compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-
 compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+compose-material-icons-extended = { module = "androidx.compose.material.icons:extended", version = "1.7.5" }
 
-# ← Важно: это была основная недостающая зависимость
-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.7.5" }
 
 google-material = { module = "com.google.android.material:material", version.ref = "material" }
 
@@ -25,7 +25,13 @@ room-runtime = { module = "androidx.room:room-runtime", version = "2.6.1" }
 room-ktx = { module = "androidx.room:room-ktx", version = "2.6.1" }
 room-compiler = { module = "androidx.room:room-compiler", version = "2.6.1" }
 
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.9.0" }
+webrtc = { module = "org.webrtc:google-webrtc", version = "1.0.32006" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.8.1" }
 java-websocket = { module = "org.java-websocket:Java-WebSocket", version = "1.5.6" }
 libsodium-jni = { module = "com.goterl:lazysodium-android", version = "5.1.0" }
-webrtc = { module = "org.webrtc:google-webrtc", version = "1.0.32006" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
