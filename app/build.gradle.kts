@@ -1,3 +1,4 @@
+// app/build.gradle.kts
 import org.gradle.api.JavaVersion
 
 plugins {
@@ -9,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.kakdela.p2p"
-    compileSdk = 34  # Downgraded to match AGP 8.4.2 (avoids warning; upgrade AGP later)
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.kakdela.p2p"
         minSdk = 24
-        targetSdk = 34  # Match compileSdk
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -24,7 +25,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -40,11 +44,6 @@ android {
     buildFeatures {
         compose = true
     }
-
-    // REMOVED: externalNativeBuild + packaging excludes (not needed for Stream WebRTC AAR)
-
-    // Suppress SDK warning if it persists (optional)
-    // lintOptions { checkReleaseBuilds = false }
 }
 
 dependencies {
@@ -62,7 +61,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Updated WebRTC: Maintained, precompiled, in Maven Central
+    // Modern, maintained, prebuilt WebRTC (works perfectly in CI)
     implementation(libs.webrtc)
 
     implementation(libs.kotlinx.coroutines.android)
@@ -72,7 +71,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
