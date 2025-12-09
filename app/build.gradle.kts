@@ -1,4 +1,3 @@
-// app/build.gradle.kts
 import org.gradle.api.JavaVersion
 
 plugins {
@@ -10,15 +9,14 @@ plugins {
 
 android {
     namespace = "com.kakdela.p2p"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.kakdela.p2p"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,15 +35,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        jvmToolchain(17)
     }
 
     buildFeatures {
         compose = true
     }
-}
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.17"
+    }
+
+    packaging {
+        resources.excludes.add("META-INF/INDEX.LIST")
+        resources.excludes.add("META-INF/io.netty.versions.properties")
+    }
+}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -59,23 +65,27 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
+    // 🔥 МАТЕРИАЛ ДОЛЖЕН БЫТЬ ОБЯЗАТЕЛЬНО!
+    implementation(libs.google.material)
+
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // WebRTC / Sodium / WS
     implementation(libs.webrtc)
-
     implementation(libs.kotlinx.coroutines.android)
-
-    // Fixes for skeleton code
     implementation(libs.java.websocket)
     implementation(libs.libsodium.jni)
 
+    // Tests
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
