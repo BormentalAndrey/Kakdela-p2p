@@ -51,7 +51,7 @@ android {
 
 dependencies {
     implementation(platform(libs.compose.bom))
-
+    implementation "androidx.compose.material:material-icons-extended:1.7.7"
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
