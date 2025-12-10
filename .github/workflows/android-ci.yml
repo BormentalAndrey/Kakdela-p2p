@@ -4,31 +4,38 @@ on:
   push:
     branches: [ main ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      # THIS IS THE FIX
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
-      - name: Setup Gradle
+      - name: Recreate Gradle Wrapper (Gradle 8.9)
+        run: |
+          ./gradlew wrapper --gradle-version 8.9
+          chmod +x ./gradlew
+
+      - name: Setup Gradle caching
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: kakdela-p2p-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: kakdela-p2p-debug
+          path: app/build/outputs/apk/debug/*.apk
