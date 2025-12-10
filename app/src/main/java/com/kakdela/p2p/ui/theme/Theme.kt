@@ -10,23 +10,17 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// ------------------------------
 // Неоновые фирменные цвета
-// ------------------------------
 private val NeonCyan = Color(0xFF00FFF0)
 private val NeonPink = Color(0xFFFF00C8)
 private val NeonPurple = Color(0xFFD700FF)
 private val NeonBlue = Color(0xFF0088FF)
 
-// ------------------------------
 // Базовые фоновые цвета
-// ------------------------------
 private val BackgroundDark = Color(0xFF0A0A0A)
 private val SurfaceDark = Color(0xFF121212)
 
-// ------------------------------
 // Цветовая схема приложения
-// ------------------------------
 private val KakdelaColorScheme = darkColorScheme(
     primary = NeonCyan,
     onPrimary = Color.Black,
@@ -59,24 +53,14 @@ private val KakdelaColorScheme = darkColorScheme(
     onError = Color.Black
 )
 
-// ------------------------------
-// Улучшенная типографика
-// ------------------------------
+// Типографика
 private val KakdelaTypography = Typography(
-    bodyLarge = Typography().bodyLarge.copy(
-        color = Color.White
-    ),
-    titleLarge = Typography().titleLarge.copy(
-        color = NeonCyan
-    ),
-    labelLarge = Typography().labelLarge.copy(
-        color = NeonPink
-    )
+    bodyLarge = Typography().bodyLarge.copy(color = Color.White),
+    titleLarge = Typography().titleLarge.copy(color = NeonCyan),
+    labelLarge = Typography().labelLarge.copy(color = NeonPink)
 )
 
-// ------------------------------
-// Корректная функция получения Activity
-// ------------------------------
+// Функция получения Activity
 private fun Context.findActivity(): Activity? {
     var ctx = this
     while (ctx is ContextWrapper) {
@@ -86,24 +70,17 @@ private fun Context.findActivity(): Activity? {
     return null
 }
 
-// ------------------------------
 // Основная тема приложения
-// ------------------------------
 @Composable
-fun KakdelaTheme(
-    content: @Composable () -> Unit
-) {
+fun KakdelaTheme(content: @Composable () -> Unit) {
     val view = LocalView.current
 
-    // Настройка системных баров
     LaunchedEffect(Unit) {
         view.context.findActivity()?.window?.let { window ->
-
             window.statusBarColor = BackgroundDark.toArgb()
             window.navigationBarColor = BackgroundDark.toArgb()
-
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = false  // тёмные иконки не нужны
+                isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false
             }
         }
