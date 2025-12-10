@@ -3,7 +3,9 @@ package com.kakdela.p2p
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.kakdela.p2p.ui.screens.ChatScreen
+import androidx.compose.material3.*
+import androidx.navigation.compose.rememberNavController
+import com.kakdela.p2p.ui.navigation.AppNavGraph
 import com.kakdela.p2p.ui.theme.KakdelaTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +13,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             KakdelaTheme {
-                ChatScreen()
+                val navController = rememberNavController()
+                AppNavGraph(navController)
             }
         }
     }
