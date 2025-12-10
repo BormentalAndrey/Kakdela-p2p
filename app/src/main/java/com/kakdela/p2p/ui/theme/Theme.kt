@@ -2,26 +2,29 @@ package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Неоновые фирменные цвета
-private val NeonCyan = Color(0xFF00FFF0)
-private val NeonPink = Color(0xFFFF00C8)
-private val NeonPurple = Color(0xFFD700FF)
-private val NeonBlue = Color(0xFF0088FF)
+// ------------------------------
+// Неоновые цвета
+// ------------------------------
+val NeonCyan = Color(0xFF00FFF0)
+val NeonPink = Color(0xFFFF00C8)
+val NeonPurple = Color(0xFFD700FF)
+val NeonBlue = Color(0xFF0088FF)
 
-// Базовые фоновые цвета
-private val BackgroundDark = Color(0xFF0A0A0A)
-private val SurfaceDark = Color(0xFF121212)
+val BackgroundDark = Color(0xFF0A0A0A)
+val SurfaceDark = Color(0xFF121212)
 
-// Цветовая схема приложения
-private val KakdelaColorScheme = darkColorScheme(
+// ------------------------------
+// Цветовая схема
+// ------------------------------
+val KakdelaColorScheme = darkColorScheme(
     primary = NeonCyan,
     onPrimary = Color.Black,
     primaryContainer = NeonCyan.copy(alpha = 0.22f),
@@ -53,32 +56,33 @@ private val KakdelaColorScheme = darkColorScheme(
     onError = Color.Black
 )
 
+// ------------------------------
 // Типографика
-private val KakdelaTypography = Typography(
-    bodyLarge = Typography().bodyLarge.copy(color = Color.White),
-    titleLarge = Typography().titleLarge.copy(color = NeonCyan),
-    labelLarge = Typography().labelLarge.copy(color = NeonPink)
-)
+// ------------------------------
+val KakdelaTypography = Typography()
 
-// Функция получения Activity
-private fun Context.findActivity(): Activity? {
-    var ctx = this
-    while (ctx is ContextWrapper) {
-        if (ctx is Activity) return ctx
-        ctx = ctx.baseContext
+// ------------------------------
+// Найти Activity из Context
+// ------------------------------
+private tailinline fun Context.findActivity(): Activity? =
+    when (this) {
+        is Activity -> this
+        is android.content.ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
-    return null
-}
 
-// Основная тема приложения
+// ------------------------------
+// Основная тема
+// ------------------------------
 @Composable
 fun KakdelaTheme(content: @Composable () -> Unit) {
     val view = LocalView.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(true) {
         view.context.findActivity()?.window?.let { window ->
             window.statusBarColor = BackgroundDark.toArgb()
             window.navigationBarColor = BackgroundDark.toArgb()
+
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false
