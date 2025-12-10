@@ -45,15 +45,17 @@ android {
     }
 
     packaging {
-        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
 dependencies {
-    // Compose BOM
+    // Compose BOM — всё берётся отсюда
     implementation(platform(libs.compose.bom))
 
-    // Compose
+    // Основные Compose-модули
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
@@ -73,16 +75,18 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // WebRTC (Stream fork)
+    // WebRTC — актуальный и рабочий форк 2025 года
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
-    // WebSocket
+    // WebSocket клиент
     implementation(libs.java.websocket)
 
-    // LazySodium
+    // LazySodium — ВСЁ ВКЛЮЧЕНО (JNA и нативные библиотеки внутри!)
     implementation("com.goterl:lazysodium-android:5.1.0")
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
 
-    // Debug
+    // НЕ ДОБАВЛЯЙ net.java.dev.jna:jna отдельно — это вызывает дубликаты!
+
+    // Debug-инструменты
     debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
