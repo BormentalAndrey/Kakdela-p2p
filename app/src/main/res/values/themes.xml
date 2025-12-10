@@ -1,9 +1,21 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Основные цвета Material3 (можно потом поменять на свои) -->
+        <item name="colorPrimary">#6750A4</item>
+        <item name="colorPrimaryContainer">#EADDFF</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#625B71</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSurface">#FFFBFE</item>
+        <item name="colorOnSurface">#1C1B1F</item>
 
-    <style name="Theme.KakDela" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/md_theme_primary</item>
-        <item name="android:navigationBarColor">@color/md_theme_primary</item>
+        <!-- Отключаем ActionBar (в Compose он не нужен) -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Цвет статус-бара и навигации -->
+        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
-
 </resources>
