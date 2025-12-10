@@ -1,8 +1,4 @@
-@echo off
-where gradle >nul 2>nul
-if %errorlevel%==0 (
-  gradle %*
-) else (
-  echo Gradle CLI not found. Run 'gradle wrapper' locally to create wrapper.
-  exit /b 1
-)
+@ECHO OFF
+SET DIR=%~dp0
+SET CLASSPATH=%DIR%\gradle\wrapper\gradle-wrapper.jar
+"%JAVA_HOME%\bin\java.exe" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
