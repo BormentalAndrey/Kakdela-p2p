@@ -38,7 +38,7 @@ fun ChatScreen() {
         )
     }
 
-    KakdelaTheme {
+    KakdelaP2PTheme {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
