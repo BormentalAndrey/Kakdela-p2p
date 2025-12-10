@@ -2,6 +2,7 @@ package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper        // ДОБАВЛЕНО!
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +72,7 @@ val KakdelaTypography = Typography(
 private tailinline fun Context.findActivity(): Activity? =
     when (this) {
         is Activity -> this
-        is android.content.ContextWrapper -> baseContext.findActivity()
+        is ContextWrapper -> baseContext.findActivity()
         else -> null
     }
 
@@ -82,11 +83,10 @@ private tailinline fun Context.findActivity(): Activity? =
 fun KakdelaTheme(content: @Composable () -> Unit) {
     val view = LocalView.current
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         view.context.findActivity()?.window?.let { window ->
             window.statusBarColor = BackgroundDark.toArgb()
             window.navigationBarColor = BackgroundDark.toArgb()
-
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false
