@@ -10,39 +10,28 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kakdela.p2p.ui.model.Message
 import com.kakdela.p2p.ui.theme.KakdelaTheme
+import java.text.SimpleDateFormat
+import java.util.*
 
-// ИКОНКИ ИЗ MATERIAL3 — РАБОТАЮТ С COMPOSE BOM 2025.12.00
+// Иконки
 import androidx.compose.material3.icons.Icons
 import androidx.compose.material3.icons.filled.Send
-
-data class Message(
-    val text: String,
-    val isFromMe: Boolean,
-    val time: String = "12:34"
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen() {
     var text by remember { mutableStateOf("") }
-    val messages = remember {
-        mutableStateListOf(
-            Message("Привет! Как дела?", false),
-            Message("Всё отлично! А у тебя?", true),
-            Message("Тоже супер", false),
-            Message("Запустил свой P2P-мессенджер!", true),
-        )
-    }
+    val messages = remember { mutableStateListOf<Message>() }
 
     KakdelaTheme {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Андрей", fontWeight = FontWeight.Bold) },
+                    title = { Text("Андрей") },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
@@ -54,7 +43,8 @@ fun ChatScreen() {
                     onTextChange = { text = it },
                     onSend = {
                         if (text.isNotBlank()) {
-                            messages.add(Message(text, true))
+                            val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                            messages.add(Message(text, true, currentTime))
                             text = ""
                         }
                     }
@@ -85,10 +75,8 @@ fun MessageBubble(message: Message) {
     ) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = if (message.isFromMe)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.surfaceVariant,
+            color = if (message.isFromMe) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surfaceVariant,
             shadowElevation = 4.dp
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
@@ -111,11 +99,7 @@ fun MessageBubble(message: Message) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InputBar(
-    text: String,
-    onTextChange: (String) -> Unit,
-    onSend: () -> Unit
-) {
+fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
     Surface(
         tonalElevation = 6.dp,
         shadowElevation = 8.dp,
@@ -138,26 +122,19 @@ fun InputBar(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent
                 ),
                 shape = RoundedCornerShape(28.dp),
                 singleLine = true
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = onSend,
-                enabled = text.isNotBlank()
-            ) {
+            IconButton(onClick = onSend, enabled = text.isNotBlank()) {
                 Icon(
                     imageVector = Icons.Default.Send,
                     contentDescription = "Отправить",
                     tint = if (text.isNotBlank())
                         MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
         }
