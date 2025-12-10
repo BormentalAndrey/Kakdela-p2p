@@ -45,28 +45,26 @@ android {
     }
 
     packaging {
-        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
 dependencies {
     // Compose BOM
     implementation(platform(libs.compose.bom))
+
+    // Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
 
-    // Material3 Icons (Core + Extended)
-    implementation("androidx.compose.material3:material3-icons-core:1.1.0")
-    implementation("androidx.compose.material3:material3-icons-extended:1.1.0")
-
-    // Activity + Core + Lifecycle
+    // AndroidX
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // Google Material
     implementation(libs.google.material)
 
     // Room + KSP
@@ -77,16 +75,17 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // WebRTC
-    implementation(libs.webrtc)
+    // WebRTC (рабочий вариант)
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
     // WebSocket
     implementation(libs.java.websocket)
 
     // LazySodium
-    implementation(libs.lazysodium.android)
+    implementation("com.goterl:lazysodium-android:5.1.0")
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
 
-    // Debug tooling
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Debug
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
