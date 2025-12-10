@@ -1,5 +1,3 @@
-// app/src/main/java/com/kakdela/p2p/ui/theme/Theme.kt
-
 package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
@@ -10,6 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+// Неоновые цвета — без дубликатов!
 private val NeonCyan = Color(0xFF00FFF0)
 private val NeonPink = Color(0xFFFF00C8)
 private val NeonPurple = Color(0xFFD700FF)
@@ -20,6 +19,7 @@ private val SurfaceDark = Color(0xFF121212)
 private val OnBackground = Color(0xFFE0E0E0)
 private val OnSurface = Color(0xFFFFFFFF)
 
+// Неоновая схема (тёмная)
 private val KakdelaColorScheme = darkColorScheme(
     primary = NeonCyan,
     onPrimary = Color.Black,
@@ -51,7 +51,9 @@ private val KakdelaColorScheme = darkColorScheme(
 private val KakdelaTypography = Typography()
 
 @Composable
-fun KakdelaTheme(content: @Composable () -> Unit) {
+fun KakdelaTheme(
+    content: @Composable () -> Unit
+) {
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
