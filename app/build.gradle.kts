@@ -50,32 +50,43 @@ android {
 }
 
 dependencies {
+    // Compose BOM
     implementation(platform(libs.compose.bom))
-    implementation("androidx.compose.material:material-icons-extended:1.7.7")
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
 
-    implementation(libs.androidx.activity.compose)
+    // Material3 Icons (Core + Extended)
+    implementation("androidx.compose.material3:material3-icons-core:1.1.0")
+    implementation("androidx.compose.material3:material3-icons-extended:1.1.0")
 
+    // Activity + Core + Lifecycle
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    // Google Material
     implementation(libs.google.material)
 
+    // Room + KSP
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // WebRTC
     implementation(libs.webrtc)
 
+    // WebSocket
     implementation(libs.java.websocket)
 
+    // LazySodium
     implementation(libs.lazysodium.android)
 
+    // Debug tooling
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
