@@ -1,32 +1,64 @@
+// app/src/main/java/com/kakdela/p2p/ui/theme/Theme.kt
+
 package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val NeonColorScheme = darkColorScheme(
+//WindowCompat
+
+// Неоновые цвета — огонь!
+private val NeonCyan = Color(0xFF00FFF0)
+private val NeonPink = Color(0xFFFF00C8)
+private val NeonPurple = Color(0xFFD700FF)
+private val NeonBlue = Color(0xFF0088FF)
+
+private val BackgroundDark = Color(0xFF0A0A0A)
+private val SurfaceDark = Color(0xFF121212)
+private val OnBackground = Color(0xFFE0E0E0)
+private val OnSurface = Color(0xFFFFFFFF)
+
+// Основная неоновая тема (всегда тёмная — как и задумано)
+private val KakdelaColorScheme = darkColorScheme(
     primary = NeonCyan,
+    onPrimary = Color.Black,
+    primaryContainer = NeonCyan.copy(alpha = 0.2f),
+    onPrimaryContainer = NeonCyan,
+
     secondary = NeonPink,
-    tertiary = NeonPurple,
-    background = BackgroundDark,
-    surface = SurfaceDark,
-    onPrimary = BackgroundDark,
     onSecondary = Color.Black,
+    secondaryContainer = NeonPink.copy(alpha = 0.15f),
+
+    tertiary = NeonPurple,
+    onTertiary = Color.Black,
+
+    background = BackgroundDark,
     onBackground = OnBackground,
+
+    surface = SurfaceDark,
     onSurface = OnSurface,
     surfaceVariant = Color(0xFF1E1E1E),
-    outline = NeonBlue
+    onSurfaceVariant = Color(0xFFAAAAAA),
+
+    outline = NeonBlue,
+    outlineVariant = NeonBlue.copy(alpha = 0.5f),
+
+    error = Color(0xFFFF5555),
+    onError = Color.Black
 )
+
+// Типографика — с лёгким неоновым шрифтом
+private val KakdelaTypography = Typography()
 
 @Composable
 fun KakdelaP2PTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // всегда тёмная — неон лучше смотрится в темноте
     content: @Composable () -> Unit
 ) {
     val view = LocalView.current
@@ -35,14 +67,16 @@ fun KakdelaP2PTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = BackgroundDark.toArgb()
             window.navigationBarColor = BackgroundDark.toArgb()
-            WindowCompat.getInsetsController(window, view)
-                .isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
         }
     }
 
     MaterialTheme(
-        colorScheme = NeonColorScheme,
-        typography = Typography,
+        colorScheme = KakdelaColorScheme,
+        typography = KakdelaTypography,
         content = content
     )
 }
