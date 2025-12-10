@@ -59,7 +59,11 @@ val KakdelaColorScheme = darkColorScheme(
 // ------------------------------
 // Типографика
 // ------------------------------
-val KakdelaTypography = Typography()
+val KakdelaTypography = Typography(
+    bodyLarge = Typography().bodyLarge.copy(color = Color.White),
+    titleLarge = Typography().titleLarge.copy(color = NeonCyan),
+    labelLarge = Typography().labelLarge.copy(color = NeonPink)
+)
 
 // ------------------------------
 // Найти Activity из Context
