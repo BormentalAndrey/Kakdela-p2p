@@ -3,7 +3,6 @@
 package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -11,9 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-//WindowCompat
-
-// Неоновые цвета — огонь!
 private val NeonCyan = Color(0xFF00FFF0)
 private val NeonPink = Color(0xFFFF00C8)
 private val NeonPurple = Color(0xFFD700FF)
@@ -24,7 +20,6 @@ private val SurfaceDark = Color(0xFF121212)
 private val OnBackground = Color(0xFFE0E0E0)
 private val OnSurface = Color(0xFFFFFFFF)
 
-// Основная неоновая тема (всегда тёмная — как и задумано)
 private val KakdelaColorScheme = darkColorScheme(
     primary = NeonCyan,
     onPrimary = Color.Black,
@@ -53,23 +48,20 @@ private val KakdelaColorScheme = darkColorScheme(
     onError = Color.Black
 )
 
-// Типографика — с лёгким неоновым шрифтом
 private val KakdelaTypography = Typography()
 
 @Composable
-fun KakdelaP2PTheme(
-    darkTheme: Boolean = true, // всегда тёмная — неон лучше смотрится в темноте
-    content: @Composable () -> Unit
-) {
+fun KakdelaTheme(content: @Composable () -> Unit) {
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = BackgroundDark.toArgb()
-            window.navigationBarColor = BackgroundDark.toArgb()
-            WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+            (view.context as Activity).window.apply {
+                statusBarColor = BackgroundDark.toArgb()
+                navigationBarColor = BackgroundDark.toArgb()
+                WindowCompat.getInsetsController(this, view).apply {
+                    isAppearanceLightStatusBars = false
+                    isAppearanceLightNavigationBars = false
+                }
             }
         }
     }
