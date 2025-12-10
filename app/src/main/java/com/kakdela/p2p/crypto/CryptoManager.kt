@@ -20,8 +20,8 @@ object CryptoManager {
 
     fun encrypt(data: ByteArray, theirPublicKey: ByteArray): ByteArray {
         val kp = getMyKeyPair()
-        val nonce = lazySodium.randomBytesBuf(Box.NONCEBYTES) // 24 байт
-        val ciphertextWithMac = ByteArray(data.size + Box.MACBYTES) // +16 байт MAC
+        val nonce = lazySodium.randomBytesBuf(Box.NONCEBYTES)
+        val ciphertextWithMac = ByteArray(data.size + Box.MACBYTES)
 
         val success = lazySodium.cryptoBoxEasy(
             ciphertextWithMac,
@@ -34,7 +34,6 @@ object CryptoManager {
 
         check(success) { "Encryption failed" }
 
-        // Возвращаем nonce (24) + ciphertext+mac
         return nonce + ciphertextWithMac
     }
 
@@ -53,7 +52,7 @@ object CryptoManager {
             ciphertextWithMac.size.toLong(),
             nonce,
             theirPublicKey,
-            kp.secretKey.as
+            kp.secretKey.asBytes   // ← ВОТ ТУТ БЫЛО "as" → ИСПРАВЛЕНО НА "asBytes"
         )
 
         return if (success) plaintext else null
