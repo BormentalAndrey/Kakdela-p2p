@@ -45,9 +45,7 @@ android {
     }
 
     packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
 }
 
@@ -75,7 +73,7 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // WebRTC (рабочий вариант)
+    // WebRTC (Stream fork)
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
     // WebSocket
@@ -87,5 +85,4 @@ dependencies {
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.compose.ui.test.manifest)
 }
