@@ -69,7 +69,7 @@ val KakdelaTypography = Typography(
 // ------------------------------
 // Найти Activity из Context
 // ------------------------------
-private tailinline fun Context.findActivity(): Activity? =
+private fun Context.findActivity(): Activity? =
     when (this) {
         is Activity -> this
         is ContextWrapper -> baseContext.findActivity()
