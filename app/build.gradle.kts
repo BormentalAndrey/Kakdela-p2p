@@ -50,48 +50,33 @@ android {
 }
 
 dependencies {
-
-    // Compose BOM
     implementation(platform(libs.compose.bom))
 
-    // Jetpack Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
-    // Activity
     implementation(libs.androidx.activity.compose)
 
-    // AndroidX Core + Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Google Material
     implementation(libs.google.material)
 
-    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // WebRTC
     implementation(libs.webrtc)
 
-    // WebSocket
     implementation(libs.java.websocket)
 
-    // Sodium encryption
-    implementation(libs.libsodium.jni)
+    implementation(libs.lazysodium.android)
 
-    // ❗ JNA AAR — обязательно
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
-
-    // Compose tooling (debug only)
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
