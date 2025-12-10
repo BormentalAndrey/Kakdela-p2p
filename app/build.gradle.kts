@@ -60,7 +60,14 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
+    // Material Icons (обычные)
+    implementation("androidx.compose.material:material-icons-core")
+
+    // Material Icons (заливка)
+    implementation("androidx.compose.material:material-icons-extended")
     // AndroidX
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
