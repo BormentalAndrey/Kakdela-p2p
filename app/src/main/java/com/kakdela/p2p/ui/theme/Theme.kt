@@ -2,6 +2,7 @@ package com.kakdela.p2p.ui.theme
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -74,14 +75,16 @@ private val KakdelaTypography = Typography(
 )
 
 // ------------------------------
-// Безопасная функция получения Activity
+// Корректная функция получения Activity
 // ------------------------------
-private tailinline fun Context.findActivity(): Activity? =
-    when (this) {
-        is Activity -> this
-        is android.content.ContextWrapper -> baseContext.findActivity()
-        else -> null
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
     }
+    return null
+}
 
 // ------------------------------
 // Основная тема приложения
@@ -93,13 +96,14 @@ fun KakdelaTheme(
     val view = LocalView.current
 
     // Настройка системных баров
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         view.context.findActivity()?.window?.let { window ->
+
             window.statusBarColor = BackgroundDark.toArgb()
             window.navigationBarColor = BackgroundDark.toArgb()
 
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = false   // тёмные статус бары
+                isAppearanceLightStatusBars = false  // тёмные иконки не нужны
                 isAppearanceLightNavigationBars = false
             }
         }
