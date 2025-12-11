@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
+    id("com.google.devtools.ksp") version "2.3.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
 }
 
@@ -57,7 +57,6 @@ android {
 }
 
 dependencies {
-
     // Compose BOM
     implementation(platform(libs.compose.bom))
 
@@ -88,7 +87,7 @@ dependencies {
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    ksp("androidx.room:room-compiler:2.6.2") // стабильная версия KSP для Room
 
     // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
