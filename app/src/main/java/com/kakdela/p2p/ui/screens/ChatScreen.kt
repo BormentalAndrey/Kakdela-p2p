@@ -17,7 +17,7 @@ import com.kakdela.p2p.ui.theme.KakdelaTheme
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Иконки
+// ✔️ Правильные M3 иконки
 import androidx.compose.material3.icons.Icons
 import androidx.compose.material3.icons.filled.Send
 
@@ -128,9 +128,10 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.width(8.dp))
+
             IconButton(onClick = onSend, enabled = text.isNotBlank()) {
                 Icon(
-                    imageVector = Icons.Default.Send,
+                    imageVector = Icons.Filled.Send,
                     contentDescription = "Отправить",
                     tint = if (text.isNotBlank())
                         MaterialTheme.colorScheme.primary
