@@ -1,11 +1,8 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.3.2"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -35,6 +32,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildFeatures {
         compose = true
     }
@@ -42,62 +43,55 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "2.2.21"
     }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
 }
 
 dependencies {
+    // AndroidX
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.activity:activity-compose:1.9.3")
+
     // Compose BOM
-    implementation(platform(libs.compose.bom))
+    implementation(platform("androidx.compose:compose-bom:2025.12.00"))
 
-    // Compose UI
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.core)
-    implementation(libs.androidx.activity.compose)
+    // Compose
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3")
 
-    // Material Legacy
-    implementation(libs.google.material)
-
-    // Navigation + Serialization
-    implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    // Google Material
+    implementation("com.google.android.material:material:1.12.0")
 
     // Coil 3
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-
-    // QR Codes
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
     // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp("androidx.room:room-compiler:2.6.2") // стабильная версия KSP для Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 
-    // Coroutines + WebSocket + Crypto
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.java.websocket)
-    implementation(libs.lazysodiumAndroid)
+    // WebRTC
+    implementation("io.getstream:stream-webrtc-android:1.3.10")
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
-    // WebRTC Stream
-    implementation(libs.webrtc.android)
-    implementation(libs.webrtc.android.ui)
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
-    // Debug
-    debugImplementation(libs.compose.ui.tooling)
+    // WebSocket
+    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+
+    // Crypto
+    implementation("com.goterl:lazysodium-android:5.1.0")
+
+    // JNA (WebRTC native)
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
