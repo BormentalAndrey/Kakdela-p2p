@@ -22,7 +22,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.21"
+        kotlinCompilerExtensionVersion = "1.5.4" // лучше использовать версию из BOM ниже
     }
 
     packaging {
@@ -49,33 +49,35 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Compose BOM
+    // === ВАЖНО: Compose BOM (все версии Compose синхронизируются автоматически) ===
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.material:material")
-    implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
 
-    // Coil (только Compose)
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // === ЭТО ГЛАВНОЕ ИСПРАВЛЕНИЕ: добавлена настоящая библиотека Material ===
+    implementation("com.google.android.material:material:1.12.0")
+
+    // Coil (для картинок в Compose)
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC
+    // WebRTC Stream
     implementation("io.getstream:stream-webrtc-android:1.3.10")
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
     // WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
@@ -84,11 +86,11 @@ dependencies {
     implementation("com.goterl:lazysodium-android:5.1.0")
 
     // JNA
-    implementation("net.java.dev.jna:jna:5.14.0")
-    implementation("net.java.dev.jna:jna-platform:5.14.0")
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
+    implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
 }
 
-// KSP arguments для Room
+// KSP аргументы для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
