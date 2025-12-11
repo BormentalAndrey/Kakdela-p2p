@@ -33,10 +33,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        // Убрано: jvmTarget = "17" (deprecated) — мигрировали ниже
-    }
-
     buildFeatures {
         compose = true
     }
@@ -51,14 +47,11 @@ android {
         }
     }
 
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    // Фикс deprecated jvmTarget — используем compilerOptions DSL
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 }
 
 dependencies {
@@ -80,7 +73,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    // Иконки (основные)
+    // Иконки
     implementation("androidx.compose.material:material-icons-core")
 
     // Coil 3
@@ -109,9 +102,3 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation("androidx.compose.ui:ui-tooling-preview")
 }
-
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-ksp {
-    useKsp2 = false  // ← ИСПРАВЛЕНО: camelCase без "2" в конце (отключает KSP2, использует стабильный KSP1)
-}
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
