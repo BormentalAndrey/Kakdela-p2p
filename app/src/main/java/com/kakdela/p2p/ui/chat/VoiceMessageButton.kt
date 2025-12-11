@@ -8,20 +8,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
+// Правильные импорты для Material 3 иконок
+import androidx.compose.material3.icons.Icons
+import androidx.compose.material3.icons.filled.Mic
+import androidx.compose.material3.icons.filled.MicOff
 
 @Composable
 fun VoiceMessageButton(
     isRecording: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier // Добавил для гибкости
 ) {
-    IconButton(onClick = onClick) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+    ) {
         Icon(
             imageVector = if (isRecording) Icons.Filled.MicOff else Icons.Filled.Mic,
-            contentDescription = if (isRecording) "Остановить запись" else "Запись голосового",
-            tint = if (isRecording) Color.Red else Color.Unspecified,
+            contentDescription = if (isRecording)
+                "Остановить запись голосового сообщения"
+            else
+                "Начать запись голосового сообщения",
+            tint = if (isRecording) Color.Red else Color.Unspecified, // Красный при записи
             modifier = Modifier.size(28.dp)
         )
     }
