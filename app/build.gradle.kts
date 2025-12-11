@@ -29,8 +29,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     buildFeatures {
@@ -49,7 +49,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
 }
@@ -101,9 +101,4 @@ dependencies {
     // Debug
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation("androidx.compose.ui:ui-tooling-preview")
-}
-
-// KSP — используем стабильный режим (KSP1)
-ksp {
-    useKsp2.set(false)
 }
