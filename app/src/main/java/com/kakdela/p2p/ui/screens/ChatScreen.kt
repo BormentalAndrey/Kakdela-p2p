@@ -17,7 +17,6 @@ import com.kakdela.p2p.ui.theme.KakdelaTheme
 import java.text.SimpleDateFormat
 import java.util.*
 
-// ✔️ Правильные старые M2-иконки, совместимые с Material3
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 
@@ -88,10 +87,8 @@ fun MessageBubble(message: Message) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = message.time,
-                    color = (
-                        if (message.isFromMe) Color.White
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    ).copy(alpha = 0.7f),
+                    color = (if (message.isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant)
+                        .copy(alpha = 0.7f),
                     fontSize = 11.sp,
                     modifier = Modifier.align(Alignment.End)
                 )
@@ -121,20 +118,27 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
                     .weight(1f)
                     .height(56.dp),
                 placeholder = { Text("Сообщение...") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = Color.Transparent,
+                shape = RoundedCornerShape(28.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(                     // правильный метод 2025 года
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    errorContainerColor = MaterialTheme.colorScheme.surface,
+
+                    focusedIndicatorColor = Color.Transparent,      // убираем линию снизу
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
                     errorIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(28.dp),
-                singleLine = true
+                )
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(onClick = onSend, enabled = text.isNotBlank()) {
+            IconButton(
+                onClick = onSend,
+                enabled = text.isNotBlank()
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Send,
                     contentDescription = "Отправить",
