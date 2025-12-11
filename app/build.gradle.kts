@@ -34,7 +34,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        // Убрано: jvmTarget = "17" (deprecated) — мигрировали ниже
     }
 
     buildFeatures {
@@ -50,6 +50,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    // Фикс deprecated jvmTarget — используем compilerOptions DSL
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 }
 
 dependencies {
@@ -64,16 +73,15 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.androidx.activity.compose)
 
-    // Material (классический, для некоторых компонентов)
+    // Material (классический)
     implementation("com.google.android.material:material:1.12.0")
 
     // Navigation + Serialization
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    // Иконки (основные — достаточно для Mic, Send, ArrowBack и т.д.)
+    // Иконки (основные)
     implementation("androidx.compose.material:material-icons-core")
-    // implementation("androidx.compose.material:material-icons-extended") // раскомментируйте, если нужны редкие иконки
 
     // Coil 3
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
@@ -102,7 +110,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling-preview")
 }
 
-// САМАЯ ВАЖНАЯ СТРОКА — спасает от бага KSP2
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 ksp {
-    useKSP2.set(false)  // отключаем багованную KSP2 → используем стабильный KSP1
+    useKsp2 = false  // ← ИСПРАВЛЕНО: camelCase без "2" в конце (отключает KSP2, использует стабильный KSP1)
 }
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
