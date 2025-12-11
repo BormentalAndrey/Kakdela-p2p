@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" // ← ОБЯЗАТЕЛЬНО!
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0" // ← Обновлено до 2.2.0!
     // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 }
 
@@ -44,7 +44,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17" // Стабильная с Compose ~1.6–1.7
+        kotlinCompilerExtensionVersion = "2.2.0" // ← Обновлено до 2.2.0 (стабильно с Compose ~1.8+)
     }
 
     packaging {
@@ -71,7 +71,7 @@ dependencies {
 
     // Навигация + сериализация маршрутов
     implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3") // ← Обновите до 1.7.3+ если нужно, но 1.7.3 OK
 
     // Иконки Material (из material, не material3! Актуально на 2025)
     // Core: основные иконки (рекомендуется, ~1MB)
@@ -79,7 +79,7 @@ dependencies {
     // Extended: все иконки (~20MB, используйте R8/ProGuard для обрезки)
     // implementation("androidx.compose.material:material-icons-extended")
 
-    // Coil 3 для AsyncImage (актуально на декабрь 2025)
+    // Coil 3 для AsyncImage (актуально на декабрь 2025, совместимо с Kotlin 2.2.0)
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0") // для загрузки по сети
 
