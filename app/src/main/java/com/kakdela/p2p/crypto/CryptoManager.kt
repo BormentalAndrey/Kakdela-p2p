@@ -1,60 +1,81 @@
+// app/src/main/java/com/kakdela/p2p/crypto/CryptoManager.kt
 package com.kakdela.p2p.crypto
 
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
 import com.goterl.lazysodium.interfaces.Box
+import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
 
 object CryptoManager {
 
-    private val lazySodium = LazySodiumAndroid(SodiumAndroid())
+    private val sodium = LazySodiumAndroid(SodiumAndroid())
 
     private var myKeyPair: KeyPair? = null
 
+    /** Генерируем или возвращаем свою постоянную пару ключей */
     fun getMyKeyPair(): KeyPair {
         if (myKeyPair == null) {
-            myKeyPair = lazySodium.cryptoBoxKeypair()
+            myKeyPair = sodium.cryptoBoxKeypair()
         }
         return myKeyPair!!
     }
 
-    fun encrypt(data: ByteArray, theirPublicKey: ByteArray): ByteArray {
-        val kp = getMyKeyPair()
-        val nonce = lazySodium.randomBytesBuf(Box.NONCEBYTES)
-        val ciphertextWithMac = ByteArray(data.size + Box.MACBYTES)
+    /** Шифруем сообщение для собеседника */
+    fun encrypt(plainText: String, theirPublicKeyHex: String): String {
+        val messageBytes = plainText.toByteArray(Charsets.UTF_8)
+        val theirPublicKey = Key.fromHexString(theirPublicKeyHex)
 
-        val success = lazySodium.cryptoBoxEasy(
-            ciphertextWithMac,
-            data,
-            data.size.toLong(),
+        val nonce = sodium.randomBytesBuf(Box.NONCEBYTES)
+        val cipher = ByteArray(messageBytes.size + Box.MACBYTES)
+
+        val success = sodium.cryptoBoxEasy(
+            cipher,
+            messageBytes,
+            messageBytes.size.toLong(),
             nonce,
-            theirPublicKey,
-            kp.secretKey.asBytes
+            theirPublicKey.asBytes,
+            getMyKeyPair().secretKey.asBytes
         )
 
-        check(success) { "Encryption failed" }
+        check(success) { "Шифрование не удалось" }
 
-        return nonce + ciphertextWithMac
+        // nonce (24 байта) + шифротекст с MAC
+        return (nonce + cipher).toHexString()
     }
 
-    fun decrypt(encryptedWithNonce: ByteArray, theirPublicKey: ByteArray): ByteArray? {
-        if (encryptedWithNonce.size < Box.NONCEBYTES + Box.MACBYTES) return null
+    /** Расшифровываем входящее сообщение */
+    fun decrypt(encryptedHex: String, theirPublicKeyHex: String): String? {
+        val encryptedBytes = encryptedHex.hexToByteArray()
+        if (encryptedBytes.size < Box.NONCEBYTES + Box.MACBYTES) return null
 
-        val nonce = encryptedWithNonce.copyOfRange(0, Box.NONCEBYTES)
-        val ciphertextWithMac = encryptedWithNonce.copyOfRange(Box.NONCEBYTES, encryptedWithNonce.size)
+        val nonce = encryptedBytes.copyOfRange(0, Box.NONCEBYTES)
+        val cipherText = encryptedBytes.copyOfRange(Box.NONCEBYTES, encryptedBytes.size)
 
-        val kp = getMyKeyPair()
-        val plaintext = ByteArray(ciphertextWithMac.size - Box.MACBYTES)
+        val theirPublicKey = Key.fromHexString(theirPublicKeyHex)
 
-        val success = lazySodium.cryptoBoxOpenEasy(
-            plaintext,
-            ciphertextWithMac,
-            ciphertextWithMac.size.toLong(),
+        val plain = ByteArray(cipherText.size - Box.MACBYTES)
+
+        val success = sodium.cryptoBoxOpenEasy(
+            plain,
+            cipherText,
+            cipherText.size.toLong(),
             nonce,
-            theirPublicKey,
-            kp.secretKey.asBytes   // ← ВОТ ТУТ БЫЛО "as" → ИСПРАВЛЕНО НА "asBytes"
+            theirPublicKey.asBytes,
+            getMyKeyPair().secretKey.asBytes
         )
 
-        return if (success) plaintext else null
+        return if (success) plain.toString(Charsets.UTF_8) else null
     }
+}
+
+// Вспомогательные расширения
+private fun ByteArray.toHexString(): String =
+    joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+
+private fun String.hexToByteArray(): ByteArray {
+    check(length % 2 == 0) { "Нечётная длина hex-строки" }
+    return chunked(2)
+        .map { it.toInt(16).toByte() }
+        .toByteArray()
 }
