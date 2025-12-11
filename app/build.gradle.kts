@@ -65,7 +65,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     // Material Icons (обычные)
     implementation("androidx.compose.material:material-icons-core")
-
+    // QR-генерация и сканер (лучшее и самое стабильное в 2025)
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     // Material Icons (заливка)
     implementation("androidx.compose.material:material-icons-extended")
     // AndroidX
