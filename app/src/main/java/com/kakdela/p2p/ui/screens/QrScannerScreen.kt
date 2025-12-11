@@ -13,32 +13,46 @@ import com.journeyapps.barcodescanner.ScanOptions
 
 @Composable
 fun QrScannerScreen(
-    onPeerScanned: (String) -> Unit,
+    onPeerAdded: (String, String) -> Unit,  // теперь имя тоже передаём
     onDismiss: () -> Unit
 ) {
+    var showNameDialog by remember { mutableStateOf<String?>(null) }
+
     val launcher = rememberLauncherForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            val data = result.contents
+        result.contents?.let { data ->
             if (data.startsWith("kakdela://peer/")) {
                 val peerId = data.removePrefix("kakdela://peer/")
-                onPeerScanned(peerId)
+                showNameDialog = peerId
             }
         }
-        onDismiss()
+        if (showNameDialog == null) onDismiss()
     }
 
-    LaunchedEffect(Unit) {
-        val options = ScanOptions().apply {
-            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            setPrompt("Наведи камеру на QR-код Kakdela")
-            setCameraId(0)
-            setBeepEnabled(true)
-            setOrientationLocked(false)
-        }
-        launcher.launch(options)
-    }
+    LaunchedEffect(Unit) { launcher.launch(ScanOptions().apply {
+        setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        setPrompt("Наведи на QR-код Kakdela")
+        setBeepEnabled(true)
+    })}
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Сканирование QR-кода…", color = Color.White)
+    showNameDialog?.let { peerId ->
+        var name by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { onDismiss(); showNameDialog = null },
+            title = { Text("Как зовут контакт?") },
+            text = {
+                TextField(value = name, onValueChange = { name = it }, placeholder = { Text("Имя") })
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (name.isNotBlank()) {
+                        ContactsRepository.addOrUpdate(peerId, name.trim())
+                        onPeerAdded(peerId, name.trim())
+                    }
+                    showNameDialog = null
+                    onDismiss()
+                }) { Text("Добавить") }
+            },
+            dismissButton = { TextButton(onClick = { showNameDialog = null; onDismiss() }) { Text("Отмена") } }
+        )
     }
 }
