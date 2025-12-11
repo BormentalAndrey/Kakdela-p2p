@@ -19,13 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.kakdela.p2p.crypto.CryptoManager
 import com.kakdela.p2p.model.ChatMessage
 import com.kakdela.p2p.model.ContactsRepository
 import com.kakdela.p2p.webrtc.FileTransferManager
+import com.kakdela.p2p.ui.components.VoiceMessageRecorder
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 private val chatHistory = mutableMapOf<String, MutableList<ChatMessage>>()
 
@@ -48,7 +46,7 @@ fun ChatScreen(peerId: String) {
         uri?.let { FileTransferManager.sendFile(context, peerId, it) }
     }
 
-    // Любые файлы
+    // Файлы
     val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { FileTransferManager.sendFile(context, peerId, it) }
     }
@@ -63,12 +61,22 @@ fun ChatScreen(peerId: String) {
             )
         },
         bottomBar = {
-            InputBar(
-                peerId = peerId,
-                onFilePicked = { uri -> FileTransferManager.sendFile(context, peerId, uri) },
-                onPhotoPicked = { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
-                onFileAttach = { filePicker.launch("*/*") }
-            )
+            Column {
+                // ГОЛОСОВЫЕ СООБЩЕНИЯ
+                VoiceMessageRecorder(peerId = peerId) {
+                    scope.launch { listState.animateScrollToItem(messages.lastIndex) }
+                }
+                
+                // ТЕКСТ + ФАЙЛЫ
+                InputBar(
+                    peerId = peerId,
+                    onPhotoPicked = { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
+                    onFilePicked = { filePicker.launch("*/*") },
+                    onMessageSent = {
+                        scope.launch { listState.animateScrollToItem(messages.lastIndex) }
+                    }
+                )
+            }
         }
     ) { padding ->
         LazyColumn(
@@ -88,15 +96,12 @@ fun ChatScreen(peerId: String) {
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
-            scope.launch {
-                listState.animateScrollToItem(messages.lastIndex)
-            }
+            listState.animateScrollToItem(messages.lastIndex)
         }
     }
 }
 
-@Composable
-@Composable
+@Composable  // УБРАЛИ ДУБЛИРОВАНИЕ!
 fun ChatBubble(message: ChatMessage, isFromMe: Boolean) {
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -114,20 +119,37 @@ fun ChatBubble(message: ChatMessage, isFromMe: Boolean) {
                             model = message.fileUri,
                             contentDescription = "Фото",
                             modifier = Modifier
-                                .size(240.dp)
+                                .sizeIn(maxWidth = 260.dp, maxHeight = 360.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .clickable { /* открыть на весь экран */ },
+                                .clickable { /* открыть полноэкранно */ },
                             contentScale = ContentScale.Crop
                         )
                     }
                     message.isVideo -> {
-                        Box(modifier = Modifier.size(240.dp).background(Color.Black.copy(0.3f), RoundedCornerShape(16.dp))) {
-                            Icon(Icons.Default.PlayCircle, "Видео", tint = Color.White, modifier = Modifier.size(64.dp).align(Alignment.Center))
+                        Box(
+                            modifier = Modifier
+                                .sizeIn(maxWidth = 260.dp, maxHeight = 360.dp)
+                                .background(Color.Black.copy(0.4f), RoundedCornerShape(16.dp))
+                                .clickable { /* воспроизвести */ }
+                        ) {
+                            Icon(
+                                Icons.Default.PlayCircleFilled,
+                                contentDescription = "Видео",
+                                tint = Color.White,
+                                modifier = Modifier.size(72.dp).align(Alignment.Center)
+                            )
+                        }
+                    }
+                    message.isVoice -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.PlayArrow, null, tint = Color.White)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Голосовое сообщение · ${message.duration ?: "0:12"}", color = Color.White)
                         }
                     }
                     message.isFile -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.InsertDriveFile, null, tint = Color.White.copy(0.8f))
+                            Icon(Icons.Default.InsertDriveFile, null, tint = Color.White.copy(0.9f))
                             Spacer(Modifier.width(8.dp))
                             Text(message.fileName ?: "Файл", color = Color.White)
                         }
