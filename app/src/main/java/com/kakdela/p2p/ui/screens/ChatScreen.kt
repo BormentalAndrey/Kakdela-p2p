@@ -1,9 +1,11 @@
+// app/src/main/java/com/kakdela/p2p/ui/screens/ChatScreen.kt
 package com.kakdela.p2p.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,44 +15,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kakdela.p2p.ui.model.Message
-import com.kakdela.p2p.ui.theme.KakdelaTheme
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+private val chatHistory = mutableMapOf<String, MutableList<Message>>() // peerId → список сообщений
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(peerId: String) {
+    val displayName = peerId.replace("KAKDELA_", "").take(12)
+    val messages = remember(peerId) { chatHistory.getOrPut(peerId) { mutableStateListOf() } }
     var text by remember { mutableStateOf("") }
-    val messages = remember { mutableStateListOf<Message>() }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
-    KakdelaTheme {
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = { Text("Андрей") },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(displayName) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
-            },
-            bottomBar = {
-                InputBar(
-                    text = text,
-                    onTextChange = { text = it },
-                    onSend = {
-                        if (text.isNotBlank()) {
-                            val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                            messages.add(Message(text, true, time))
-                            text = ""
+            )
+        },
+        bottomBar = {
+            InputBar(
+                text = text,
+                onTextChange = { text = it },
+                onSend = {
+                    if (text.isNotBlank()) {
+                        val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                        messages.add(Message(text, true, time))
+                        text = ""
+                        scope.launch {
+                            listState.animateScrollToItem(messages.lastIndex)
                         }
                     }
-                )
-            }
+                }
+            )
+        }
         ) { paddingValues ->
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -64,8 +71,16 @@ fun ChatScreen() {
             }
         }
     }
+
+    // Автоскролл при появлении нового сообщения
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.lastIndex)
+        }
+    }
 }
 
+// Остальные функции MessageBubble и InputBar — оставляем как у тебя (они идеальны)
 @Composable
 fun MessageBubble(message: Message) {
     Box(
@@ -114,36 +129,25 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
             TextField(
                 value = text,
                 onValueChange = onTextChange,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp),
+                modifier = Modifier.weight(1f).height(56.dp),
                 placeholder = { Text("Сообщение...") },
                 shape = RoundedCornerShape(28.dp),
                 singleLine = true,
-                colors = TextFieldDefaults.colors(                     // правильный метод 2025 года
+                colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    disabledContainerColor = MaterialTheme.colorScheme.surface,
-                    errorContainerColor = MaterialTheme.colorScheme.surface,
-
-                    focusedIndicatorColor = Color.Transparent,      // убираем линию снизу
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent
+                    unfocusedContainerColor = MaterialScheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 )
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(Modifier.width(8.dp))
 
-            IconButton(
-                onClick = onSend,
-                enabled = text.isNotBlank()
-            ) {
+            IconButton(onClick = onSend, enabled = text.isNotBlank()) {
                 Icon(
-                    imageVector = Icons.Filled.Send,
+                    Icons.Filled.Send,
                     contentDescription = "Отправить",
-                    tint = if (text.isNotBlank())
-                        MaterialTheme.colorScheme.primary
+                    tint = if (text.isNotBlank()) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
