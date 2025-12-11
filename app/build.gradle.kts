@@ -102,3 +102,8 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation("androidx.compose.ui:ui-tooling-preview")
 }
+
+// KSP — используем стабильный режим (KSP1)
+ksp {
+    useKsp2.set(false)
+}
