@@ -93,7 +93,7 @@ dependencies {
     // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.java.websocket)
-    implementation(libs.lazysodiumandroid)
+    implementation(libs.lazysodiumAndroid)
 
     // WebRTC Stream
     implementation(libs.webrtc.android)
