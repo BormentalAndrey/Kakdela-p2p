@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Основные цвета (берём из colors.xml) -->
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="colorOnPrimary">@color/color_on_primary</item>
-        <item name="colorPrimaryContainer">@color/color_primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/color_on_primary_container</item>
+        <!-- Основные цвета -->
+        <item name="colorPrimary">@color/neon_cyan</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorPrimaryContainer">@color/neon_cyan</item>
+        <item name="colorOnPrimaryContainer">#000000</item>
 
         <item name="colorSecondary">@color/neon_pink</item>
         <item name="colorOnSecondary">#000000</item>
-        <item name="colorSecondaryContainer">@color/neon_pink</item>
-        <item name="colorOnSecondaryContainer">#000000</item>
 
         <item name="colorTertiary">@color/neon_purple</item>
         <item name="colorOnTertiary">#000000</item>
 
-        <!-- Фон и текст -->
+        <!-- Фон и поверхности -->
         <item name="android:colorBackground">@color/background_dark</item>
         <item name="colorOnBackground">@color/on_background</item>
         <item name="colorSurface">@color/surface_dark</item>
