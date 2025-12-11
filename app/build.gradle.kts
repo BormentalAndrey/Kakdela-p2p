@@ -44,7 +44,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.0" // ← Обновлено до 2.2.0 (стабильно с Compose ~1.8+)
+        kotlinCompilerExtensionVersion = "2.2.20" // ← Обновлено до 2.2.0 (стабильно с Compose ~1.8+)
     }
 
     packaging {
