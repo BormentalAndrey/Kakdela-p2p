@@ -23,7 +23,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -41,7 +44,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.17" // ← чуть поновее, стабильнее
+        kotlinCompilerExtensionVersion = "1.5.17" // Стабильная с Compose ~1.6–1.7
     }
 
     packaging {
@@ -52,39 +55,53 @@ android {
 }
 
 dependencies {
-    implementation(platform(libs.compose.bom))
+    // Compose BOM (рекомендуется последняя на декабрь 2025)
+    implementation(platform("androidx.compose:compose-bom:2025.12.00"))
 
-    // Основные
+    // Основные Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+    implementation(libs.compose.foundation) // ← ВАЖНО: clickable, clip, draggable и т.д.
     implementation(libs.androidx.activity.compose)
-    implementation("com.google.android.material:material:1.12.0")
-    // Навигация + сериализация маршрутов (toRoute)
-    implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3") // ← ОБЯЗАТЕЛЬНО
 
-    // Иконки
-    implementation("androidx.compose.material:material-icons-extended")
+    // Material Design (для некоторых компонентов, если используете)
+    implementation("com.google.android.material:material:1.12.0")
+
+    // Навигация + сериализация маршрутов
+    implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    // Иконки Material3 (рекомендуемый современный способ)
+    implementation("androidx.compose.material3:material3-icons-filled")
+    implementation("androidx.compose.material3:material3-icons-outlined")
+    // Если нужны ВСЕ иконки (очень большой размер APK — не рекомендуется):
+    // implementation("androidx.compose.material3:material3-icons-extended")
+
+    // Coil 3 для AsyncImage (актуально на декабрь 2025)
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0") // для загрузки по сети
 
     // QR-код
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
-    // Room
+    // Room (если используете)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler) // ← раскомментируй, если используешь Room
+    ksp(libs.room.compiler)
 
     // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.java.websocket)
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // WebRTC (если оставляешь)
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
+    // WebRTC — обновлённая версия от Stream (на декабрь 2025)
+    implementation("io.getstream:stream-webrtc-android-ui:1.4.2") // ← проверьте актуальную на GitHub/Maven
+    implementation("io.getstream:stream-webrtc-android-core:1.4.2")
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)
+    debugImplementation("androidx.compose.ui:ui-tooling-preview")
 }
