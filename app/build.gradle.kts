@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp") // Для Room
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -31,15 +31,12 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+        }
     }
-}
-
-repositories {
-    google()
-    mavenCentral()
 }
 
 dependencies {
@@ -61,8 +58,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
 
-    // Coil для Compose
+    // Coil 2.4.0 (для Compose)
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-okhttp:2.4.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
