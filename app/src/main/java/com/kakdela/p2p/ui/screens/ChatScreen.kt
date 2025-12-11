@@ -1,39 +1,62 @@
 // app/src/main/java/com/kakdela/p2p/ui/screens/ChatScreen.kt
 package com.kakdela.p2p.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kakdela.p2p.ui.model.Message
+import coil.compose.AsyncImage
+import com.kakdela.p2p.crypto.CryptoManager
+import com.kakdela.p2p.model.ChatMessage
+import com.kakdela.p2p.model.ContactsRepository
+import com.kakdela.p2p.webrtc.FileTransferManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-private val chatHistory = mutableMapOf<String, MutableList<Message>>() // peerId → список сообщений
+private val chatHistory = mutableMapOf<String, MutableList<ChatMessage>>()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(peerId: String) {
-    val displayName = peerId.replace("KAKDELA_", "").take(12)
-    val messages = remember(peerId) { chatHistory.getOrPut(peerId) { mutableStateListOf() } }
-    var text by remember { mutableStateOf("") }
+    val contact = ContactsRepository.getById(peerId) ?: return
+    val displayName = contact.displayName
+
+    val messages = remember(peerId) {
+        chatHistory.getOrPut(peerId) { mutableStateListOf() }
+    }
+
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Фото/видео
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { FileTransferManager.sendFile(context, peerId, it) }
+    }
+
+    // Любые файлы
+    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { FileTransferManager.sendFile(context, peerId, it) }
+    }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(displayName) },
+                title = { Text(displayName, fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
@@ -41,114 +64,89 @@ fun ChatScreen(peerId: String) {
         },
         bottomBar = {
             InputBar(
-                text = text,
-                onTextChange = { text = it },
-                onSend = {
-                    if (text.isNotBlank()) {
-                        val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                        messages.add(Message(text, true, time))
-                        text = ""
-                        scope.launch {
-                            listState.animateScrollToItem(messages.lastIndex)
-                        }
-                    }
-                }
+                peerId = peerId,
+                onFilePicked = { uri -> FileTransferManager.sendFile(context, peerId, uri) },
+                onPhotoPicked = { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
+                onFileAttach = { filePicker.launch("*/*") }
             )
         }
-        ) { paddingValues ->
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(messages) { message ->
-                    MessageBubble(message)
-                }
+    ) { padding ->
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(messages, key = { it.id }) { msg ->
+                ChatBubble(message = msg, isFromMe = msg.isFromMe)
             }
         }
     }
 
-    // Автоскролл при появлении нового сообщения
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.lastIndex)
+            scope.launch {
+                listState.animateScrollToItem(messages.lastIndex)
+            }
         }
     }
 }
 
-// Остальные функции MessageBubble и InputBar — оставляем как у тебя (они идеальны)
 @Composable
-fun MessageBubble(message: Message) {
+@Composable
+fun ChatBubble(message: ChatMessage, isFromMe: Boolean) {
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = if (message.isFromMe) Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = if (isFromMe) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = if (message.isFromMe) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.surfaceVariant,
+            color = if (isFromMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             shadowElevation = 4.dp
         ) {
-            Column(modifier = Modifier.padding(14.dp)) {
-                Text(
-                    text = message.text,
-                    color = if (message.isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+            Column(modifier = Modifier.padding(12.dp)) {
+                when {
+                    message.isImage -> {
+                        AsyncImage(
+                            model = message.fileUri,
+                            contentDescription = "Фото",
+                            modifier = Modifier
+                                .size(240.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable { /* открыть на весь экран */ },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    message.isVideo -> {
+                        Box(modifier = Modifier.size(240.dp).background(Color.Black.copy(0.3f), RoundedCornerShape(16.dp))) {
+                            Icon(Icons.Default.PlayCircle, "Видео", tint = Color.White, modifier = Modifier.size(64.dp).align(Alignment.Center))
+                        }
+                    }
+                    message.isFile -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.InsertDriveFile, null, tint = Color.White.copy(0.8f))
+                            Spacer(Modifier.width(8.dp))
+                            Text(message.fileName ?: "Файл", color = Color.White)
+                        }
+                    }
+                    else -> {
+                        Text(
+                            text = message.text ?: "",
+                            color = if (isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = message.time,
-                    color = (if (message.isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant)
-                        .copy(alpha = 0.7f),
+                    color = (if (isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.7f),
                     fontSize = 11.sp,
                     modifier = Modifier.align(Alignment.End)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
-    Surface(
-        tonalElevation = 6.dp,
-        shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = text,
-                onValueChange = onTextChange,
-                modifier = Modifier.weight(1f).height(56.dp),
-                placeholder = { Text("Сообщение...") },
-                shape = RoundedCornerShape(28.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialScheme.colorScheme.surface,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                )
-            )
-
-            Spacer(Modifier.width(8.dp))
-
-            IconButton(onClick = onSend, enabled = text.isNotBlank()) {
-                Icon(
-                    Icons.Filled.Send,
-                    contentDescription = "Отправить",
-                    tint = if (text.isNotBlank()) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
         }
