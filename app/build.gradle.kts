@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget  // ← Добавлено для compilerOptions
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -33,6 +35,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    // Удалено: kotlinOptions { jvmTarget = "17" } — дубликат, используем новый DSL ниже
+
     buildFeatures {
         compose = true
     }
@@ -49,7 +53,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_21)  // ← Новый DSL, для JDK 21
         }
     }
 }
