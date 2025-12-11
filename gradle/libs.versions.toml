@@ -1,17 +1,17 @@
 [versions]
-# Последние стабильные версии на декабрь 2025
+# Последние стабильные версии на 11 декабря 2025
 agp                  = "8.7.2"
-kotlin               = "2.2.20"         # ← Обновлено до стабильной 2.2.20 (совместимо с Coil 3.3.0)
-compose-bom          = "2025.12.00"
+kotlin               = "2.2.20"         # ← Стабильная (релиз ~декабрь 2025)
+compose-bom          = "2025.12.00"     # ← Релиз 03.12.2025 (Compose 1.10.0 + Material3 1.4.0)
 lifecycle            = "2.8.7"
 activity-compose     = "1.9.3"
 room                 = "2.6.1"
 coroutines           = "1.8.1"
-ksp                  = "2.2.20-1.0.27"  # ← Обновлено под Kotlin 2.2.20 (последняя для этой версии)
+ksp                  = "2.2.20-2.0.4"   # ← Исправлено: последняя для Kotlin 2.2.20 (релиз 07.10.2025)
 webrtc               = "1.3.10"         # Stream WebRTC — актуальный релиз 11.09.2025
 java-websocket       = "1.5.6"
 lazysodium           = "5.1.0"
-coil                 = "3.3.0"          # Coil 3 — современный, декабрь 2025 (требует Kotlin 2.2.0+)
+coil                 = "3.3.0"          # Coil 3 — стабильная, совместима с Kotlin 2.2.20
 
 [libraries]
 # AndroidX
@@ -57,7 +57,6 @@ room-compiler                    = { module = "androidx.room:room-compiler", ver
 # WebRTC (Stream fork — свежий и поддерживаемый)
 webrtc-android                   = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
 webrtc-android-ui                = { module = "io.getstream:stream-webrtc-android-ui", version.ref = "webrtc" }
-# Нет отдельного -core: основной — stream-webrtc-android
 
 # Coroutines
 kotlinx-coroutines-android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -74,4 +73,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library     = { id = "com.android.library", version.ref = "agp" }
 kotlin-android      = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }      # ← 2.2.20
 kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }  # ← 2.2.20
-ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }             # ← 2.2.20-1.0.27
+ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }             # ← 2.2.20-2.0.4
