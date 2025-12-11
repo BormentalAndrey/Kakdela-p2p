@@ -20,6 +20,16 @@ android {
         versionName = "1.0"
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -33,72 +43,62 @@ android {
         kotlinCompilerExtensionVersion = "2.2.21"
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 }
 
 dependencies {
+
+    // Compose BOM
     implementation(platform(libs.compose.bom))
 
+    // Compose UI
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.core)
     implementation(libs.androidx.activity.compose)
+
+    // Material Legacy
     implementation(libs.google.material)
 
-    implementation(libs.compose.material.icons.core)
-    implementation(libs.compose.material.icons.extended)
-
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // Navigation + Serialization
+    implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     // Coil 3
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // QR Codes
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Coroutines
+    // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
-
-    // WebSocket
     implementation(libs.java.websocket)
-
-    // Crypto libs
-    implementation(libs.lazysodiumAndroid)
-    implementation(libs.jna)
+    implementation(libs.lazysodium.android)
 
     // WebRTC Stream
     implementation(libs.webrtc.android)
     implementation(libs.webrtc.android.ui)
 
-    // ZXing
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-
+    // Debug
     debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.compose.ui.tooling.preview)
 }
