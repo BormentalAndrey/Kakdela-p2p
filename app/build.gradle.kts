@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") // Для Room и других KSP-плагинов
 }
 
 android {
@@ -30,11 +30,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
 
-kotlin {
-    // Указываем JVM 17 для KSP и компиляции Kotlin
-    jvmToolchain(17)
+    // Новый DSL для Kotlin компилятора
+    compilerOptions {
+        jvmTarget.set(JavaVersion.VERSION_17.toString())
+        freeCompilerArgs.addAll(listOf("-opt-in=kotlin.RequiresOptIn"))
+    }
 }
 
 dependencies {
@@ -50,17 +51,15 @@ dependencies {
 
     // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
-
-    // Compose UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.compose.material3:material3")
 
     // Coil 3
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
@@ -71,13 +70,13 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
-
     // WebRTC
     implementation("io.getstream:stream-webrtc-android:1.3.10")
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
     // WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
@@ -85,14 +84,19 @@ dependencies {
     // Crypto
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // JNA (WebRTC native)
+    // JNA
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
 
-// Опционально: для инструментов компиляции Compose
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+// Для KSP
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// Для дебага Compose preview
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
+        jvmTarget = "17"
     }
 }
