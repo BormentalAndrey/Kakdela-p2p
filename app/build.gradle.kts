@@ -22,7 +22,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4" // лучше использовать версию из BOM ниже
+        kotlinCompilerExtensionVersion = "1.5.4" // используем BOM для синхронизации версий Compose
     }
 
     packaging {
@@ -49,7 +49,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // === ВАЖНО: Compose BOM (все версии Compose синхронизируются автоматически) ===
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -61,10 +61,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // === ЭТО ГЛАВНОЕ ИСПРАВЛЕНИЕ: добавлена настоящая библиотека Material ===
+    // Material
     implementation("com.google.android.material:material:1.12.0")
 
-    // Coil (для картинок в Compose)
+    // Coil (Compose)
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Room
@@ -85,9 +85,9 @@ dependencies {
     // Crypto
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // JNA
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
+    // JNA (исправлено)
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
 
 // KSP аргументы для Room
