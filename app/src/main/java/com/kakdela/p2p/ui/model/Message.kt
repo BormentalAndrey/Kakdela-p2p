@@ -1,3 +1,4 @@
+// app/src/main/java/com/kakdela/p2p/ui/model/Message.kt
 package com.kakdela.p2p.ui.model
 
 data class Message(
