@@ -3,9 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20" // ← Обновлено до 2.2.0!
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -44,7 +42,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.20" // ← Обновлено до 2.2.0 (стабильно с Compose ~1.8+)
+        kotlinCompilerExtensionVersion = "2.2.20"
     }
 
     packaging {
@@ -55,7 +53,7 @@ android {
 }
 
 dependencies {
-    // Compose BOM (рекомендуется последняя на декабрь 2025)
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
 
     // Основные Compose
@@ -63,31 +61,29 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    implementation(libs.compose.foundation) // ← ВАЖНО: clickable, clip, draggable и т.д.
+    implementation(libs.compose.foundation)
     implementation(libs.androidx.activity.compose)
 
-    // Material Design (для некоторых компонентов, если используете)
+    // Material (классический, для некоторых компонентов)
     implementation("com.google.android.material:material:1.12.0")
 
-    // Навигация + сериализация маршрутов
+    // Navigation + Serialization
     implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3") // ← Обновите до 1.7.3+ если нужно, но 1.7.3 OK
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    // Иконки Material (из material, не material3! Актуально на 2025)
-    // Core: основные иконки (рекомендуется, ~1MB)
+    // Иконки (основные — достаточно для Mic, Send, ArrowBack и т.д.)
     implementation("androidx.compose.material:material-icons-core")
-    // Extended: все иконки (~20MB, используйте R8/ProGuard для обрезки)
-    // implementation("androidx.compose.material:material-icons-extended")
+    // implementation("androidx.compose.material:material-icons-extended") // раскомментируйте, если нужны редкие иконки
 
-    // Coil 3 для AsyncImage (актуально на декабрь 2025, совместимо с Kotlin 2.2.0)
+    // Coil 3
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0") // для загрузки по сети
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
-    // QR-код
+    // QR
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
-    // Room (если используете)
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
@@ -97,11 +93,16 @@ dependencies {
     implementation(libs.java.websocket)
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // WebRTC — обновлённая версия от Stream (на декабрь 2025)
-    implementation("io.getstream:stream-webrtc-android:1.3.10") // Основной core
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10") // UI компоненты
+    // WebRTC Stream
+    implementation("io.getstream:stream-webrtc-android:1.3.10")
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation("androidx.compose.ui:ui-tooling-preview")
+}
+
+// САМАЯ ВАЖНАЯ СТРОКА — спасает от бага KSP2
+ksp {
+    useKSP2.set(false)  // отключаем багованную KSP2 → используем стабильный KSP1
 }
