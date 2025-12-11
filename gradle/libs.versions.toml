@@ -11,6 +11,7 @@ ksp                  = "2.0.21-1.0.25"
 webrtc               = "1.3.9"          # Stream fork — актуальный
 java-websocket       = "1.5.6"
 lazysodium           = "5.1.0"
+coil                 = "3.3.0"          # Coil 3 — современный, декабрь 2025
 
 [libraries]
 # AndroidX
@@ -23,14 +24,28 @@ androidx-activity-compose        = { module = "androidx.activity:activity-compos
 
 # Compose BOM (все Compose-библиотеки берут версии из BOM — не указываем version)
 compose-bom                      = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+
+# Основные Compose артефакты
 compose-ui                       = { module = "androidx.compose.ui:ui" }
 compose-ui-graphics              = { module = "androidx.compose.ui:ui-graphics" }
 compose-ui-tooling               = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview       = { module = "androidx.compose.ui:ui-tooling-preview" }
+
+# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# ВАЖНО: Добавленные зависимости
+compose-foundation               = { module = "androidx.compose.foundation:foundation" }  # clickable, clip, draggable, detectDragGestures и т.д.
+compose-material3-icons-filled   = { module = "androidx.compose.material3:material3-icons-filled" }
+compose-material3-icons-outlined = { module = "androidx.compose.material3:material3-icons-outlined" }
+# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
 compose-material3                = { module = "androidx.compose.material3:material3" }
 
 # Material Design (классический)
 google-material                  = { module = "com.google.android.material:material", version = "1.12.0" }
+
+# Coil 3 для AsyncImage
+coil-compose                     = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp              = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
 # Room
 room-runtime                     = { module = "androidx.room:room-runtime", version.ref = "room" }
