@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Ночная тема — тоже динамическая, но с тёмными иконками в статус-баре -->
-    <style name="Theme.KakdelaP2P" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <!-- В тёмной теме иконки в статус-баре тёмные -->
-        <item name="android:windowLightStatusBar">false</item>
-        
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
-    </style>
-
+    <!-- В твоём случае светлая и тёмная темы одинаковые (всё тёмное) — просто наследуем ту же тему -->
+    <style name="Theme.KakdelaP2P" parent="Theme.KakdelaP2P" />
 </resources>
