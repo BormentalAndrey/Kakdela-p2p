@@ -17,9 +17,9 @@ import com.kakdela.p2p.ui.theme.KakdelaTheme
 import java.text.SimpleDateFormat
 import java.util.*
 
-// ✔️ Правильные M3 иконки
-import androidx.compose.material3.icons.Icons
-import androidx.compose.material3.icons.filled.Send
+// ✔️ Правильные старые M2-иконки, совместимые с Material3
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,8 +43,8 @@ fun ChatScreen() {
                     onTextChange = { text = it },
                     onSend = {
                         if (text.isNotBlank()) {
-                            val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                            messages.add(Message(text, true, currentTime))
+                            val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                            messages.add(Message(text, true, time))
                             text = ""
                         }
                     }
@@ -88,7 +88,10 @@ fun MessageBubble(message: Message) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = message.time,
-                    color = (if (message.isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.7f),
+                    color = (
+                        if (message.isFromMe) Color.White
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    ).copy(alpha = 0.7f),
                     fontSize = 11.sp,
                     modifier = Modifier.align(Alignment.End)
                 )
@@ -118,15 +121,17 @@ fun InputBar(text: String, onTextChange: (String) -> Unit, onSend: () -> Unit) {
                     .weight(1f)
                     .height(56.dp),
                 placeholder = { Text("Сообщение...") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
                 ),
                 shape = RoundedCornerShape(28.dp),
                 singleLine = true
             )
+
             Spacer(modifier = Modifier.width(8.dp))
 
             IconButton(onClick = onSend, enabled = text.isNotBlank()) {
