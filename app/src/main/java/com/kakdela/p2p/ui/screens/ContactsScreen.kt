@@ -17,34 +17,33 @@ import com.kakdela.p2p.p2p.TrustedPeersManager
 fun ContactsScreen(navController: NavHostController) {
     var showScanner by remember { mutableStateOf(false) }
     var showMyQr by remember { mutableStateOf(false) }
+    var renamingPeer by remember { mutableStateOf<String?>(null) }
 
-    val trustedList = TrustedPeersManager.getAll()
+    val contacts = ContactsRepository.contacts.values.toList()
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(title = { Text("Kakdela") })
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showScanner = true }) {
-                Icon(Icons.Default.QrCodeScanner, "Добавить")
-            }
-        }
+        topBar = { /* как было */ },
+        floatingActionButton = { FloatingActionButton(onClick = { showScanner = true }) { Icon(Icons.Default.QrCodeScanner, "") } }
     ) { padding ->
-        if (trustedList.isEmpty()) {
+        if (contacts.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                Text("Нет контактов\nНажми кнопку ↓ и отсканируй QR друга")
+                Text("Нет контактов\nДобавь по QR-коду")
             }
         } else {
-            LazyColumn(contentPadding = padding + PaddingValues(16.dp)) {
-                items(trustedList) { peerId ->
+            LazyColumn(contentPadding = padding) {
+                items(contacts, key = { it.peerId }) { contact ->
                     ListItem(
-                        headlineContent = { Text(peerId) },
-                        supportingContent = { Text("Нажми → чат") },
+                        headlineContent = { Text(contact.displayName) },
+                        supportingContent = { Text(contact.peerId.takeLast(8)) },
+                        trailingContent = {
+                            IconButton(onClick = { renamingPeer = contact.peerId }) {
+                                Icon(Icons.Default.Edit, "Переименовать")
+                            }
+                        },
                         modifier = Modifier.clickable {
-                            navController.navigate("chat/$peerId")
+                            navController.navigate("chat/${contact.peerId}")
                         }
                     )
-                    Divider()
                 }
             }
         }
@@ -52,11 +51,25 @@ fun ContactsScreen(navController: NavHostController) {
 
     if (showScanner) {
         QrScannerScreen(
-            onPeerAdded = { /* можно показать тост */ },
+            onPeerAdded = { _, _ -> /* обновится автоматически */ },
             onDismiss = { showScanner = false }
         )
     }
 
-    if (showMyQr) MyQrScreen()
-    // можно добавить кнопку "Показать мой QR" в меню
+    renamingPeer?.let { peerId ->
+        val current = ContactsRepository.getById(peerId)
+        var newName by remember { mutableStateOf(current?.displayName ?: "") }
+        AlertDialog(
+            onDismissRequest = { renamingPeer = null },
+            title = { Text("Переименовать") },
+            text = { TextField(value = newName, onValueChange = { newName = it }) },
+            confirmButton = {
+                TextButton(onClick = {
+                    ContactsRepository.rename(peerId, newName.trim())
+                    renamingPeer = null
+                }) { Text("Сохранить") }
+            },
+            dismissButton = { TextButton(onClick = { renamingPeer = null }) { Text("Отмена") } }
+        )
+    }
 }
