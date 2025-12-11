@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- Основная тема приложения -->
+    <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Материалы цвета — если используешь Compose, они игнорируются -->
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+    </style>
+
+</resources>
