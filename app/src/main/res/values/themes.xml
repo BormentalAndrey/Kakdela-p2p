@@ -1,14 +1,11 @@
 <resources>
-
     <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Прозрачный статусбар -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-
-        <!-- Прозрачный навбар -->
         <item name="android:navigationBarColor">@android:color/transparent</item>
-
-        <!-- Тёмные иконки в статусбаре (false = светлые, true = тёмные) -->
         <item name="android:windowLightStatusBar">false</item>
-    </style>
 
+        <!-- Важно: запрещаем XML-цветовую палитру
+             чтобы Compose полностью управлял темой -->
+        <item name="colorPrimary">@android:color/transparent</item>
+    </style>
 </resources>
