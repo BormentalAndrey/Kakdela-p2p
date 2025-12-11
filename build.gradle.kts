@@ -1,19 +1,16 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file (корневой build.gradle.kts)
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
-    alias(libs.plugins.ksp) apply false  // ← Это строка 1: теперь версия 2.2.20-2.0.4 (существует!)
+    alias(libs.plugins.ksp) apply false   // ← KSP 2.2.20-2.0.4 из libs.versions.toml
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// УДАЛИЛИ ВЕСЬ БЛОК allprojects { repositories { … } } — это и вызывало ошибку!
+// Репозитории теперь только в settings.gradle.kts
 
-tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+// Исправлено устаревшее rootProject.buildDir → layout.buildDirectory
+tasks.register<Delete>("clean") {
+    delete(layout.buildDirectory)
 }
