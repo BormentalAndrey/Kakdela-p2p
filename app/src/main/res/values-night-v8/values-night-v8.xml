@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Тёмная тема для Android 13+ (API 33+) -->
+    <!-- Мы используем твои собственные неоновые цвета, а не md_theme_* -->
+
+    <!-- Primary -->
+    <color name="md_theme_primary">#00FFF0</color>              <!-- neon_cyan -->
+    <color name="md_theme_onPrimary">#000000</color>
+    <color name="md_theme_primaryContainer">#00FFF0</color>
+    <color name="md_theme_onPrimaryContainer">#000000</color>
+
+    <!-- Secondary -->
+    <color name="md_theme_secondary">#FF00C8</color>           <!-- neon_pink -->
+    <color name="md_theme_onSecondary">#000000</color>
+    <color name="md_theme_secondaryContainer">#FF00C8</color>
+    <color name="md_theme_onSecondaryContainer">#000000</color>
+
+    <!-- Tertiary -->
+    <color name="md_theme_tertiary">#D700FF</color>            <!-- neon_purple -->
+    <color name="md_theme_onTertiary">#000000</color>
+
+    <!-- Background & Surface -->
+    <color name="md_theme_background">#0A0A0A</color>
+    <color name="md_theme_onBackground">#E0E0E0</color>
+    <color name="md_theme_surface">#121212</color>
+    <color name="md_theme_onSurface">#FFFFFF</color>
+    <color name="md_theme_surfaceVariant">#1E1E1E</color>
+    <color name="md_theme_onSurfaceVariant">#CCCCCC</color>
+
+    <!-- Error -->
+    <color name="md_theme_error">#FF5555</color>
+    <color name="md_theme_onError">#000000</color>
+
+    <!-- Outline & другие -->
+    <color name="md_theme_outline">#666666</color>
+    <color name="md_theme_outlineVariant">#444444</color>
+    <color name="md_theme_scrim">#000000</color>
+
+</resources>
