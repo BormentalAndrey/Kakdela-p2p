@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") // Для Room
 }
 
 android {
@@ -37,6 +37,11 @@ android {
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+}
+
 dependencies {
     // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
@@ -56,9 +61,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
 
-    // Coil (для Compose)
+    // Coil для Compose
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("io.coil-kt:coil-okhttp:2.4.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
@@ -84,7 +88,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
 
-// KSP аргументы для Room
+// KSP arguments для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
