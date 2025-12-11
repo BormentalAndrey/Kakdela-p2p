@@ -17,25 +17,6 @@ android {
         versionName = "1.0"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
     }
@@ -43,29 +24,42 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "2.2.21"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+kotlin {
+    // Указываем JVM 17 для KSP и компиляции Kotlin
+    jvmToolchain(17)
 }
 
 dependencies {
-    // AndroidX
+    // AndroidX Core
     implementation("androidx.core:core-ktx:1.13.1")
+
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+
+    // Activity Compose
     implementation("androidx.activity:activity-compose:1.9.3")
 
     // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
 
-    // Compose
+    // Compose UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.material3:material3")
-
-    // Google Material
     implementation("com.google.android.material:material:1.12.0")
 
     // Coil 3
@@ -77,13 +71,13 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC
-    implementation("io.getstream:stream-webrtc-android:1.3.10")
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
-
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+    // WebRTC
+    implementation("io.getstream:stream-webrtc-android:1.3.10")
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
     // WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
@@ -94,4 +88,11 @@ dependencies {
     // JNA (WebRTC native)
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
+}
+
+// Опционально: для инструментов компиляции Compose
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
+    }
 }
