@@ -1,17 +1,17 @@
 [versions]
 # Последние стабильные версии на 11 декабря 2025
 agp                  = "8.7.2"
-kotlin               = "2.2.20"         # ← Стабильная (релиз ~декабрь 2025)
-compose-bom          = "2025.12.00"     # ← Релиз 03.12.2025 (Compose 1.10.0 + Material3 1.4.0)
+kotlin               = "2.2.21"         # ← Обновлено: релиз 23.10.2025, фиксит KSP2 баги
+compose-bom          = "2025.12.00"
 lifecycle            = "2.8.7"
 activity-compose     = "1.9.3"
 room                 = "2.6.1"
 coroutines           = "1.8.1"
-ksp                  = "2.2.20-1.0.24"   # ← Исправлено: последняя для Kotlin 2.2.20 (релиз 07.10.2025)
-webrtc               = "1.3.10"         # Stream WebRTC — актуальный релиз 11.09.2025
+ksp                  = "2.2.21-2.0.20"  # ← Обновлено: релиз 28.10.2025, пофикшен "unexpected jvm signature V"
+webrtc               = "1.3.10"
 java-websocket       = "1.5.6"
 lazysodium           = "5.1.0"
-coil                 = "3.3.0"          # Coil 3 — стабильная, совместима с Kotlin 2.2.20
+coil                 = "3.3.0"
 
 [libraries]
 # AndroidX
@@ -22,30 +22,26 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 
 androidx-activity-compose        = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 
-# Compose BOM (все Compose-библиотеки берут версии из BOM — не указываем version)
+# Compose BOM
 compose-bom                      = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 
-# Основные Compose артефакты
+# Основные Compose
 compose-ui                       = { module = "androidx.compose.ui:ui" }
 compose-ui-graphics              = { module = "androidx.compose.ui:ui-graphics" }
 compose-ui-tooling               = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview       = { module = "androidx.compose.ui:ui-tooling-preview" }
 
-# ВАЖНО: Добавленные зависимости
-compose-foundation               = { module = "androidx.compose.foundation:foundation" }  # clickable, clip, draggable, detectDragGestures и т.д.
+compose-foundation               = { module = "androidx.compose.foundation:foundation" }
 
-# Иконки Material (из material, не material3! Актуально на 2025)
-# Core: основные иконки (рекомендуется, ~1MB)
+# Иконки Material
 compose-material-icons-core      = { module = "androidx.compose.material:material-icons-core" }
-# Extended: все иконки (~20MB, используйте R8/ProGuard для обрезки)
 compose-material-icons-extended  = { module = "androidx.compose.material:material-icons-extended" }
 
 compose-material3                = { module = "androidx.compose.material3:material3" }
 
-# Material Design (классический)
 google-material                  = { module = "com.google.android.material:material", version = "1.12.0" }
 
-# Coil 3 для AsyncImage
+# Coil 3
 coil-compose                     = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp              = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
@@ -54,7 +50,7 @@ room-runtime                     = { module = "androidx.room:room-runtime", vers
 room-ktx                         = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler                    = { module = "androidx.room:room-compiler", version.ref = "room" }
 
-# WebRTC (Stream fork — свежий и поддерживаемый)
+# WebRTC
 webrtc-android                   = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
 webrtc-android-ui                = { module = "io.getstream:stream-webrtc-android-ui", version.ref = "webrtc" }
 
@@ -62,15 +58,15 @@ webrtc-android-ui                = { module = "io.getstream:stream-webrtc-androi
 kotlinx-coroutines-android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
-# WebSocket клиент
+# WebSocket
 java-websocket                   = { module = "org.java-websocket:Java-WebSocket", version.ref = "java-websocket" }
 
-# Криптография (libsodium)
+# Crypto
 lazysodium-android               = { module = "com.goterl:lazysodium-android", version.ref = "lazysodium" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library     = { id = "com.android.library", version.ref = "agp" }
-kotlin-android      = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }      # ← 2.2.20
-kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }  # ← 2.2.20
-ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }             # ← 2.2.20-2.0.4
+kotlin-android      = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }
