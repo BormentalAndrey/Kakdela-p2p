@@ -1,18 +1,28 @@
 // app/src/main/java/com/kakdela/p2p/ui/components/VoiceMessageRecorder.kt
 package com.kakdela.p2p.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.material3.icons.Icons
+import androidx.compose.material3.icons.filled.ArrowBack
+import androidx.compose.material3.icons.filled.Mic
+import androidx.compose.material3.icons.filled.MicOff
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx78.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kakdela.p2p.webrtc.FileTransferManager
 import kotlinx.coroutines.delay
 import java.io.File
 import java.text.SimpleDateFormat
@@ -21,82 +31,172 @@ import java.util.*
 @Composable
 fun VoiceMessageRecorder(
     peerId: String,
-    onVoiceSent: () -> Unit
+    onVoiceSent: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isRecording by remember { mutableStateOf(false) }
-    var recordingTime by remember { mutableStateOf(0) }
-    var slideToCancel by remember { mutableStateOf(false) }
+    var recordingTime by remember { mutableStateOf(0L) } // в секундах
+    var isCancelled by remember { mutableStateOf(false) }
+
+    // Анимация смещения при смахивании
+    val offsetX = remember { Animatable(0f) }
 
     val context = LocalContext.current
-    val recorder = remember { android.media.MediaRecorder() }
-    val audioFile = remember { File(context.cacheDir, "voice_${System.currentTimeMillis()}.aac") }
 
+    // Файл для записи
+    val audioFile = remember {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        File(context.cacheDir, "voice_$timestamp.aac")
+    }
+
+    // Таймер записи
     LaunchedEffect(isRecording) {
         if (isRecording) {
-            recorder.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
-            recorder.setOutputFormat(android.media.MediaRecorder.OutputFormat.AAC_ADTS)
-            recorder.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
-            recorder.setOutputFile(audioFile.absolutePath)
-            recorder.prepare()
-            recorder.start()
-
+            recordingTime = 0L
             while (isRecording) {
-                delay(1000)
+                delay(1000L)
                 recordingTime++
             }
-        } else if (recordingTime > 0) {
-            recorder.stop()
-            recorder.release()
-            // Отправляем голосовое
-            com.kakela.p2p.webrtc.FileTransferManager.sendVoice(peerId, audioFile)
-            onVoiceSent()
-            recordingTime = 0
         }
     }
 
+    // Логика начала/остановки записи
+    val startRecording: () -> Unit = {
+        isRecording = true
+        isCancelled = false
+        offsetX.snapTo(0f)
+    }
+
+    val stopRecording: (cancelled: Boolean) -> Unit = { cancelled ->
+        isRecording = false
+        offsetX.snapTo(0f)
+        if (!cancelled && recordingTime > 0) {
+            // Отправляем только если запись была дольше 0 сек и не отменена
+            FileTransferManager.sendVoice(peerId, audioFile)
+            onVoiceSent()
+        }
+        // Файл можно удалить, если отмена
+        if (cancelled && audioFile.exists()) {
+            audioFile.delete()
+        }
+        recordingTime = 0L
+    }
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(70.dp)
-            .background(if (isRecording) Color.Red.copy(0.9f) else MaterialTheme.colorScheme.surface)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragStart = { isRecording = true },
-                    onDragEnd = {
-                        if (slideToCancel) {
-                            isRecording = false // отмена
-                        } else if (isRecording) {
-                            isRecording = false // отправка
-                        }
-                    },
-                    onDragCancel = { isRecording = false },
-                    onDrag = { change, dragAmount ->
-                        if (dragAmount.x < -100) slideToCancel = true
-                    }
-                )
-            },
+            .background(
+                color = if (isRecording) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (isRecording) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Mic, "Запись", tint = Color.White)
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = if (slideToCancel) "← Смахни для отмены" else formatTime(recordingTime),
-                    color = Color.White,
-                    fontSize = 18.sp
+        if (!isRecording) {
+            // Кнопка начала записи
+            IconButton(
+                onClick = startRecording,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Mic,
+                    contentDescription = "Запись голосового сообщения",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         } else {
-            IconButton(onClick = { isRecording = true }) {
-                Icon(Icons.Default.Mic, "Голосовое сообщение", tint = MaterialTheme.colorScheme.primary)
+            // Режим записи с возможностью отмены
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { /* уже записываем */ },
+                            onDragEnd = {
+                                if (offsetX.value < -120f) {
+                                    isCancelled = true
+                                    stopRecording(cancelled = true)
+                                } else {
+                                    stopRecording(cancelled = false)
+                                }
+                            },
+                            onDragCancel = { stopRecording(cancelled = true) },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                val newOffset = (offsetX.value + dragAmount.x).coerceAtMost(0f) // только влево
+                                offsetX.animateTo(newOffset, tween(0)) // без анимации возврата
+                            }
+                        )
+                    }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = offsetX.value.dp.coerceAtLeast(-200.dp)) // ограничиваем смещение
+                        .padding(start = 16.dp)
+                ) {
+                    if (offsetX.value < -80f) {
+                        // Стрелка отмены
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Смахни для отмены",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        // Таймер и индикатор записи
+                        Icon(
+                            imageVector = Icons.Filled.Mic,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = formatTime(recordingTime),
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        // Красная точка "запись идёт"
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(Color.Red)
+                        )
+                    }
+                }
+
+                // Кнопка "стоп" при записи (опционально)
+                IconButton(
+                    onClick = { stopRecording(cancelled = false) },
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.MicOff,
+                        contentDescription = "Остановить запись",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }
 }
 
-private fun formatTime(seconds: Int): String {
-    val m = seconds / 60
-    val s = seconds % 60
-    return String.format("%02d:%02d", m, s)
+private fun formatTime(seconds: Long): String {
+    val minutes = seconds / 60
+    val secs = seconds % 60
+    return String.format("%02d:%02d", minutes, secs)
 }
