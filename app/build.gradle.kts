@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" // ← ОБЯЗАТЕЛЬНО!
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 }
 
 android {
@@ -20,10 +23,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -41,7 +41,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
+        kotlinCompilerExtensionVersion = "1.5.17" // ← чуть поновее, стабильнее
     }
 
     packaging {
@@ -52,48 +52,39 @@ android {
 }
 
 dependencies {
-    // Compose BOM — все версии берутся отсюда
     implementation(platform(libs.compose.bom))
 
-    // Основные Compose-модули
+    // Основные
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    // Navigation Compose
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.androidx.activity.compose)
+
+    // Навигация + сериализация маршрутов (toRoute)
+    implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3") // ← ОБЯЗАТЕЛЬНО
+
+    // Иконки
     implementation("androidx.compose.material:material-icons-extended")
-    // Material Icons (обычные)
-    implementation("androidx.compose.material:material-icons-core")
-    // QR-генерация и сканер (лучшее и самое стабильное в 2025)
+
+    // QR-код
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    // Material Icons (заливка)
-    implementation("androidx.compose.material:material-icons-extended")
-    // AndroidX
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.google.material)
 
-    // Room + KSP
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    //   ksp(libs.room.compiler)
+    ksp(libs.room.compiler) // ← раскомментируй, если используешь Room
 
-    // Coroutines
+    // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
-
-    // WebRTC — актуальный форк 2025 года
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
-
-    // WebSocket клиент
     implementation(libs.java.websocket)
-
-    // LazySodium — всё включено
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // Debug-инструменты
+    // WebRTC (если оставляешь)
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
+
+    // Debug
     debugImplementation(libs.compose.ui.tooling)
-    // Убрана строка debugImplementation(libs.compose.ui.test.manifest)
 }
