@@ -73,11 +73,11 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    // Иконки Material3 (рекомендуемый современный способ)
-    implementation("androidx.compose.material3:material3-icons-filled")
-    implementation("androidx.compose.material3:material3-icons-outlined")
-    // Если нужны ВСЕ иконки (очень большой размер APK — не рекомендуется):
-    // implementation("androidx.compose.material3:material3-icons-extended")
+    // Иконки Material (из material, не material3! Актуально на 2025)
+    // Core: основные иконки (рекомендуется, ~1MB)
+    implementation("androidx.compose.material:material-icons-core")
+    // Extended: все иконки (~20MB, используйте R8/ProGuard для обрезки)
+    // implementation("androidx.compose.material:material-icons-extended")
 
     // Coil 3 для AsyncImage (актуально на декабрь 2025)
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
@@ -98,8 +98,8 @@ dependencies {
     implementation("com.goterl:lazysodium-android:5.1.0")
 
     // WebRTC — обновлённая версия от Stream (на декабрь 2025)
-    implementation("io.getstream:stream-webrtc-android-ui:1.4.2") // ← проверьте актуальную на GitHub/Maven
-    implementation("io.getstream:stream-webrtc-android-core:1.4.2")
+    implementation("io.getstream:stream-webrtc-android:1.3.10") // Основной core
+    implementation("io.getstream:stream-webrtc-android-ui:1.3.10") // UI компоненты
 
     // Debug
     debugImplementation(libs.compose.ui.tooling)
