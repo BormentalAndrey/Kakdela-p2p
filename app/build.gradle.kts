@@ -1,10 +1,10 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget  // ← Добавлено для compilerOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.ksp)   // ← правильно, версия подставляется из libs.versions.toml
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
 }
 
@@ -35,8 +35,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    // Удалено: kotlinOptions { jvmTarget = "17" } — дубликат, используем новый DSL ниже
-
     buildFeatures {
         compose = true
     }
@@ -53,16 +51,17 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)  // ← Новый DSL, для JDK 21
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 }
 
 dependencies {
-    // Compose BOM
+
+    // BOM
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
 
-    // Основные Compose
+    // Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
@@ -70,19 +69,19 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.androidx.activity.compose)
 
-    // Material (классический)
+    // Material (classic)
     implementation("com.google.android.material:material:1.12.0")
 
     // Navigation + Serialization
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    // Иконки
-    implementation("androidx.compose.material:material-icons-core")
+    // Icons
+    implementation(libs.compose.material.icons.core)
 
     // Coil 3
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // QR
     implementation("com.google.zxing:core:3.5.3")
@@ -96,13 +95,12 @@ dependencies {
     // Coroutines + WebSocket + Crypto
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.java.websocket)
-    implementation("com.goterl:lazysodium-android:5.1.0")
+    implementation(lazysodium.android)
 
     // WebRTC Stream
-    implementation("io.getstream:stream-webrtc-android:1.3.10")
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
+    implementation(libs.webrtc.android)
+    implementation(libs.webrtc.android.ui)
 
-    // Debug
+    // Debug only
     debugImplementation(libs.compose.ui.tooling)
-    debugImplementation("androidx.compose.ui:ui-tooling-preview")
 }
