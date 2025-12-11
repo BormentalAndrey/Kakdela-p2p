@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Базовая тема приложения -->
-    <style name="Theme.Kakdela" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Kakdelap2p" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary colors -->
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
