@@ -1,8 +1,7 @@
 // app/src/main/java/com/kakdela/p2p/ui/screens/MyQrScreen.kt
 package com.kakdela.p2p.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -11,67 +10,72 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kakdela.p2p.crypto.CryptoManager
 import com.kakdela.p2p.utils.DeviceUtils
 import com.kakdela.p2p.utils.QrUtils
 
 @Composable
 fun MyQrScreen() {
-    // Уникальный ID устройства — вечный, даже после переустановки
-    val rawId = DeviceUtils.getDeviceId() ?: "UNKNOWN"
-    val myPeerId = "KAKDELA_${rawId.takeLast(12)}"  // короткий, но уникальный
+    val context = LocalContext.current
 
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    // ВАЛЬТЕРНАТИВА 1: Через интернет (рекомендую)
-    val qrData = "https://kakdela.app/add/$myPeerId"
+    // 1. Уникальный ID устройства
+    val rawId = DeviceUtils.getDeviceId(context) ?: "UNKNOWN"
+    val myPeerId = "KAKDELA_${rawId.takeLast(12)}"
 
-    // АЛЬТЕРНАТИВА 2: Только оффлайн (если не хочешь сайт)
-    // val qrData = "kakdela://peer/$myPeerId"
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    // 2. Публичный ключ для E2E-шифрования
+    val publicKeyHex = CryptoManager.getMyKeyPair().publicKey.asHexString
 
-    val qrBitmap = QrUtils.generateQrBitmap(qrData, 900)
+    // 3. Бесплатные STUN-серверы Google (для пробивания NAT)
+    val iceServers = "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302"
+
+    // 4. Финальная строка для QR — всё в одном!
+    val qrData = "kakdela://connect?v=2&id=$myPeerId&pk=$publicKeyHex&ice=$iceServers"
+
+    val qrBitmap = QrUtils.generateQrBitmap(qrData, 1000)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Добавь меня в Kakdela",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            text = "Подключись ко мне",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Покажи этот QR-код другу — и вы сразу сможете писать друг другу",
+            text = "Отсканируй этот QR-код — и мы сможем писать друг другу в любой точке мира",
             textAlign = androidx.compose.ui.text.TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
         Card(
-            modifier = Modifier.size(320.dp),
+            modifier = Modifier.size(340.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            elevation = CardDefaults.cardElevation(16.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Image(
                     bitmap = qrBitmap.asImageBitmap(),
-                    contentDescription = "Мой QR-код для добавления",
+                    contentDescription = "QR-код для подключения",
                     modifier = Modifier
-                        .size(280.dp)
-                        .padding(16.dp)
+                        .size(300.dp)
+                        .padding(20.dp)
                 )
             }
         }
@@ -81,17 +85,17 @@ fun MyQrScreen() {
         Text(
             text = myPeerId,
             fontFamily = FontFamily.Monospace,
-            fontSize = 15.sp,
+            fontSize = 16.sp,
             color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 1.2.sp
+            letterSpacing = 1.5.sp
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Работает через интернет и без него",
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            text = "Работает через интернет и без него · Полностью зашифровано",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
         )
     }
 }
