@@ -31,17 +31,14 @@ android {
         }
     }
 
-    kotlin {
-        jvmToolchain(17)
-        compilerOptions {
-            // Новая DSL для Kotlin 2.2+
-            freeCompilerArgs.addAll(listOf("-opt-in=kotlin.RequiresOptIn"))
-        }
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
 dependencies {
-    // AndroidX Core
+    // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
@@ -55,11 +52,13 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
 
-    // Coil
-    implementation("io.coil-kt:coil-compose:3.3.0")
-    implementation("io.coil-kt:coil-network-okhttp:3.3.0")
+    // Coil (для Compose)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-okhttp:2.4.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
@@ -85,6 +84,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
 
+// KSP аргументы для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
