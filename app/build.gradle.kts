@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp") // Для Room и других KSP-плагинов
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -31,22 +31,18 @@ android {
         }
     }
 
-    // Новый DSL для Kotlin компилятора
-    compilerOptions {
-        jvmTarget.set(JavaVersion.VERSION_17.toString())
-        freeCompilerArgs.addAll(listOf("-opt-in=kotlin.RequiresOptIn"))
+    // Рабочий вариант Kotlin компилятора для Kotlin 2.2.x
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
 dependencies {
-    // AndroidX Core
+    // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
-
-    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
-
-    // Activity Compose
     implementation("androidx.activity:activity-compose:1.9.3")
 
     // Compose BOM
@@ -61,7 +57,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
 
-    // Coil 3
+    // Coil
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
@@ -89,14 +85,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
 }
 
-// Для KSP
+// KSP arguments для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-// Для дебага Compose preview
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
