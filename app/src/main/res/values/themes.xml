@@ -1,10 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <style name="Theme.KakdelaP2P" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Material3 сам подтянет все md_theme_* цвета из colors.xml -->
+        <!-- Прозрачный статусбар -->
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- Прозрачный навбар -->
         <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Тёмные иконки в статусбаре (false = светлые, true = тёмные) -->
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
