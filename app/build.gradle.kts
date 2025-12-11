@@ -60,7 +60,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
-
+    implementation("com.google.android.material:material:1.12.0")
     // Навигация + сериализация маршрутов (toRoute)
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3") // ← ОБЯЗАТЕЛЬНО
