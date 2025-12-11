@@ -8,7 +8,7 @@ activity-compose     = "1.9.3"
 room                 = "2.6.1"
 coroutines           = "1.8.1"
 ksp                  = "2.0.21-1.0.25"
-webrtc               = "1.3.9"          # Stream fork — актуальный
+webrtc               = "1.3.10"         # Stream WebRTC — актуальный релиз 11.09.2025
 java-websocket       = "1.5.6"
 lazysodium           = "5.1.0"
 coil                 = "3.3.0"          # Coil 3 — современный, декабрь 2025
@@ -31,12 +31,14 @@ compose-ui-graphics              = { module = "androidx.compose.ui:ui-graphics" 
 compose-ui-tooling               = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview       = { module = "androidx.compose.ui:ui-tooling-preview" }
 
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 # ВАЖНО: Добавленные зависимости
 compose-foundation               = { module = "androidx.compose.foundation:foundation" }  # clickable, clip, draggable, detectDragGestures и т.д.
-compose-material3-icons-filled   = { module = "androidx.compose.material3:material3-icons-filled" }
-compose-material3-icons-outlined = { module = "androidx.compose.material3:material3-icons-outlined" }
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
+# Иконки Material (из material, не material3! Актуально на 2025)
+# Core: основные иконки (рекомендуется, ~1MB)
+compose-material-icons-core      = { module = "androidx.compose.material:material-icons-core" }
+# Extended: все иконки (~20MB, используйте R8/ProGuard для обрезки)
+compose-material-icons-extended  = { module = "androidx.compose.material:material-icons-extended" }
 
 compose-material3                = { module = "androidx.compose.material3:material3" }
 
@@ -53,7 +55,9 @@ room-ktx                         = { module = "androidx.room:room-ktx", version.
 room-compiler                    = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 # WebRTC (Stream fork — свежий и поддерживаемый)
-webrtc                           = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
+webrtc-android                   = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
+webrtc-android-ui                = { module = "io.getstream:stream-webrtc-android-ui", version.ref = "webrtc" }
+# Нет отдельного -core: основной — stream-webrtc-android
 
 # Coroutines
 kotlinx-coroutines-android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
