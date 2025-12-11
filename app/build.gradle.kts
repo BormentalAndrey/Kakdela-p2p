@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0" // ← Обновлено до 2.2.0!
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20" // ← Обновлено до 2.2.0!
     // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 }
 
