@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
+    id("com.google.devtools.ksp") version "1.9.10-1.0.13"
 }
 
 android {
@@ -90,7 +90,7 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
     }
 
-    // JNA — ИСПРАВЛЕНИЕ: exclude из lazysodium + JAR без @aar (стабильно работает)
+    // JNA — без @aar
     implementation("net.java.dev.jna:jna:5.18.1")
     implementation("net.java.dev.jna:jna-platform:5.18.1")
 }
