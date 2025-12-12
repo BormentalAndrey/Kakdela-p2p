@@ -1,20 +1,33 @@
 package com.kakdela.p2p.db
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 
-@Dao
-interface ChatMessageDao {
+@Database(
+    entities = [ChatMessage::class],
+    version = 1,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(msg: ChatMessage)
+    abstract fun chatMessageDao(): ChatMessageDao
 
-    @Query("SELECT * FROM ChatMessage WHERE chatId = :chatId ORDER BY timestamp ASC")
-    fun observeChat(chatId: String): Flow<List<ChatMessage>>
+    companion object {
 
-    @Query("SELECT * FROM ChatMessage ORDER BY timestamp ASC")
-    fun observeAll(): Flow<List<ChatMessage>>
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "kakdela_db"
+                ).fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
+            }
+    }
 }
