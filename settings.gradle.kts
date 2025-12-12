@@ -5,7 +5,6 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        // Фиксируем версии плагинов
         id("com.android.application") version "8.4.0"
         id("org.jetbrains.kotlin.android") version "1.9.22"
         id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
