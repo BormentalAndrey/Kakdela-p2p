@@ -1,8 +1,15 @@
-// app/src/main/java/com/kakdela/p2p/ui/model/Message.kt
-package com.kakdela.p2p.ui.model
+// Message.kt
+package com.kakdela.p2p.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "messages")
 data class Message(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val chatId: String,
+    val senderId: String,
+    val author: String,
     val text: String,
-    val isFromMe: Boolean,
-    val time: String
+    val timestamp: Long
 )
