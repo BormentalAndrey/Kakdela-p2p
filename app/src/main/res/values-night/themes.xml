@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- В твоём случае светлая и тёмная темы одинаковые (всё тёмное) — просто наследуем ту же тему -->
-    <style name="Theme.KakdelaP2P" parent="Theme.KakdelaP2P" />
-</resources>
