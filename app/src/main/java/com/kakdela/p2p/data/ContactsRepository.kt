@@ -1,19 +1,14 @@
 package com.kakdela.p2p.data
 
-// Very small repository: in-memory list for quick start. Later move to Room.
-class ContactsRepository {
-    private val list = mutableListOf<Contact>()
+import com.kakdela.p2p.data.db.Contact
+import com.kakdela.p2p.data.db.ContactsDao
 
-    init {
-        // sample
-        list.add(Contact(displayName = "Alice"))
-        list.add(Contact(displayName = "Bob"))
+class ContactsRepository(
+    private val dao: ContactsDao
+) {
+    suspend fun add(peerId: String, name: String) {
+        dao.insert(Contact(peerId, name))
     }
 
-    fun getAll(): List<Contact> = list.toList()
-
-    fun add(contact: Contact): String {
-        list.add(contact)
-        return contact.id
-    }
+    suspend fun getAll() = dao.getAll()
 }
