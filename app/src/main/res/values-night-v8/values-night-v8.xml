@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ЭТО ТОЧНО ТО, ЧТО ИЩЕТ Material 1.12.0 в values-night-v8 -->
-    <!-- Без _dark в конце! -->
+    <!-- Тёмная тема для Android 13+ (Material 3 1.12.0 требует именно такие имена) -->
 
-    <color name="md_theme_primary">#00FFF0</color>            <!-- neon_cyan -->
+    <color name="md_theme_primary">#00FFF0</color>                    <!-- neon cyan -->
     <color name="md_theme_onPrimary">#000000</color>
     <color name="md_theme_primaryContainer">#00FFF0</color>
     <color name="md_theme_onPrimaryContainer">#000000</color>
 
-    <color name="md_theme_secondary">#FF00C8</color>          <!-- neon_pink -->
+    <color name="md_theme_secondary">#FF00C8</color>                  <!-- neon pink -->
     <color name="md_theme_onSecondary">#000000</color>
     <color name="md_theme_secondaryContainer">#FF00C8</color>
     <color name="md_theme_onSecondaryContainer">#000000</color>
 
-    <color name="md_theme_tertiary">#D700FF</color>           <!-- neon_purple -->
+    <color name="md_theme_tertiary">#D700FF</color>                   <!-- neon purple -->
     <color name="md_theme_onTertiary">#000000</color>
     <color name="md_theme_tertiaryContainer">#D700FF</color>
     <color name="md_theme_onTertiaryContainer">#000000</color>
