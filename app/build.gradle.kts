@@ -25,12 +25,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.18"
     }
 
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -43,21 +37,18 @@ android {
 }
 
 dependencies {
-    // AndroidX
+    // AndroidX + Lifecycle
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Compose BOM
+    // Compose BOM + UI
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
@@ -67,28 +58,26 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    // Room (стабильная версия 2.8.4)
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     // WebRTC
     implementation("io.getstream:stream-webrtc-android:1.3.10")
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-
     // WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
 
-    // Crypto
+    // Crypto + JNA
     implementation("com.goterl:lazysodium-android:5.1.0") {
         exclude(group = "net.java.dev.jna", module = "jna")
         exclude(group = "net.java.dev.jna", module = "jna-platform")
     }
-
-    // JNA (стабильная версия для Android)
     implementation("net.java.dev.jna:jna:5.18.1")
     implementation("net.java.dev.jna:jna-platform:5.18.1")
 }
