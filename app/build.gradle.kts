@@ -21,7 +21,6 @@ android {
         compose = true
     }
 
-    // САМАЯ ВАЖНАЯ СТРОКА — именно 1.5.18!
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.18"
     }
@@ -50,14 +49,16 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Compose BOM — стабильный и совместимый
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material3:material3-icons-extended")
+
+    // ПРАВИЛЬНЫЕ ИКОНКИ — ИЗ MATERIAL 2 (единственный способ!)
+    implementation("androidx.compose.material:material-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -86,12 +87,11 @@ dependencies {
     // Crypto
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // JNA — ТОЛЬКО ТАК РАБОТАЕТ НА АНДРОИД (с @aar!)
+    // JNA
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
 }
 
-// KSP для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
