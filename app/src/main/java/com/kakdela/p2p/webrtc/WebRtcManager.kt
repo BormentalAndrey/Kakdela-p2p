@@ -1,16 +1,20 @@
-// app/src/main/java/com/kakdela/p2p/webrtc/WebRtcManager.kt
-object WebRtcManager {
-    private val peerConnections = mutableMapOf<String, PeerConnection>()
+package com.kakdela.p2p.webrtc
 
-    fun startDirectConnection(peerId: String, theirPublicKeyHex: String, iceServers: String) {
-        // Создаём WebRTC соединение напрямую
-        // Используем бесплатные Google STUN
-        // После подключения — открывается DataChannel
-        // По нему шлём зашифрованные сообщения через CryptoManager
-    }
+import org.webrtc.*
 
-    fun sendMessage(peerId: String, text: String) {
-        val encrypted = CryptoManager.encrypt(text, theirPublicKeyHex)
-        peerConnections[peerId]?.dataChannel?.send(encrypted)
+class WebRtcManager(
+    private val peerConnectionFactory: PeerConnectionFactory,
+    private val crypto: CryptoManager
+) {
+
+    var dataChannel: DataChannel? = null
+    var theirPublicKeyHex: String? = null
+
+    fun encryptAndSend(bytes: ByteArray) {
+        theirPublicKeyHex ?: return
+        val encrypted = crypto.encrypt(bytes, theirPublicKeyHex!!)
+        dataChannel?.send(DataChannel.Buffer(
+            java.nio.ByteBuffer.wrap(encrypted), false
+        ))
     }
 }
