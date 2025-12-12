@@ -57,13 +57,13 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
 
-    // Material icons extended
+    // Иконки — из Material 2
     implementation("androidx.compose.material:material-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Material (для системных баров)
+    // Material
     implementation("com.google.android.material:material:1.12.0")
 
     // Coil
@@ -85,11 +85,14 @@ dependencies {
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
 
     // Crypto
-    implementation("com.goterl:lazysodium-android:5.1.0")
+    implementation("com.goterl:lazysodium-android:5.1.0") {
+        exclude(group = "net.java.dev.jna", module = "jna")
+        exclude(group = "net.java.dev.jna", module = "jna-platform")
+    }
 
-    // JNA (исправлено на 5.14.0, @aar)
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
+    // JNA — ИСПРАВЛЕНИЕ: exclude из lazysodium + JAR без @aar (стабильно работает)
+    implementation("net.java.dev.jna:jna:5.18.1")
+    implementation("net.java.dev.jna:jna-platform:5.18.1")
 }
 
 ksp {
