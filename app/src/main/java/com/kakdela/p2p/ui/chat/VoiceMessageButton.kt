@@ -11,26 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/**
- * VoiceMessageButton — визуальная кнопка для старта/стопа записи.
- * Использует стандартные Material icons (Mic / MicOff) и корректные импорты.
- */
 @Composable
 fun VoiceMessageButton(
     isRecording: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-    ) {
+    IconButton(onClick = onClick, modifier = modifier) {
         Icon(
             imageVector = if (isRecording) Icons.Filled.MicOff else Icons.Filled.Mic,
-            contentDescription = if (isRecording)
-                "Остановить запись голосового сообщения"
-            else
-                "Начать запись голосового сообщения",
+            contentDescription = if (isRecording) "Stop recording" else "Start recording",
             tint = if (isRecording) Color.Red else Color.Unspecified,
             modifier = Modifier.size(28.dp)
         )
