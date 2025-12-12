@@ -6,9 +6,9 @@ import androidx.room.PrimaryKey
 @Entity
 data class ChatMessage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val chatId: String,     // идентификатор чата/peer
-    val author: String,     // who sent
+    val chatId: String,
+    val author: String,
     val text: String,
-    val type: String = "text", // text/voice/file
+    val type: String = "text",
     val timestamp: Long = System.currentTimeMillis()
 )
