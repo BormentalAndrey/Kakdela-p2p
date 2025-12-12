@@ -4,12 +4,12 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
     plugins {
         id("com.android.application") version "8.4.0"
-        id("org.jetbrains.kotlin.android") version "1.9.22"
-        id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
-        // Обновляем KSP до версии, совместимой с Kotlin 1.9.22
-        id("com.google.devtools.ksp") version "1.9.22-1.0.13"
+        id("org.jetbrains.kotlin.android") version "2.2.21"
+        id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
+        id("com.google.devtools.ksp") version "2.2.21-1.0.21"
     }
 }
 
@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kakdela-p2p"
 include(":app")
+include(":goterl")
