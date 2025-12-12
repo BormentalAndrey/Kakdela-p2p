@@ -21,8 +21,9 @@ android {
         compose = true
     }
 
+    // САМАЯ ВАЖНАЯ СТРОКА — именно 1.5.18!
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4" // используем BOM для синхронизации версий Compose
+        kotlinCompilerExtensionVersion = "1.5.18"
     }
 
     packaging {
@@ -49,22 +50,22 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Compose BOM
+    // Compose BOM — стабильный и совместимый
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Material
+    // Material (для системных баров)
     implementation("com.google.android.material:material:1.12.0")
 
-    // Coil (Compose)
+    // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Room
@@ -72,7 +73,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // WebRTC Stream
+    // WebRTC
     implementation("io.getstream:stream-webrtc-android:1.3.10")
     implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
@@ -85,12 +86,12 @@ dependencies {
     // Crypto
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // JNA (исправлено)
-    implementation("net.java.dev.jna:jna:5.14.0")
-    implementation("net.java.dev.jna:jna-platform:5.14.0")
+    // JNA — ТОЛЬКО ТАК РАБОТАЕТ НА АНДРОИД (с @aar!)
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
+    implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
 }
 
-// KSP аргументы для Room
+// KSP для Room
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
