@@ -15,15 +15,20 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun chatMessageDao(): ChatMessageDao
 
     companion object {
-        @Volatile private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(ctx: Context): AppDatabase =
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
-                    ctx.applicationContext,
+                    context.applicationContext,
                     AppDatabase::class.java,
                     "kakdela_db"
-                ).build().also { INSTANCE = it }
+                )
+                .fallbackToDestructiveMigration()
+                .build()
+                .also { INSTANCE = it }
             }
     }
 }
