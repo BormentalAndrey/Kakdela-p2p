@@ -57,13 +57,13 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
 
-    // ПРАВИЛЬНЫЕ ИКОНКИ — ИЗ MATERIAL 2 (единственный способ!)
+    // Иконки — из Material 2 (единственный способ)
     implementation("androidx.compose.material:material-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Material (для системных баров)
+    // Material
     implementation("com.google.android.material:material:1.12.0")
 
     // Coil
@@ -87,9 +87,9 @@ dependencies {
     // Crypto
     implementation("com.goterl:lazysodium-android:5.1.0")
 
-    // JNA
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("net.java.dev.jna:jna-platform:5.14.0@aar")
+    // JNA — ИСПРАВЛЕНИЕ: обновлено до 5.15.0 с AAR (работает на Android)
+    implementation("net.java.dev.jna:jna:5.15.0@aar")
+    implementation("net.java.dev.jna:jna-platform:5.15.0@aar")
 }
 
 ksp {
