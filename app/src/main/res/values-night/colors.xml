@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Custom user colors -->
+    <color name="neon_cyan">#00FFF0</color>
+    <color name="neon_pink">#FF00C8</color>
+    <color name="neon_purple">#D700FF</color>
+
+    <color name="background_dark">#0A0A0A</color>
+    <color name="on_background">#E0E0E0</color>
+
+    <color name="surface_dark">#121212</color>
+    <color name="on_surface">#FFFFFF</color>
+
+    <color name="error">#FF5555</color>
+    <color name="on_error">#000000</color>
+
+    <!-- MATERIAL 3 REQUIRED DARK -->
+    <color name="md_theme_primary_dark">#00FFF0</color>
+    <color name="md_theme_onPrimary_dark">#000000</color>
+    <color name="md_theme_primaryContainer_dark">#008C84</color>
+    <color name="md_theme_onPrimaryContainer_dark">#FFFFFF</color>
+
+    <color name="md_theme_secondary_dark">#FF00C8</color>
+    <color name="md_theme_onSecondary_dark">#000000</color>
+    <color name="md_theme_secondaryContainer_dark">#930078</color>
+    <color name="md_theme_onSecondaryContainer_dark">#FFFFFF</color>
+
+    <color name="md_theme_tertiary_dark">#D700FF</color>
+    <color name="md_theme_onTertiary_dark">#000000</color>
+    <color name="md_theme_tertiaryContainer_dark">#6E0080</color>
+    <color name="md_theme_onTertiaryContainer_dark">#FFFFFF</color>
+
+    <color name="md_theme_background_dark">#0A0A0A</color>
+    <color name="md_theme_onBackground_dark">#E0E0E0</color>
+
+    <color name="md_theme_surface_dark">#121212</color>
+    <color name="md_theme_onSurface_dark">#FFFFFF</color>
+    <color name="md_theme_surfaceVariant_dark">#1E1E1E</color>
+    <color name="md_theme_onSurfaceVariant_dark">#CCCCCC</color>
+
+    <color name="md_theme_error_dark">#FF5555</color>
+    <color name="md_theme_onError_dark">#000000</color>
+
+    <color name="md_theme_outline_dark">#666666</color>
+    <color name="md_theme_outlineVariant_dark">#444444</color>
+
+    <color name="md_theme_scrim_dark">#000000</color>
+    <color name="md_theme_onSurfaceInverse_dark">#000000</color>
+
+    <!-- Attributes required by M3 -->
+    <color name="colorInverseOnSurface">#000000</color>
+    <color name="colorScrim">#000000</color>
+
+</resources>
