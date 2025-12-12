@@ -4,10 +4,6 @@ import com.kakdela.p2p.db.ChatMessage
 import com.kakdela.p2p.db.ChatMessageDao
 import kotlinx.coroutines.flow.Flow
 
-/**
- * MessageRepository — тонкая прослойка над ChatMessageDao.
- * Методы соответствуют использованию в проекте (sendMessage, observeChat).
- */
 class MessageRepository(private val dao: ChatMessageDao) {
 
     suspend fun sendMessage(chatId: String, author: String, text: String) {
@@ -19,7 +15,9 @@ class MessageRepository(private val dao: ChatMessageDao) {
         dao.insert(msg)
     }
 
-    fun observeChat(chatId: String): Flow<List<ChatMessage>> = dao.observeChat(chatId)
+    fun observeChat(chatId: String): Flow<List<ChatMessage>> =
+        dao.observeChat(chatId)
 
-    fun observeAll(): Flow<List<ChatMessage>> = dao.observeAll()
+    fun observeAll(): Flow<List<ChatMessage>> =
+        dao.observeAll()
 }
