@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.compose") version "1.9.22"
+    id("com.google.devtools.ksp") version "1.9.22-1.0.13"
 }
 
 android {
@@ -56,6 +56,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+
+    // Иконки Material 2
     implementation("androidx.compose.material:material-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
@@ -88,9 +90,9 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna-platform")
     }
 
-    // JNA (стабильно работает с Android)
-    implementation("net.java.dev.jna:jna:4.5.1@aar")
-    implementation("net.java.dev.jna:jna-platform:4.5.1@aar")
+    // JNA (новая версия, jar без @aar)
+    implementation("net.java.dev.jna:jna:5.18.1")
+    implementation("net.java.dev.jna:jna-platform:5.18.1")
 }
 
 ksp {
