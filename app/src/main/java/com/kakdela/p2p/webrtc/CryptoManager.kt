@@ -18,26 +18,22 @@ object CryptoManager {
         return myKeyPair!!
     }
 
-    // --- Helpers ---
-
-    private fun ByteArray.toHexString(): String =
+    private fun ByteArray.toHex(): String =
         joinToString("") { "%02x".format(it) }
 
     private fun String.hexToBytes(): ByteArray {
-        require(length % 2 == 0) { "Invalid HEX length" }
+        require(length % 2 == 0)
         return chunked(2).map { it.toInt(16).toByte() }.toByteArray()
     }
 
-    // --- Encrypt ---
-
     fun encryptMessage(text: String, theirPublicKeyHex: String): String {
-        val msg = text.toByteArray(Charsets.UTF_8)
+        val msg = text.toByteArray()
         val theirKey = Key.fromHexString(theirPublicKeyHex).asBytes
         val nonce = sodium.randomBytesBuf(Box.NONCEBYTES)
-        val cipherText = ByteArray(msg.size + Box.MACBYTES)
+        val cipher = ByteArray(msg.size + Box.MACBYTES)
 
         val ok = sodium.cryptoBoxEasy(
-            cipherText,
+            cipher,
             msg,
             msg.size.toLong(),
             nonce,
@@ -47,19 +43,17 @@ object CryptoManager {
 
         check(ok) { "Encryption failed" }
 
-        return (nonce + cipherText).toHexString()
+        return (nonce + cipher).toHex()
     }
 
-    // --- Decrypt ---
-
     fun decryptMessage(encryptedHex: String, theirPublicKeyHex: String): String? {
-        val full = encryptedHex.hexToBytes()
-        if (full.size < Box.NONCEBYTES + Box.MACBYTES) return null
+        val data = encryptedHex.hexToBytes()
+        if (data.size < Box.NONCEBYTES + Box.MACBYTES) return null
 
-        val nonce = full.copyOfRange(0, Box.NONCEBYTES)
-        val cipher = full.copyOfRange(Box.NONCEBYTES, full.size)
-        val theirKey = Key.fromHexString(theirPublicKeyHex).asBytes
+        val nonce = data.copyOfRange(0, Box.NONCEBYTES)
+        val cipher = data.copyOfRange(Box.NONCEBYTES, data.size)
         val plain = ByteArray(cipher.size - Box.MACBYTES)
+        val theirKey = Key.fromHexString(theirPublicKeyHex).asBytes
 
         val ok = sodium.cryptoBoxOpenEasy(
             plain,
