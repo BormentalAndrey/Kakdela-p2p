@@ -5,22 +5,22 @@ import android.content.Context
 object WebRtcManager {
 
     fun initialize(context: Context) {
-        // TODO: Initialize WebRTC PeerConnectionFactory
+        // TODO: PeerConnectionFactory initialization
     }
 
     fun initiateConnection(peerId: String, publicKey: String, iceServersJson: String) {
-        // TODO: Signaling + PeerConnection createOffer
+        // TODO: signaling sendOffer
     }
 
     fun receiveOffer(peerId: String, offerSdp: String) {
-        // TODO: setRemoteDescription + createAnswer
+        // TODO: set remote offer, createAnswer()
     }
 
     fun receiveAnswer(peerId: String, answerSdp: String) {
-        // TODO: setRemoteDescription
+        // TODO: set remote answer
     }
 
     fun addIceCandidate(peerId: String, candidate: String) {
-        // TODO: Add ICE candidate
+        // TODO: add ice candidate to PeerConnection
     }
 }
