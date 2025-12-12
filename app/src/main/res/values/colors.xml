@@ -1,17 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Неоновые цвета -->
-    <color name="neon_cyan">#00FFF0</color>
-    <color name="neon_pink">#FF00C8</color>
-    <color name="neon_purple">#D700FF</color>
-    <color name="neon_blue">#0088FF</color>
 
-    <!-- Фон и поверхность -->
-    <color name="background_dark">#0A0A0A</color>
-    <color name="surface_dark">#121212</color>
-    <color name="on_background">#E0E0E0</color>
-    <color name="on_surface">#FFFFFF</color>
+    <color name="md_theme_primary">#00E0E0</color>
+    <color name="md_theme_onPrimary">#000000</color>
+    <color name="md_theme_primaryContainer">#00CCCC</color>
+    <color name="md_theme_onPrimaryContainer">#000000</color>
 
-    <!-- Ошибка -->
-    <color name="error">#FF5555</color>
-    <color name="on_error">#000000</color>
+    <color name="md_theme_secondary">#FF00C8</color>
+    <color name="md_theme_onSecondary">#000000</color>
+    <color name="md_theme_secondaryContainer">#FF00C8</color>
+    <color name="md_theme_onSecondaryContainer">#000000</color>
+
+    <color name="md_theme_tertiary">#D700FF</color>
+    <color name="md_theme_onTertiary">#000000</color>
+    <color name="md_theme_tertiaryContainer">#D700FF</color>
+    <color name="md_theme_onTertiaryContainer">#000000</color>
+
+    <color name="md_theme_error">#FF5555</color>
+    <color name="md_theme_onError">#000000</color>
+
+    <color name="md_theme_background">#FFFFFF</color>
+    <color name="md_theme_onBackground">#000000</color>
+
+    <color name="md_theme_surface">#FFFFFF</color>
+    <color name="md_theme_onSurface">#000000</color>
+
+    <color name="md_theme_surfaceVariant">#EEEEEE</color>
+    <color name="md_theme_onSurfaceVariant">#333333</color>
+
+    <color name="md_theme_outline">#777777</color>
+    <color name="md_theme_outlineVariant">#AAAAAA</color>
+
+    <color name="md_theme_scrim">#000000</color>
+
+    <color name="md_theme_onSurfaceInverse">#FFFFFF</color>
+
 </resources>
