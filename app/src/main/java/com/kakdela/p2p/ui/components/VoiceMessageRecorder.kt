@@ -1,4 +1,3 @@
-// app/src/main/java/com/kakdela/p2p/ui/components/VoiceMessageRecorder.kt
 package com.kakdela.p2p.ui.components
 
 import androidx.compose.animation.core.Animatable
@@ -8,15 +7,16 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.material3.icons.Icons
-import androidx.compose.material3.icons.filled.ArrowBack
-import androidx.compose.material3.icons.filled.Mic
-import androidx.compose.material3.icons.filled.MicOff
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.*
-import androidx78.compose.ui.Alignment
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consume
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -38,12 +38,9 @@ fun VoiceMessageRecorder(
     var recordingTime by remember { mutableStateOf(0L) } // в секундах
     var isCancelled by remember { mutableStateOf(false) }
 
-    // Анимация смещения при смахивании
     val offsetX = remember { Animatable(0f) }
-
     val context = LocalContext.current
 
-    // Файл для записи
     val audioFile = remember {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         File(context.cacheDir, "voice_$timestamp.aac")
@@ -71,11 +68,9 @@ fun VoiceMessageRecorder(
         isRecording = false
         offsetX.snapTo(0f)
         if (!cancelled && recordingTime > 0) {
-            // Отправляем только если запись была дольше 0 сек и не отменена
             FileTransferManager.sendVoice(peerId, audioFile)
             onVoiceSent()
         }
-        // Файл можно удалить, если отмена
         if (cancelled && audioFile.exists()) {
             audioFile.delete()
         }
@@ -94,7 +89,6 @@ fun VoiceMessageRecorder(
         contentAlignment = Alignment.Center
     ) {
         if (!isRecording) {
-            // Кнопка начала записи
             IconButton(
                 onClick = startRecording,
                 modifier = Modifier.size(48.dp)
@@ -107,13 +101,12 @@ fun VoiceMessageRecorder(
                 )
             }
         } else {
-            // Режим записи с возможностью отмены
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectDragGestures(
-                            onDragStart = { /* уже записываем */ },
+                            onDragStart = { },
                             onDragEnd = {
                                 if (offsetX.value < -120f) {
                                     isCancelled = true
@@ -125,8 +118,8 @@ fun VoiceMessageRecorder(
                             onDragCancel = { stopRecording(cancelled = true) },
                             onDrag = { change, dragAmount ->
                                 change.consume()
-                                val newOffset = (offsetX.value + dragAmount.x).coerceAtMost(0f) // только влево
-                                offsetX.animateTo(newOffset, tween(0)) // без анимации возврата
+                                val newOffset = (offsetX.value + dragAmount.x).coerceAtMost(0f)
+                                offsetX.animateTo(newOffset, tween(0))
                             }
                         )
                     }
@@ -135,11 +128,10 @@ fun VoiceMessageRecorder(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .offset(x = offsetX.value.dp.coerceAtLeast(-200.dp)) // ограничиваем смещение
+                        .offset(x = offsetX.value.dp.coerceAtLeast(-200.dp))
                         .padding(start = 16.dp)
                 ) {
                     if (offsetX.value < -80f) {
-                        // Стрелка отмены
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = null,
@@ -154,7 +146,6 @@ fun VoiceMessageRecorder(
                             fontWeight = FontWeight.Medium
                         )
                     } else {
-                        // Таймер и индикатор записи
                         Icon(
                             imageVector = Icons.Filled.Mic,
                             contentDescription = null,
@@ -169,7 +160,6 @@ fun VoiceMessageRecorder(
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.width(8.dp))
-                        // Красная точка "запись идёт"
                         Box(
                             modifier = Modifier
                                 .size(12.dp)
@@ -179,7 +169,6 @@ fun VoiceMessageRecorder(
                     }
                 }
 
-                // Кнопка "стоп" при записи (опционально)
                 IconButton(
                     onClick = { stopRecording(cancelled = false) },
                     modifier = Modifier.align(Alignment.CenterEnd)
