@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="md_theme_onSurfaceInverse_dark">#FFFFFF</color>
-
-    <!-- Material 3 requires these attributes -->
-    <attr name="colorInverseOnSurface" format="color" />
-    <attr name="colorScrim" format="color" />
-
+    <!-- никаких md_theme_* ! -->
 </resources>
