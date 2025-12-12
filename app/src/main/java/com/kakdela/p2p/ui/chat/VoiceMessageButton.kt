@@ -1,6 +1,9 @@
 package com.kakdela.p2p.ui.chat
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -8,11 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-// Правильные импорты для Material Icons
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-
+/**
+ * VoiceMessageButton — визуальная кнопка для старта/стопа записи.
+ * Использует стандартные Material icons (Mic / MicOff) и корректные импорты.
+ */
 @Composable
 fun VoiceMessageButton(
     isRecording: Boolean,
