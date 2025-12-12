@@ -1,20 +1,26 @@
 package com.kakdela.p2p.webrtc
 
-import org.webrtc.*
+import android.content.Context
 
-class WebRtcManager(
-    private val peerConnectionFactory: PeerConnectionFactory,
-    private val crypto: CryptoManager
-) {
+object WebRtcManager {
 
-    var dataChannel: DataChannel? = null
-    var theirPublicKeyHex: String? = null
+    fun initialize(context: Context) {
+        // TODO: Initialize WebRTC PeerConnectionFactory
+    }
 
-    fun encryptAndSend(bytes: ByteArray) {
-        theirPublicKeyHex ?: return
-        val encrypted = crypto.encrypt(bytes, theirPublicKeyHex!!)
-        dataChannel?.send(DataChannel.Buffer(
-            java.nio.ByteBuffer.wrap(encrypted), false
-        ))
+    fun initiateConnection(peerId: String, publicKey: String, iceServersJson: String) {
+        // TODO: Signaling + PeerConnection createOffer
+    }
+
+    fun receiveOffer(peerId: String, offerSdp: String) {
+        // TODO: setRemoteDescription + createAnswer
+    }
+
+    fun receiveAnswer(peerId: String, answerSdp: String) {
+        // TODO: setRemoteDescription
+    }
+
+    fun addIceCandidate(peerId: String, candidate: String) {
+        // TODO: Add ICE candidate
     }
 }
