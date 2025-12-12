@@ -1,36 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Тёмная тема для Android 13+ (Material 3 1.12.0 требует именно такие имена) -->
 
-    <color name="md_theme_primary">#00FFF0</color>                    <!-- neon cyan -->
-    <color name="md_theme_onPrimary">#000000</color>
-    <color name="md_theme_primaryContainer">#00FFF0</color>
-    <color name="md_theme_onPrimaryContainer">#000000</color>
+    <!-- Именно эти имена с _dark он ищет в values-night-v8 в версии 1.12.0 -->
+    <color name="md_theme_primary_dark">#00FFF0</color>
+    <color name="md_theme_onPrimary_dark">#000000000</color>
+    <color name="md_theme_primaryContainer_dark">#00FFF0</color>
+    <color name="md_theme_onPrimaryContainer_dark">#000000</color>
 
-    <color name="md_theme_secondary">#FF00C8</color>                  <!-- neon pink -->
-    <color name="md_theme_onSecondary">#000000</color>
-    <color name="md_theme_secondaryContainer">#FF00C8</color>
-    <color name="md_theme_onSecondaryContainer">#000000</color>
+    <color name="md_theme_secondary_dark">#FF00C8</color>
+    <color name="md_theme_onSecondary_dark">#000000</color>
+    <color name="md_theme_secondaryContainer_dark">#FF00C8</color>
+    <color name="md_theme_onSecondaryContainer_dark">#000000</color>
 
-    <color name="md_theme_tertiary">#D700FF</color>                   <!-- neon purple -->
-    <color name="md_theme_onTertiary">#000000</color>
-    <color name="md_theme_tertiaryContainer">#D700FF</color>
-    <color name="md_theme_onTertiaryContainer">#000000</color>
+    <color name="md_theme_tertiary_dark">#D700FF</color>
+    <color name="md_theme_onTertiary_dark">#000000</color>
+    <color name="md_theme_tertiaryContainer_dark">#D700FF</color>
+    <color name="md_theme_onTertiaryContainer_dark">#000000</color>
 
-    <color name="md_theme_background">#0A0A0A</color>
-    <color name="md_theme_onBackground">#E0E0E0</color>
+    <color name="md_theme_background_dark">#0A0A0A</color>
+    <color name="md_theme_onBackground_dark">#E0E0E0</color>
 
-    <color name="md_theme_surface">#121212</color>
-    <color name="md_theme_onSurface">#FFFFFF</color>
-    <color name="md_theme_surfaceVariant">#1E1E1E</color>
-    <color name="md_theme_onSurfaceVariant">#CCCCCC</color>
+    <color name="md_theme_surface_dark">#121212</color>
+    <color name="md_theme_onSurface_dark">#FFFFFF</color>
+    <color name="md_theme_surfaceVariant_dark">#1E1E1E</color>
+    <color name="md_theme_onSurfaceVariant_dark">#CCCCCC</color>
 
-    <color name="md_theme_error">#FF5555</color>
-    <color name="md_theme_onError">#000000</color>
-    <color name="md_theme_errorContainer">#FF5555</color>
-    <color name="md_theme_onErrorContainer">#000000</color>
+    <color name="md_theme_error_dark">#FF5555</color>
+    <color name="md_theme_onError_dark">#000000</color>
 
-    <color name="md_theme_outline">#666666</color>
-    <color name="md_theme_outlineVariant">#444444</color>
-    <color name="md_theme_scrim">#000000</color>
+    <!-- Эти тоже иногда запрашиваются -->
+    <color name="md_theme_errorContainer_dark">#FF5555</color>
+    <color name="md_theme_onErrorContainer_dark">#000000</color>
+    <color name="md_theme_outline_dark">#666666</color>
+    <color name="md_theme_outlineVariant_dark">#444444</color>
+    <color name="md_theme_scrim_dark">#000000</color>
+
 </resources>
