@@ -18,7 +18,11 @@ fun ContactsScreen(onOpenChat: (String) -> Unit) {
     val contacts = TrustedPeersManager.getAll()
     var showScanner by remember { mutableStateOf(false) }
     var renamingPeer by remember { mutableStateOf<String?>(null) }
+    val p2pService = P2PService(LocalContext.current)
 
+    LaunchedEffect(Unit) {
+        p2pService.discoverPeers(onSuccess = { /* update UI */ }, onFailure = { /* error */ })
+    }
     Scaffold(
         topBar = { TopAppBar(title = { Text("Контакты") }) },
         floatingActionButton = { FloatingActionButton(onClick = { showScanner = true }) { Icon(Icons.Default.QrCodeScanner, "") } }
