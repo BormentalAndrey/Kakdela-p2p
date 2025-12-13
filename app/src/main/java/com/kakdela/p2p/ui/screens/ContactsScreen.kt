@@ -1,31 +1,17 @@
 package com.kakdela.p2p.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kakdela.p2p.model.Contact
 import com.kakdela.p2p.trusted.TrustedPeersManager
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 @Composable
 fun ContactsScreen(onOpenChat: (String) -> Unit) {
@@ -35,11 +21,11 @@ fun ContactsScreen(onOpenChat: (String) -> Unit) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Контакты") }) },
-        floatingActionButton = { FloatingActionButton(onClick = { showScanner = true }) { Icon(Icons.Default.QrCode, "Scan") } }
+        floatingActionButton = { FloatingActionButton(onClick = { showScanner = true }) { Icon(Icons.Default.QrCodeScanner, "") } }
     ) { padding ->
         if (contacts.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Нет контактов. Добавьте по QR.")
+            Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
+                Text("Нет контактов\nДобавь по QR-коду")
             }
         } else {
             LazyColumn(contentPadding = padding) {
@@ -49,10 +35,12 @@ fun ContactsScreen(onOpenChat: (String) -> Unit) {
                         supportingContent = { Text(contact.peerId.takeLast(8)) },
                         trailingContent = {
                             IconButton(onClick = { renamingPeer = contact.peerId }) {
-                                Icon(Icons.Default.Edit, "Rename")
+                                Icon(Icons.Default.Edit, "Переименовать")
                             }
                         },
-                        modifier = Modifier.clickable { onOpenChat(contact.peerId) }
+                        modifier = Modifier.clickable {
+                            onOpenChat(contact.peerId)
+                        }
                     )
                 }
             }
@@ -60,15 +48,11 @@ fun ContactsScreen(onOpenChat: (String) -> Unit) {
     }
 
     if (showScanner) {
-        QrScannerScreen(onPeerAdded = { peerId, publicKeyHex, iceServers ->
-            TrustedPeersManager.addPeer(Contact(peerId, "New Contact", publicKeyHex))
-            showScanner = false
-        })
+        QrScannerScreen(onDismiss = { showScanner = false })
     }
 
     renamingPeer?.let { peerId ->
-        val current = TrustedPeersManager.getById(peerId)
-        var newName by remember { mutableStateOf(current?.displayName ?: "") }
+        var newName by remember { mutableStateOf(TrustedPeersManager.getById(peerId)?.displayName ?: "") }
         AlertDialog(
             onDismissRequest = { renamingPeer = null },
             title = { Text("Переименовать") },
@@ -78,7 +62,8 @@ fun ContactsScreen(onOpenChat: (String) -> Unit) {
                     TrustedPeersManager.rename(peerId, newName.trim())
                     renamingPeer = null
                 }) { Text("Сохранить") }
-            }
+            },
+            dismissButton = { TextButton(onClick = { renamingPeer = null }) { Text("Отмена") } }
         )
     }
 }
