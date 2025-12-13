@@ -1,7 +1,12 @@
 package com.kakdela.p2p.p2p
 
-object P2PService {
-    fun start() { /* start peer, signalling */ }
-    fun stop() { /* stop */ }
-    fun sendData(peerId: String, data: ByteArray) { /* send data to peer */ }
+// Заглушка для P2P-сервиса (WiFi Direct, discovery, etc.)
+class P2PService {
+    fun init() {
+        // Инициализация WiFi P2P
+    }
+
+    fun discoverPeers() {
+        // Поиск пиров
+    }
 }
