@@ -1,75 +1,41 @@
 [versions]
-# Последние стабильные версии на 11 декабря 2025
-agp                  = "8.7.2"
-kotlin               = "2.2.21"
-compose-bom          = "2025.12.00"
-lifecycle            = "2.8.7"
-activity-compose     = "1.9.3"
-room                 = "2.6.1"
-coroutines           = "1.8.1"
-ksp                  = "2.3.2"
-webrtc               = "1.3.10"
-java-websocket       = "1.5.6"
-lazysodium           = "5.1.0"
-coil                 = "3.3.0"
-jna-version          = "5.14.0"
+kotlin = "2.0.21"
+compose-bom = "2024.10.01"
+activity-compose = "1.9.3"
+navigation-compose = "2.7.2"
+lifecycle = "2.8.7"
+core-ktx = "1.15.0"
+material3 = "1.3.0"
+coil = "2.7.0"
+room = "2.6.1"
+kotlinx-coroutines = "1.9.0"
+webrtc = "1.3.10"
+lazysodium = "5.1.0"
+jna = "5.18.1"
+zxing = "4.3.0"
+qrgen = "2.6.0"
 
 [libraries]
-# AndroidX
-androidx-core-ktx                = { module = "androidx.core:core-ktx", version = "1.13.1" }
-
-androidx-lifecycle-runtime-ktx   = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
-androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-
-androidx-activity-compose        = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
-
-# Compose BOM
-compose-bom                      = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-
-# Compose
-compose-ui                       = { module = "androidx.compose.ui:ui" }
-compose-ui-graphics              = { module = "androidx.compose.ui:ui-graphics" }
-compose-ui-tooling               = { module = "androidx.compose.ui:ui-tooling" }
-compose-ui-tooling-preview       = { module = "androidx.compose.ui:ui-tooling-preview" }
-compose-foundation               = { module = "androidx.compose.foundation:foundation" }
-
-compose-material-icons-core      = { module = "androidx.compose.material:material-icons-core" }
-compose-material-icons-extended  = { module = "androidx.compose.material:material-icons-extended" }
-
-compose-material3                = { module = "androidx.compose.material3:material3" }
-
-google-material                  = { module = "com.google.android.material:material", version = "1.12.0" }
-
-# Coil 3
-coil-compose                     = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil-network-okhttp              = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
-
-# Room
-room-runtime                     = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-ktx                         = { module = "androidx.room:room-ktx", version.ref = "room" }
-room-compiler                    = { module = "androidx.room:room-compiler", version.ref = "room" }
-
-# WebRTC
-webrtc-android                   = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
-webrtc-android-ui                = { module = "io.getstream:stream-webrtc-android-ui", version.ref = "webrtc" }
-
-# Coroutines
-kotlinx-coroutines-android       = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-kotlinx-coroutines-core          = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
-
-# WebSocket
-java-websocket                   = { module = "org.java-websocket:Java-WebSocket", version.ref = "java-websocket" }
-
-# Crypto
-lazysodiumAndroid                = { module = "com.goterl:lazysodium-android", version.ref = "lazysodium" }
-
-# JNA (WebRTC native)
-jna                              = { module = "net.java.dev.jna:jna", version.ref = "jna-version" }
-jna-platform                     = { module = "net.java.dev.jna:jna-platform", version.ref = "jna-version" }
-
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-android-library     = { id = "com.android.library", version.ref = "agp" }
-kotlin-android      = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+stream-webrtc-android = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
+lazysodium-android = { module = "com.github.terl:lazysodium-android", version.ref = "lazysodium" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+zxing-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing" }
+qrgen = { module = "net.glxn.qrgen:android", version.ref = "qrgen" }
