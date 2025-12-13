@@ -1,37 +1,64 @@
+
 package com.kakdela.p2p.ui.screens
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.viewinterop.AndroidView
-import com.journeyapps.barcodescanner.CaptureActivity
-import com.journeyapps.barcodescanner.ScanOptions
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
+import com.kakdela.p2p.trusted.TrustedPeersManager
+import com.kakdela.p2p.webrtc.WebRtcManager
+import com.kakdela.p2p.model.Contact
 
 @Composable
-fun QrScannerScreen(onPeerAdded: (String, String, List<String>) -> Unit) {
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val intent = result.data
-        if (intent != null) {
-            val contents = intent.getStringExtra("SCAN_RESULT")
-            // Парсинг qrData: peerId, pubKey, iceServers
-            val peerId = contents?.split("?")?.get(1)?.split("&")?.get(0)?.split("=")?.get(1) ?: ""
-            val publicKeyHex = contents.split("&") [0].split("=")[1]
-            val iceServers = contents.split("&")[1].split("=")[1].split(",")
-            onPeerAdded(peerId, publicKeyHex, iceServers)
+fun QrScannerScreen(onDismiss: () -> Unit) {
+    var showNameDialog by remember { mutableStateOf<String?>(null) }
+    var pendingPeerId by remember { mutableStateOf<String?>(null) }
+    var pendingPublicKeyHex by remember { mutableStateOf<String?>(null) }
+    var pendingIceServers by remember { mutableStateOf<List<String>?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        val data = result.contents ?: return@rememberLauncherForActivityResult
+
+        // Парсинг QR: kakdela://connect?id=PEER_ID&pubkey=PUB_KEY_HEX
+        val params = data.split("?").getOrNull(1)?.split("&") ?: return@rememberLauncherForActivityResult
+        val peerId = params.find { it.startsWith("id=") }?.substringAfter("=") ?: return@rememberLauncherForActivityResult
+        val publicKeyHex = params.find { it.startsWith("pubkey=") }?.substringAfter("=")
+        val iceServers = params.find { it.startsWith("iceServers=") }?.substringAfter("=")?.split(",") ?: listOf("stun:stun.l.google.com:19302")
+
+        pendingPeerId = peerId
+        pendingPublicKeyHex = publicKeyHex
+        pendingIceServers = iceServers
+        showNameDialog = peerId
+    }
+
+    Column(Modifier.fillMaxSize(), Arrangement.Center, Alignment.CenterHorizontally) {
+        Button(onClick = { launcher.launch(ScanOptions()) }) {
+            Text("Сканировать QR")
         }
     }
 
-    LaunchedEffect(Unit) {
-        val options = ScanOptions()
-        options.setPrompt("Сканируйте QR")
-        options.setBeepEnabled(true)
-        options.setOrientationLocked(true)
-        launcher.launch(options.createScanIntent(LocalContext.current))
+    showNameDialog?.let { peerId ->
+        var name by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showNameDialog = null },
+            title = { Text("Имя контакта") },
+            text = { TextField(value = name, onValueChange = { name = it }) },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (name.isNotBlank()) {
+                        TrustedPeersManager.addPeer(Contact(peerId, name.trim(), pendingPublicKeyHex ?: "", pendingIceServers ?: emptyList()))
+                        WebRtcManager.initiateConnection(peerId, pendingPublicKeyHex ?: "", pendingIceServers ?: emptyList())
+                    }
+                    showNameDialog = null
+                    onDismiss()
+                }) { Text("Добавить") }
+            }
+        )
     }
 }
