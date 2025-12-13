@@ -4,7 +4,5 @@ import android.graphics.Bitmap
 import net.glxn.qrgen.android.QRCode
 
 object QrUtils {
-    fun generateQrCode(data: String): Bitmap {
-        return QRCode.from(data).bitmap()
-    }
+    fun generateQrCode(data: String): Bitmap = QRCode.from(data).bitmap()
 }
