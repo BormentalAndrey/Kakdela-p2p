@@ -13,9 +13,4 @@ class App : Application() {
         database = AppDatabase.getInstance(this)
         webRtcManager = WebRtcManager(this)
     }
-
-    companion object {
-        lateinit var instance: App
-            private set
-    }
 }
