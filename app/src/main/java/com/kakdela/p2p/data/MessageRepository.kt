@@ -1,23 +1,18 @@
 package com.kakdela.p2p.data
 
-import com.kakdela.p2p.db.ChatMessage
-import com.kakdela.p2p.db.ChatMessageDao
+import com.kakdela.p2p.App
+import com.kakdela.p2p.db.ChatMessageEntity
 import kotlinx.coroutines.flow.Flow
 
-class MessageRepository(private val dao: ChatMessageDao) {
+object MessageRepository {
 
-    suspend fun sendMessage(chatId: String, author: String, text: String) {
-        val msg = ChatMessage(
-            chatId = chatId,
-            author = author,
-            text = text
-        )
-        dao.insert(msg)
+    private val dao = App.instance.database.messageDao()
+
+    suspend fun insert(message: ChatMessageEntity) {
+        dao.insert(message)
     }
 
-    fun observeChat(chatId: String): Flow<List<ChatMessage>> =
-        dao.observeChat(chatId)
-
-    fun observeAll(): Flow<List<ChatMessage>> =
-        dao.observeAll()
+    fun observeChat(peerId: String): Flow<List<ChatMessageEntity>> {
+        return dao.observeChat(peerId)
+    }
 }
