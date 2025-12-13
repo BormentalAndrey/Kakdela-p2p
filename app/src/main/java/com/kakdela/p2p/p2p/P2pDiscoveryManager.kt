@@ -1,14 +1,8 @@
-object P2pDiscoveryManager {
-    // … твой текущий код …
+package com.kakdela.p2p.p2p
 
-    // ←←←← НОВАЯ ПЕРЕМЕННАЯ
-    private val trustedPeers = mutableSetOf<String>()
-
-    fun addTrustedPeer(peerId: String) {
-        trustedPeers.add(peerId)
-    }
-
-    fun isPeerTrusted(peerId: String): Boolean {
-        return trustedPeers.contains(peerId)
+// Заглушка для управления discovery
+class P2pDiscoveryManager {
+    fun startDiscovery() {
+        // Запуск discovery
     }
 }
