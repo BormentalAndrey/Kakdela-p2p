@@ -1,13 +1,21 @@
 package com.kakdela.p2p
 
 import android.app.Application
-import com.kakdela.p2p.data.MessageDatabase
+import com.kakdela.p2p.db.AppDatabase
+import com.kakdela.p2p.webrtc.WebRtcManager
 
-class KakdelaApplication : Application() {
-    lateinit var database: MessageDatabase
+class App : Application() {
+    lateinit var database: AppDatabase
+    lateinit var webRtcManager: WebRtcManager
 
     override fun onCreate() {
         super.onCreate()
-        database = MessageDatabase.getInstance(this)
+        database = AppDatabase.getInstance(this)
+        webRtcManager = WebRtcManager(this)
+    }
+
+    companion object {
+        lateinit var instance: App
+            private set
     }
 }
