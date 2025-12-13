@@ -5,22 +5,25 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ChatMessage::class], version = 1, exportSchema = false)
+@Database(
+    entities = [ChatMessageEntity::class],
+    version = 1,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun chatMessageDao(): ChatMessageDao
+
+    abstract fun messageDao(): ChatMessageDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
+        @Volatile private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
+        fun getInstance(context: Context): AppDatabase =
+            INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "message_database"
+                    "kakdela.db"
                 ).build().also { INSTANCE = it }
             }
-        }
     }
 }
