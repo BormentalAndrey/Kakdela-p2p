@@ -30,8 +30,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            freeCompilerArgs.addAll(listOf("-opt-in=kotlin.RequiresOptIn"))
+        }
     }
 
     packaging {
@@ -42,26 +45,33 @@ android {
 }
 
 dependencies {
-
-    // Core
+    // AndroidX + Lifecycle
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Compose
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
+
+    // Compose UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.7.2")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Room — ОДНА версия, ТОЛЬКО KSP
+    // Material
+    implementation("com.google.android.material:material:1.12.0")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
+    // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
@@ -69,32 +79,15 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
-    // WebRTC — ОДНА версия
+    // WebRTC
     implementation("io.getstream:stream-webrtc-android:1.3.10")
-    implementation("io.getstream:stream-webrtc-android-ui:1.3.10")
 
-    // WebSocket
-    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    // Sodium Crypto
+    implementation("com.github.terl:lazysodium-android:5.1.0@aar")
 
-    // Crypto — ОДИН lazysodium
-    implementation("com.goterl:lazysodium-android:5.1.0") {
-        exclude(group = "net.java.dev.jna", module = "jna")
-        exclude(group = "net.java.dev.jna", module = "jna-platform")
-    }
-    implementation("net.java.dev.jna:jna:5.18.1")
-    implementation("net.java.dev.jna:jna-platform:5.18.1")
-
-    // QR / Camera
+    // ZXing QR
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    implementation("com.google.zxing:core:3.5.1")
-    implementation("androidx.camera:camera-camera2:1.3.4")
-    implementation("androidx.camera:camera-lifecycle:1.3.4")
-    implementation("androidx.camera:camera-view:1.3.4")
 
-    // Local module
-    implementation(project(":goterl"))
-}
-
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
+    // QRGen
+    implementation("net.glxn.qrgen:android:2.6.0")
 }
