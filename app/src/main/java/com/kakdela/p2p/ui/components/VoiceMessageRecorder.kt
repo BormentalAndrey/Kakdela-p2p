@@ -1,7 +1,6 @@
 package com.kakdela.p2p.ui.components
 
 import android.media.MediaRecorder
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -15,14 +14,14 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.consume
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.animation.core.Animatable
 import java.io.File
 import java.util.UUID
 
 @Composable
-fun VoiceMessageRecorder(
-    onVoiceSent: (ByteArray) -> Unit
-) {
+fun VoiceMessageRecorder(onVoiceSent: (ByteArray) -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
@@ -31,8 +30,7 @@ fun VoiceMessageRecorder(
     var outputFile: File? = null
 
     Row(
-        modifier = Modifier
-            .padding(8.dp)
+        modifier = Modifier.padding(8.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Mic,
@@ -60,7 +58,6 @@ fun VoiceMessageRecorder(
                                 offsetX.animateTo(offsetX.value + dragAmount.x)
                             }
                             if (offsetX.value < -100f) {
-                                // Cancel recording
                                 recorder?.release()
                                 recorder = null
                                 outputFile?.delete()
