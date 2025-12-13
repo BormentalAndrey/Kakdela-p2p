@@ -4,25 +4,25 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import java.util.UUID
 
 @Composable
-fun InputBar(onSendText: (String) -> Unit, onSendPhoto: () -> Unit, onSendFile: () -> Unit) {
+fun InputBar(
+    sendText: (String) -> Unit,
+    sendFile: () -> Unit,
+    sendPhoto: () -> Unit
+) {
     var text by remember { mutableStateOf("") }
 
     Row(
@@ -33,13 +33,13 @@ fun InputBar(onSendText: (String) -> Unit, onSendPhoto: () -> Unit, onSendFile: 
     ) {
         Icon(
             Icons.Default.AttachFile,
-            contentDescription = "Attach File",
-            modifier = Modifier.clickable(onClick = onSendFile)
+            "File",
+            modifier = Modifier.clickable { sendFile() }
         )
         Icon(
             Icons.Default.Photo,
-            contentDescription = "Send Photo",
-            modifier = Modifier.clickable(onClick = onSendPhoto)
+            "Photo",
+            modifier = Modifier.clickable { sendPhoto() }
         )
         TextField(
             value = text,
@@ -48,7 +48,7 @@ fun InputBar(onSendText: (String) -> Unit, onSendPhoto: () -> Unit, onSendFile: 
             placeholder = { Text("Сообщение") }
         )
         if (text.isNotBlank()) {
-            IconButton(onClick = { onSendText(text); text = "" }) {
+            IconButton(onClick = { sendText(text); text = "" }) {
                 Icon(Icons.Default.Send, "Send")
             }
         }
