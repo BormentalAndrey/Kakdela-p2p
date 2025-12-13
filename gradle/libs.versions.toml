@@ -1,4 +1,5 @@
 [versions]
+androidGradlePlugin = "8.4.2"        # исправлено, ранее не было
 kotlin = "1.9.25"
 ksp = "1.9.25-1.0.26"
 compose-bom = "2024.10.01"
