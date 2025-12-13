@@ -1,8 +1,19 @@
 package com.kakdela.p2p.trusted
 
-class TrustedPeersManager {
-    private val peers = mutableSetOf<String>()
+import com.kakdela.p2p.model.Contact
 
-    fun add(id: String) = peers.add(id)
-    fun all(): Set<String> = peers
+object TrustedPeersManager {
+    private val peers = mutableMapOf<String, Contact>()
+
+    fun addPeer(contact: Contact) {
+        peers[contact.peerId] = contact
+    }
+
+    fun getById(peerId: String): Contact? = peers[peerId]
+
+    fun getAll(): List<Contact> = peers.values.toList()
+
+    fun rename(peerId: String, newName: String) {
+        peers[peerId]?.let { peers[peerId] = it.copy(displayName = newName) }
+    }
 }
