@@ -1,5 +1,6 @@
 [versions]
-kotlin = "2.0.21"
+kotlin = "1.9.25"
+ksp = "1.9.25-1.0.26"
 compose-bom = "2024.10.01"
 activity-compose = "1.9.3"
 navigation-compose = "2.7.2"
@@ -39,3 +40,10 @@ jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 zxing-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing" }
 qrgen = { module = "net.glxn.qrgen:android", version.ref = "qrgen" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
