@@ -1,4 +1,5 @@
 # ProGuard rules for Kakdela-p2p
+
 -keep class com.kakdela.p2p.** { *; }
 -keep class org.webrtc.** { *; }
 -dontwarn org.webrtc.**
