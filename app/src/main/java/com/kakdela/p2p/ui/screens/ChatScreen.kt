@@ -1,176 +1,113 @@
-// app/src/main/java/com/kakdela/p2p/ui/screens/ChatScreen.kt
 package com.kakdela.p2p.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kakdela.p2p.model.ChatMessage
-import com.kakdela.p2p.model.ContactsRepository
-import com.kakdela.p2p.webrtc.FileTransferManager
+import com.kakdela.p2p.trusted.TrustedPeersManager
 import com.kakdela.p2p.ui.components.VoiceMessageRecorder
-import kotlinx.coroutines.launch
+import com.kakdela.p2p.webrtc.FileTransferManager
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 
-private val chatHistory = mutableMapOf<String, MutableList<ChatMessage>>()
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(peerId: String) {
-    val contact = ContactsRepository.getById(peerId) ?: return
+fun ChatScreen(peerId: String, onBack: () -> Unit) {
+    val contact = TrustedPeersManager.getById(peerId) ?: return
     val displayName = contact.displayName
-
-    val messages = remember(peerId) {
-        chatHistory.getOrPut(peerId) { mutableStateListOf() }
-    }
-
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val messages = remember { mutableStateListOf<ChatMessage>() } // Load from Room in real
 
-    // Фото/видео
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let { FileTransferManager.sendFile(context, peerId, it) }
+        uri?.let { FileTransferManager.sendFile(peerId, it, context) }
     }
-
-    // Файлы
     val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { FileTransferManager.sendFile(context, peerId, it) }
+        uri?.let { FileTransferManager.sendFile(peerId, it, context) }
     }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(displayName, fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
-        },
-        bottomBar = {
-            Column {
-                // ГОЛОСОВЫЕ СООБЩЕНИЯ
-                VoiceMessageRecorder(peerId = peerId) {
-                    scope.launch { listState.animateScrollToItem(messages.lastIndex) }
-                }
-                
-                // ТЕКСТ + ФАЙЛЫ
-                InputBar(
-                    peerId = peerId,
-                    onPhotoPicked = { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
-                    onFilePicked = { filePicker.launch("*/*") },
-                    onMessageSent = {
-                        scope.launch { listState.animateScrollToItem(messages.lastIndex) }
-                    }
-                )
-            }
+            TopAppBar(title = { Text(displayName) })
         }
     ) { padding ->
-        LazyColumn(
-            state = listState,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(messages, key = { it.id }) { msg ->
-                ChatBubble(message = msg, isFromMe = msg.isFromMe)
-            }
-        }
-    }
-
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.lastIndex)
-        }
-    }
-}
-
-@Composable  // УБРАЛИ ДУБЛИРОВАНИЕ!
-fun ChatBubble(message: ChatMessage, isFromMe: Boolean) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = if (isFromMe) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = if (isFromMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-            shadowElevation = 4.dp
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                when {
-                    message.isImage -> {
-                        AsyncImage(
-                            model = message.fileUri,
-                            contentDescription = "Фото",
-                            modifier = Modifier
-                                .sizeIn(maxWidth = 260.dp, maxHeight = 360.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .clickable { /* открыть полноэкранно */ },
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    message.isVideo -> {
-                        Box(
-                            modifier = Modifier
-                                .sizeIn(maxWidth = 260.dp, maxHeight = 360.dp)
-                                .background(Color.Black.copy(0.4f), RoundedCornerShape(16.dp))
-                                .clickable { /* воспроизвести */ }
-                        ) {
-                            Icon(
-                                Icons.Default.PlayCircleFilled,
-                                contentDescription = "Видео",
-                                tint = Color.White,
-                                modifier = Modifier.size(72.dp).align(Alignment.Center)
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(messages) { message ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = if (message.isSent) Arrangement.End else Arrangement.Start
+                    ) {
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (message.isSent) Color(0xFF00FFF0) else Color(0xFF2A2A2A)
                             )
+                        ) {
+                            when (message.type) {
+                                "text" -> Text(message.content, modifier = Modifier.padding(12.dp))
+                                "image" -> AsyncImage(
+                                    model = message.content,
+                                    contentDescription = "Image",
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                "voice" -> Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.PlayArrow, "Play")
+                                    Text("${message.duration ?: 0}s")
+                                }
+                            }
                         }
-                    }
-                    message.isVoice -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.PlayArrow, null, tint = Color.White)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Голосовое сообщение · ${message.duration ?: "0:12"}", color = Color.White)
-                        }
-                    }
-                    message.isFile -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.InsertDriveFile, null, tint = Color.White.copy(0.9f))
-                            Spacer(Modifier.width(8.dp))
-                            Text(message.fileName ?: "Файл", color = Color.White)
-                        }
-                    }
-                    else -> {
-                        Text(
-                            text = message.text ?: "",
-                            color = if (isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 16.sp
-                        )
                     }
                 }
-
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = message.time,
-                    color = (if (isFromMe) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.7f),
-                    fontSize = 11.sp,
-                    modifier = Modifier.align(Alignment.End)
-                )
             }
+            InputBar(
+                onSendText = { text ->
+                    FileTransferManager.sendText(peerId, text)
+                    messages.add(ChatMessage(content = text, type = "text", isSent = true))
+                },
+                onSendPhoto = { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                onSendFile = { filePicker.launch("*/*") }
+            )
+            VoiceMessageRecorder(onVoiceSent = { voice ->
+                FileTransferManager.sendVoice(peerId, voice)
+                messages.add(ChatMessage(content = "voice", type = "voice", isSent = true, duration = voice.size / 16000)) // Approximate
+            })
         }
     }
 }
