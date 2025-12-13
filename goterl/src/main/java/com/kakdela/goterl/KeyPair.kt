@@ -1,6 +1,3 @@
 package com.kakdela.goterl
 
-data class KeyPair(
-    val publicKey: ByteArray,
-    val secretKey: ByteArray
-)
+data class KeyPair(val publicKey: ByteArray, val secretKey: ByteArray)
