@@ -2,42 +2,39 @@ package com.kakdela.p2p.crypto
 
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
-import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.utils.Key
 import com.goterl.lazysodium.utils.KeyPair
+import com.goterl.lazysodium.interfaces.Box
+import com.goterl.lazysodium.interfaces.Random
 
 object CryptoManager {
 
-    private val sodium = LazySodiumAndroid(SodiumAndroid())
+    private val lazySodium = LazySodiumAndroid(SodiumAndroid())
 
-    private var myKeyPair: KeyPair? = null
-
-    /** Генерируем или возвращаем свою постоянную пару ключей */
-    fun getMyKeyPair(): KeyPair {
-        if (myKeyPair == null) {
-            myKeyPair = sodium.cryptoBoxKeypair()
-        }
-        return myKeyPair!!
+    fun generateKeyPair(): KeyPair {
+        val publicKey = ByteArray(Box.PUBLICKEYBYTES)
+        val secretKey = ByteArray(Box.SECRETKEYBYTES)
+        lazySodium.cryptoBoxKeypair(publicKey, secretKey)
+        return KeyPair(Key.fromBytes(publicKey), Key.fromBytes(secretKey))
     }
 
-    /** Шифруем сообщение для получателя (end-to-end) */
-    fun encrypt(message: ByteArray, receiverPublicKey: ByteArray): ByteArray? {
-        val publicKey = Key.fromBytes(receiverPublicKey)
-        val privateKey = Key.fromBytes(getMyKeyPair().secretKey.asBytes)
-        return sodium.cryptoBoxEasy(message, publicKey.asBytes, privateKey.asBytes)
+    fun encrypt(message: ByteArray, nonce: ByteArray, receiverPublicKey: Key, senderPrivateKey: Key): ByteArray {
+        val cipher = ByteArray(message.size + Box.MACBYTES)
+        lazySodium.cryptoBoxEasy(cipher, message, message.size.toLong(), nonce, receiverPublicKey.asBytes, senderPrivateKey.asBytes)
+        return cipher
     }
 
-    /** Расшифровываем сообщение от отправителя */
-    fun decrypt(ciphertext: ByteArray, senderPublicKey: ByteArray): ByteArray? {
-        val publicKey = Key.fromBytes(senderPublicKey)
-        val privateKey = Key.fromBytes(getMyKeyPair().secretKey.asBytes)
-        return sodium.cryptoBoxOpenEasy(ciphertext, publicKey.asBytes, privateKey.asBytes)
+    fun decrypt(cipher: ByteArray, nonce: ByteArray, senderPublicKey: Key, receiverPrivateKey: Key): ByteArray? {
+        val message = ByteArray(cipher.size - Box.MACBYTES)
+        val success = lazySodium.cryptoBoxOpenEasy(message, cipher, cipher.size.toLong(), nonce, senderPublicKey.asBytes, receiverPrivateKey.asBytes)
+        return if (success) message else null
     }
 
-    private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it.toInt() and 0xFF) }
-
-    private fun String.hexToByteArray(): ByteArray {
-        check(length % 2 == 0) { "Нечётная длина hex-строки" }
-        return chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+    fun generateNonce(): ByteArray {
+        val nonce = ByteArray(Box.NONCEBYTES)
+        lazySodium.randomBytesBuf(nonce, Box.NONCEBYTES)
+        return nonce
     }
+
+    val myKeyPair: KeyPair by lazy { generateKeyPair() }
 }
