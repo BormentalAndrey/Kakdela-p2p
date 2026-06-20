@@ -2,7 +2,6 @@ package com.vasilisinaazbuka.games
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,9 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.R
@@ -23,9 +21,20 @@ import com.vasilisinaazbuka.audio.AudioPlayer
 import com.vasilisinaazbuka.data.GameState
 import com.vasilisinaazbuka.ui.CharacterView
 import com.vasilisinaazbuka.ui.LevelComplete
-import com.vasilisinaazbuka.ui.StarDisplay
 import com.vasilisinaazbuka.ui.theme.*
 import kotlinx.coroutines.delay
+
+// Режимы игры (вынесены из функции)
+private enum class MusicMode { FREE_PLAY, REPEAT_MELODY, GUESS_SOUND }
+
+// Модель звука (вынесена из функции)
+private data class SoundItem(
+    val id: Int,
+    val name: String,
+    val emoji: String,
+    val soundRes: Int,
+    val category: String
+)
 
 /**
  * Игра «Музыкальная шкатулка» — 3 режима: свободная игра, повтори мелодию, угадай звук
@@ -35,47 +44,35 @@ fun MusicBoxScreen(
     onGameComplete: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    // Режимы игры
-    enum class Mode { FREE_PLAY, REPEAT_MELODY, GUESS_SOUND }
-    var currentMode by remember { mutableStateOf(Mode.FREE_PLAY) }
+    var currentMode by remember { mutableStateOf(MusicMode.FREE_PLAY) }
     var showLevelComplete by remember { mutableStateOf(false) }
     var score by remember { mutableIntStateOf(0) }
     val maxScore = 3
 
-    // Данные для звуковой сетки 4×3
-    data class SoundItem(
-        val id: Int,
-        val name: String,
-        val emoji: String,
-        val soundRes: Int,
-        val category: String
-    )
+    val soundItems = remember {
+        listOf(
+            SoundItem(1, "Кошка", "🐱", R.raw.sound_cat, "animals"),
+            SoundItem(2, "Собака", "🐶", R.raw.sound_dog, "animals"),
+            SoundItem(3, "Корова", "🐮", R.raw.sound_cow, "animals"),
+            SoundItem(4, "Лягушка", "🐸", R.raw.sound_frog, "animals"),
+            SoundItem(5, "Машина", "🚗", R.raw.sound_car, "transport"),
+            SoundItem(6, "Самолёт", "✈️", R.raw.sound_plane, "transport"),
+            SoundItem(7, "Поезд", "🚂", R.raw.sound_train, "transport"),
+            SoundItem(8, "Корабль", "🚢", R.raw.sound_ship, "transport"),
+            SoundItem(9, "Гитара", "🎸", R.raw.sound_guitar, "instrument"),
+            SoundItem(10, "Барабан", "🥁", R.raw.sound_drum, "instrument"),
+            SoundItem(11, "Колокол", "🔔", R.raw.sound_bell, "instrument"),
+            SoundItem(12, "Флейта", "🎵", R.raw.sound_flute, "instrument")
+        )
+    }
 
-    val soundItems = listOf(
-        SoundItem(1, "Кошка", "🐱", R.raw.sound_cat, "animals"),
-        SoundItem(2, "Собака", "🐶", R.raw.sound_dog, "animals"),
-        SoundItem(3, "Корова", "🐮", R.raw.sound_cow, "animals"),
-        SoundItem(4, "Лягушка", "🐸", R.raw.sound_frog, "animals"),
-        SoundItem(5, "Машина", "🚗", R.raw.sound_car, "transport"),
-        SoundItem(6, "Самолёт", "✈️", R.raw.sound_plane, "transport"),
-        SoundItem(7, "Поезд", "🚂", R.raw.sound_train, "transport"),
-        SoundItem(8, "Корабль", "🚢", R.raw.sound_ship, "transport"),
-        SoundItem(9, "Гитара", "🎸", R.raw.sound_guitar, "instrument"),
-        SoundItem(10, "Барабан", "🥁", R.raw.sound_drum, "instrument"),
-        SoundItem(11, "Колокол", "🔔", R.raw.sound_bell, "instrument"),
-        SoundItem(12, "Флейта", "🎵", R.raw.sound_flute, "instrument")
-    )
-
-    // Состояния для режима «Повтори мелодию»
     var melodySequence by remember { mutableStateOf(listOf<SoundItem>()) }
     var playerSequence by remember { mutableStateOf(listOf<SoundItem>()) }
     var isShowingMelody by remember { mutableStateOf(false) }
     var highlightedItemId by remember { mutableIntStateOf(-1) }
 
-    // Состояния для режима «Угадай звук»
     var currentSound by remember { mutableStateOf<SoundItem?>(null) }
     var options by remember { mutableStateOf(listOf<SoundItem>()) }
-    var attempts by remember { mutableIntStateOf(0) }
 
     // Сброс при смене режима
     fun resetMode() {
@@ -83,13 +80,13 @@ fun MusicBoxScreen(
         melodySequence = emptyList()
         playerSequence = emptyList()
         currentSound = null
-        attempts = 0
+        options = emptyList()
         showLevelComplete = false
     }
 
     // Генерация мелодии для режима «Повтори»
     fun generateMelody() {
-        val pool = soundItems.take(8) // Только животные и транспорт
+        val pool = soundItems.take(8)
         melodySequence = List(4) { pool.random() }
         playerSequence = emptyList()
         isShowingMelody = true
@@ -129,7 +126,6 @@ fun MusicBoxScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Заголовок
             Text(
                 text = "Музыкальная шкатулка",
                 style = MaterialTheme.typography.headlineMedium,
@@ -144,24 +140,24 @@ fun MusicBoxScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Mode.entries.forEach { mode ->
+                MusicMode.entries.forEach { mode ->
                     FilterChip(
                         selected = currentMode == mode,
                         onClick = {
                             currentMode = mode
                             resetMode()
                             when (mode) {
-                                Mode.REPEAT_MELODY -> generateMelody()
-                                Mode.GUESS_SOUND -> generateGuessQuestion()
+                                MusicMode.REPEAT_MELODY -> generateMelody()
+                                MusicMode.GUESS_SOUND -> generateGuessQuestion()
                                 else -> {}
                             }
                         },
                         label = {
                             Text(
                                 text = when (mode) {
-                                    Mode.FREE_PLAY -> "🎹 Свободная"
-                                    Mode.REPEAT_MELODY -> "🔁 Повтори"
-                                    Mode.GUESS_SOUND -> "❓ Угадай"
+                                    MusicMode.FREE_PLAY -> "🎹 Свободная"
+                                    MusicMode.REPEAT_MELODY -> "🔁 Повтори"
+                                    MusicMode.GUESS_SOUND -> "❓ Угадай"
                                 }
                             )
                         },
@@ -174,22 +170,20 @@ fun MusicBoxScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Персонаж Кузя
             CharacterView(
-                character = "kuzya",
+                character = "knopa",
                 emotion = if (score >= maxScore) "happy" else "neutral",
                 message = when (currentMode) {
-                    Mode.FREE_PLAY -> "Нажимай на картинки и слушай звуки!"
-                    Mode.REPEAT_MELODY -> "Повтори мою мелодию!"
-                    Mode.GUESS_SOUND -> "Угадай, что звучит?"
+                    MusicMode.FREE_PLAY -> "Нажимай на картинки и слушай звуки!"
+                    MusicMode.REPEAT_MELODY -> "Повтори мою мелодию!"
+                    MusicMode.GUESS_SOUND -> "Угадай, что звучит?"
                 },
                 modifier = Modifier.height(80.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Счёт (для режимов с заданиями)
-            if (currentMode != Mode.FREE_PLAY) {
+            if (currentMode != MusicMode.FREE_PLAY) {
                 Text(
                     text = "Правильно: $score из $maxScore",
                     style = MaterialTheme.typography.titleMedium,
@@ -210,7 +204,7 @@ fun MusicBoxScreen(
                 items(soundItems) { item ->
                     val isHighlighted = highlightedItemId == item.id
                     val bgColor by animateColorAsState(
-                        if (isHighlighted) FairyGold.copy(alpha = 0.5f) else Color.White,
+                        targetValue = if (isHighlighted) FairyGold.copy(alpha = 0.5f) else Color.White,
                         label = "highlight"
                     )
 
@@ -219,15 +213,14 @@ fun MusicBoxScreen(
                             .aspectRatio(1f)
                             .clickable {
                                 when (currentMode) {
-                                    Mode.FREE_PLAY -> {
+                                    MusicMode.FREE_PLAY -> {
                                         AudioPlayer.playSFX(item.soundRes)
                                     }
-                                    Mode.REPEAT_MELODY -> {
+                                    MusicMode.REPEAT_MELODY -> {
                                         if (!isShowingMelody) {
                                             playerSequence = playerSequence + item
                                             AudioPlayer.playSFX(item.soundRes)
 
-                                            // Проверка последовательности
                                             val currentIndex = playerSequence.size - 1
                                             if (currentIndex < melodySequence.size &&
                                                 playerSequence[currentIndex].id == melodySequence[currentIndex].id) {
@@ -241,13 +234,12 @@ fun MusicBoxScreen(
                                                     }
                                                 }
                                             } else {
-                                                // Ошибка — сброс
                                                 playerSequence = emptyList()
                                                 AudioPlayer.playSFX(R.raw.sfx_error)
                                             }
                                         }
                                     }
-                                    Mode.GUESS_SOUND -> {
+                                    MusicMode.GUESS_SOUND -> {
                                         if (currentSound != null && item.id == currentSound!!.id) {
                                             score++
                                             AudioPlayer.playSFX(R.raw.sfx_success)
@@ -271,10 +263,7 @@ fun MusicBoxScreen(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            Text(
-                                text = item.emoji,
-                                fontSize = 36.sp
-                            )
+                            Text(text = item.emoji, fontSize = 36.sp)
                         }
                     }
                 }
@@ -282,8 +271,7 @@ fun MusicBoxScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Кнопки управления для режимов
-            if (currentMode == Mode.REPEAT_MELODY && !isShowingMelody) {
+            if (currentMode == MusicMode.REPEAT_MELODY && !isShowingMelody) {
                 Button(
                     onClick = {
                         playerSequence = emptyList()
@@ -296,18 +284,17 @@ fun MusicBoxScreen(
                 }
             }
 
-            if (currentMode == Mode.GUESS_SOUND && currentSound != null) {
+            if (currentMode == MusicMode.GUESS_SOUND && currentSound != null) {
                 Button(
                     onClick = { AudioPlayer.playSFX(currentSound!!.soundRes) },
                     modifier = Modifier.height(60.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = FairyGold)
                 ) {
-                    Text("🔊 Прослушать ещё раз", fontSize = 18.sp)
+                    Text("🔊 Прослушать ещё раз", fontSize = 18.sp, color = Color.White)
                 }
             }
         }
 
-        // Окно завершения
         if (showLevelComplete) {
             LevelComplete(
                 stars = 3,
