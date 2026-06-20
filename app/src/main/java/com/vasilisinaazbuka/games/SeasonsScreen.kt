@@ -13,8 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.R
@@ -24,6 +24,22 @@ import com.vasilisinaazbuka.ui.CharacterView
 import com.vasilisinaazbuka.ui.LevelComplete
 import com.vasilisinaazbuka.ui.StageProgressIndicator
 import com.vasilisinaazbuka.ui.theme.*
+
+// Сезоны вынесены из функции
+private enum class Season(val name: String, val emoji: String, val color: Color) {
+    WINTER("Зима", "❄️", Color(0xFFB3E5FC)),
+    SPRING("Весна", "🌸", Color(0xFFC8E6C9)),
+    SUMMER("Лето", "☀️", Color(0xFFFFF9C4)),
+    AUTUMN("Осень", "🍂", Color(0xFFFFCCBC))
+}
+
+// Модель предмета вынесена из функции
+private data class SeasonItem(
+    val id: String,
+    val name: String,
+    val emoji: String,
+    val correctSeason: Season
+)
 
 /**
  * Игра «Времена года» — 4 уровня с распределением предметов по сезонам
@@ -35,40 +51,32 @@ fun SeasonsScreen(
     onGameComplete: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    // Сезоны
-    enum class Season(val name: String, val emoji: String, val color: androidx.compose.ui.graphics.Color) {
-        WINTER("Зима", "❄️", Color(0xFFB3E5FC)),
-        SPRING("Весна", "🌸", Color(0xFFC8E6C9)),
-        SUMMER("Лето", "☀️", Color(0xFFFFF9C4)),
-        AUTUMN("Осень", "🍂", Color(0xFFFFCCBC))
+    val allItems = remember {
+        listOf(
+            SeasonItem("sled", "Санки", "🛷", Season.WINTER),
+            SeasonItem("snowman", "Снеговик", "⛄", Season.WINTER),
+            SeasonItem("hat", "Шапка", "🎩", Season.WINTER),
+            SeasonItem("flower", "Цветок", "🌸", Season.SPRING),
+            SeasonItem("umbrella", "Зонт", "☂️", Season.SPRING),
+            SeasonItem("leaf", "Лист", "🍃", Season.SPRING),
+            SeasonItem("ball", "Мяч", "⚽", Season.SUMMER),
+            SeasonItem("swimsuit", "Купальник", "🩱", Season.SUMMER),
+            SeasonItem("mushroom", "Гриб", "🍄", Season.AUTUMN),
+            SeasonItem("pumpkin", "Тыква", "🎃", Season.AUTUMN)
+        )
     }
 
-    // Предметы для распределения
-    data class SeasonItem(val id: String, val name: String, val emoji: String, val correctSeason: Season)
-
-    val allItems = listOf(
-        SeasonItem("sled", "Санки", "🛷", Season.WINTER),
-        SeasonItem("snowman", "Снеговик", "⛄", Season.WINTER),
-        SeasonItem("hat", "Шапка", "🎩", Season.WINTER),
-        SeasonItem("flower", "Цветок", "🌸", Season.SPRING),
-        SeasonItem("umbrella", "Зонт", "☂️", Season.SPRING),
-        SeasonItem("leaf", "Лист", "🍃", Season.SPRING),
-        SeasonItem("ball", "Мяч", "⚽", Season.SUMMER),
-        SeasonItem("swimsuit", "Купальник", "🩱", Season.SUMMER),
-        SeasonItem("mushroom", "Гриб", "🍄", Season.AUTUMN),
-        SeasonItem("pumpkin", "Тыква", "🎃", Season.AUTUMN)
-    )
-
-    // Перемешанные предметы для текущего уровня
     var availableItems by remember { mutableStateOf(allItems.shuffled().take(8)) }
-    var placedItems by remember { mutableStateOf<Map<Season, MutableList<SeasonItem>>>(emptyMap()) }
+    var placedItems by remember { mutableStateOf(mapOf<Season, List<SeasonItem>>()) }
+    var selectedItem by remember { mutableStateOf<SeasonItem?>(null) }
     var showLevelComplete by remember { mutableStateOf(false) }
     var stars by remember { mutableIntStateOf(0) }
 
     // Инициализация
     LaunchedEffect(stage) {
         availableItems = allItems.shuffled().take(8)
-        placedItems = Season.entries.associateWith { mutableListOf() }
+        placedItems = Season.entries.associateWith { emptyList() }
+        selectedItem = null
         showLevelComplete = false
     }
 
@@ -89,6 +97,11 @@ fun SeasonsScreen(
             AudioPlayer.playSFX(R.raw.sfx_success)
             GameState.completeLevel("seasons", stage)
         }
+    }
+
+    // Неразмещённые предметы
+    val unplacedItems = availableItems.filter { item ->
+        placedItems.values.none { list -> list.contains(item) }
     }
 
     Column(
@@ -135,9 +148,21 @@ fun SeasonsScreen(
                             .fillMaxWidth()
                             .aspectRatio(0.8f)
                             .clickable {
-                                // При нажатии на зону — можно добавить предмет (опционально)
+                                // Размещаем выбранный предмет в эту зону
+                                if (selectedItem != null) {
+                                    placedItems = placedItems.toMutableMap().apply {
+                                        put(season, (get(season) ?: emptyList()) + selectedItem!!)
+                                    }
+                                    selectedItem = null
+                                    AudioPlayer.playSFX(R.raw.sfx_drop)
+                                }
                             },
-                        colors = CardDefaults.cardColors(containerColor = season.color.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selectedItem != null) 
+                                season.color.copy(alpha = 0.7f) 
+                            else 
+                                season.color.copy(alpha = 0.5f)
+                        ),
                         shape = RoundedCornerShape(12.dp),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
@@ -151,92 +176,63 @@ fun SeasonsScreen(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
-
                             Spacer(modifier = Modifier.height(4.dp))
-
-                            // Показ размещённых предметов
                             seasonItems.forEach { item ->
-                                Text(
-                                    text = item.emoji,
-                                    fontSize = 24.sp
-                                )
+                                Text(text = item.emoji, fontSize = 24.sp)
                             }
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.width(4.dp))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Доступные предметы
+        // Подсказка
         Text(
-            text = "Доступные предметы (нажми на предмет, затем на сезон):",
+            text = if (selectedItem != null) 
+                "Выбран: ${selectedItem!!.emoji} ${selectedItem!!.name} — нажми на сезон!" 
+            else 
+                "Выбери предмет, затем нажми на сезон:",
             style = MaterialTheme.typography.bodyMedium,
-            color = FairyPurple
+            color = if (selectedItem != null) FairyGold else FairyPurple,
+            fontWeight = if (selectedItem != null) FontWeight.Bold else FontWeight.Normal
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Кнопки предметов
-        val unplacedItems = availableItems.filter { item ->
-            placedItems.values.none { list -> list.contains(item) }
-        }
-
+        // Доступные предметы
         if (unplacedItems.isNotEmpty()) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
-                modifier = Modifier.height(120.dp),
+                columns = GridCells.Fixed(5),
+                modifier = Modifier.height(80.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(unplacedItems) { item ->
-                    var selectedItem by remember { mutableStateOf<SeasonItem?>(null) }
+                    val isSelected = selectedItem == item
 
                     Box(
                         modifier = Modifier
-                            .size(60.dp)
+                            .size(56.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(
-                                if (selectedItem == item) FairyGold.copy(alpha = 0.5f)
+                                if (isSelected) FairyGold.copy(alpha = 0.5f)
                                 else Color.White
                             )
-                            .border(2.dp, FairyGold, RoundedCornerShape(12.dp))
+                            .border(
+                                width = if (isSelected) 3.dp else 2.dp,
+                                color = if (isSelected) FairyGold else FairyGold.copy(alpha = 0.3f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
                             .clickable {
-                                selectedItem = item
+                                selectedItem = if (isSelected) null else item
+                                AudioPlayer.playSFX(R.raw.sfx_click)
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = item.emoji, fontSize = 32.sp)
-                    }
-
-                    // Здесь нужно реализовать логику выбора предмета и размещения в сезон
-                    // Для упрощения: используем дополнительную кнопку
-                }
-            }
-
-            // Временное решение: кнопки для размещения
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Season.entries.forEach { season ->
-                    Button(
-                        onClick = {
-                            val item = unplacedItems.firstOrNull()
-                            if (item != null) {
-                                placedItems = placedItems.toMutableMap().apply {
-                                    get(season)?.add(item)
-                                }
-                                AudioPlayer.playSFX(R.raw.sfx_drop)
-                            }
-                        },
-                        modifier = Modifier.height(60.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = season.color)
-                    ) {
-                        Text("В ${season.name}", fontSize = 14.sp)
+                        Text(text = item.emoji, fontSize = 28.sp)
                     }
                 }
             }
@@ -254,13 +250,14 @@ fun SeasonsScreen(
         // Кнопка сброса
         Button(
             onClick = {
-                placedItems = Season.entries.associateWith { mutableListOf() }
+                placedItems = Season.entries.associateWith { emptyList() }
+                selectedItem = null
                 AudioPlayer.playSFX(R.raw.sfx_reset)
             },
-            modifier = Modifier.height(60.dp),
+            modifier = Modifier.height(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = FairyPink)
         ) {
-            Text("🔄 Заново", fontSize = 18.sp, color = Color.White)
+            Text("🔄 Заново", fontSize = 16.sp, color = Color.White)
         }
     }
 
