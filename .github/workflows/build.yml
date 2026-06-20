@@ -1,0 +1,49 @@
+  build-debug:
+    name: Сборка Debug APK
+    needs: [ lint, unit-tests ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: 📥 Checkout репозитория
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Установка Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔧 Настройка Gradle
+        run: chmod +x gradlew
+
+      - name: 📱 Создание debug-файла .kar (заглушки для сборки)
+        run: |
+          mkdir -p app/src/main/assets/kar
+          for i in $(seq -w 1 20); do
+            if [ ! -f "app/src/main/assets/kar/song_${i}.kar" ]; then
+              echo '{"metadata":{"title":"Песня '$i'","author":"Василиса"},"syllables":[],"words":[]}' > "app/src/main/assets/kar/song_${i}.kar"
+            fi
+          done
+
+      - name: 🔨 Сборка Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+        env:
+          GRADLE_OPTS: ${{ env.GRADLE_OPTS }}
+
+      - name: 📦 Загрузка Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+          compression-level: 9
+
+      - name: 📏 Размер APK
+        run: |
+          APK_SIZE=$(du -sh app/build/outputs/apk/debug/app-debug.apk | cut -f1)
+          echo "📱 Размер Debug APK: $APK_SIZE"
+          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
