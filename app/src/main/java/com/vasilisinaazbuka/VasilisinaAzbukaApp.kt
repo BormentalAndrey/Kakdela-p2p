@@ -1,11 +1,30 @@
 package com.vasilisinaazbuka
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.vasilisinaazbuka.games.*
 import com.vasilisinaazbuka.navigation.Routes
+import com.vasilisinaazbuka.ui.theme.*
 
 /**
  * Корневой композабл приложения с навигацией
@@ -29,13 +48,23 @@ fun VasilisinaAzbukaApp() {
         }
 
         // Игра 1: Раскраска (5 уровней)
-        composable(Routes.Coloring.route) { backStackEntry ->
-            val stage = backStackEntry.arguments?.getString("stage")?.toIntOrNull() ?: 1
+        composable(
+            route = Routes.Coloring.route,
+            arguments = listOf(
+                navArgument("stage") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
+            )
+        ) { backStackEntry ->
+            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             ColoringScreen(
                 stage = stage,
                 onNextStage = {
-                    navController.navigate(Routes.Coloring.createRoute(stage + 1)) {
-                        popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true }
+                    if (stage < GameState.MAX_COLORING_LEVELS) {
+                        navController.navigate(Routes.Coloring.createRoute(stage + 1)) {
+                            popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true }
+                        }
                     }
                 },
                 onGameComplete = {
@@ -43,7 +72,11 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
 
@@ -55,18 +88,32 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
 
         // Игра 3: Пазл по памяти (5 уровней)
-        composable(Routes.MemoryPuzzle.route) { backStackEntry ->
-            val stage = backStackEntry.arguments?.getString("stage")?.toIntOrNull() ?: 1
+        composable(
+            route = Routes.MemoryPuzzle.route,
+            arguments = listOf(
+                navArgument("stage") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
+            )
+        ) { backStackEntry ->
+            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             MemoryPuzzleScreen(
                 stage = stage,
                 onNextStage = {
-                    navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) {
-                        popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true }
+                    if (stage < GameState.MAX_MEMORYPUZZLE_LEVELS) {
+                        navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) {
+                            popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true }
+                        }
                     }
                 },
                 onGameComplete = {
@@ -74,18 +121,32 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
 
         // Игра 4: Накорми Кузю (5 уровней)
-        composable(Routes.FeedKuzya.route) { backStackEntry ->
-            val stage = backStackEntry.arguments?.getString("stage")?.toIntOrNull() ?: 1
+        composable(
+            route = Routes.FeedKuzya.route,
+            arguments = listOf(
+                navArgument("stage") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
+            )
+        ) { backStackEntry ->
+            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             FeedKuzyaScreen(
                 stage = stage,
                 onNextStage = {
-                    navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) {
-                        popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true }
+                    if (stage < GameState.MAX_FEEDKUZYA_LEVELS) {
+                        navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) {
+                            popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true }
+                        }
                     }
                 },
                 onGameComplete = {
@@ -93,18 +154,32 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
 
         // Игра 5: Времена года (4 уровня)
-        composable(Routes.Seasons.route) { backStackEntry ->
-            val stage = backStackEntry.arguments?.getString("stage")?.toIntOrNull() ?: 1
+        composable(
+            route = Routes.Seasons.route,
+            arguments = listOf(
+                navArgument("stage") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
+            )
+        ) { backStackEntry ->
+            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             SeasonsScreen(
                 stage = stage,
                 onNextStage = {
-                    navController.navigate(Routes.Seasons.createRoute(stage + 1)) {
-                        popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true }
+                    if (stage < GameState.MAX_SEASONS_LEVELS) {
+                        navController.navigate(Routes.Seasons.createRoute(stage + 1)) {
+                            popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true }
+                        }
                     }
                 },
                 onGameComplete = {
@@ -112,18 +187,50 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
 
-        // Игра 6: Караоке-читалка (5 уровней)
-        composable(Routes.Karaoke.route) { backStackEntry ->
-            val stage = backStackEntry.arguments?.getString("stage")?.toIntOrNull() ?: 1
+        // Игра 6: Караоке-читалка (20 песен, 5 уровней сложности)
+        composable(
+            route = Routes.Karaoke.route,
+            arguments = listOf(
+                navArgument("songIndex") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                },
+                navArgument("stage") {
+                    type = NavType.IntType
+                    defaultValue = 1
+                }
+            )
+        ) { backStackEntry ->
+            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
+            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
+            
             KaraokeScreen(
+                songIndex = songIndex,
                 stage = stage,
                 onNextStage = {
-                    navController.navigate(Routes.Karaoke.createRoute(stage + 1)) {
-                        popUpTo(Routes.Karaoke.createRoute(stage)) { inclusive = true }
+                    if (stage < 5) {
+                        navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) {
+                            popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true }
+                        }
+                    }
+                },
+                onNextSong = {
+                    if (songIndex < 20) {
+                        navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) {
+                            popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Routes.Menu.route) {
+                            popUpTo(Routes.Menu.route) { inclusive = true }
+                        }
                     }
                 },
                 onGameComplete = {
@@ -131,7 +238,11 @@ fun VasilisinaAzbukaApp() {
                         popUpTo(Routes.Menu.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.Menu.route)
+                    }
+                }
             )
         }
     }
@@ -139,33 +250,23 @@ fun VasilisinaAzbukaApp() {
 
 /**
  * Экран главного меню с выбором игр
+ * Отображает все доступные игры с прогрессом и навигацией
  */
 @Composable
 fun MainMenuScreen(onGameSelected: (String) -> Unit) {
-    import androidx.compose.foundation.Image
-    import androidx.compose.foundation.background
-    import androidx.compose.foundation.clickable
-    import androidx.compose.foundation.layout.*
-    import androidx.compose.foundation.lazy.LazyColumn
-    import androidx.compose.foundation.shape.RoundedCornerShape
-    import androidx.compose.material3.*
-    import androidx.compose.ui.Alignment
-    import androidx.compose.ui.Modifier
-    import androidx.compose.ui.draw.clip
-    import androidx.compose.ui.layout.ContentScale
-    import androidx.compose.ui.res.painterResource
-    import androidx.compose.ui.text.font.FontWeight
-    import androidx.compose.ui.text.style.TextAlign
-    import androidx.compose.ui.unit.dp
-    import androidx.compose.ui.unit.sp
-    import com.vasilisinaazbuka.navigation.Routes
-    import com.vasilisinaazbuka.ui.theme.*
+    // Получаем прогресс по всем играм
+    val gameProgress = remember {
+        try {
+            GameState.getOverallProgress()
+        } catch (e: IllegalStateException) {
+            emptyMap()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                // Фоновое изображение с полупрозрачным слоем
                 FairyBlue.copy(alpha = 0.1f)
             )
     ) {
@@ -176,6 +277,13 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             alpha = 0.3f
+        )
+
+        // Полупрозрачный белый слой для читаемости
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.4f))
         )
 
         LazyColumn(
@@ -204,24 +312,78 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Список игр
+                // Список игр с прогрессом
                 val games = listOf(
-                    Triple("🎨", "Раскраска", Routes.Coloring.createRoute(1)),
-                    Triple("🎵", "Музыкальная шкатулка", Routes.MusicBox.route),
-                    Triple("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1)),
-                    Triple("🍎", "Накорми Кузю", Routes.FeedKuzya.createRoute(1)),
-                    Triple("❄️", "Времена года", Routes.Seasons.createRoute(1)),
-                    Triple("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1))
+                    GameMenuItem(
+                        emoji = "🎨",
+                        name = "Раскраска",
+                        route = Routes.Coloring.createRoute(1),
+                        gameId = "coloring",
+                        description = "Раскрась картинки из разных городов"
+                    ),
+                    GameMenuItem(
+                        emoji = "🎵",
+                        name = "Музыкальная шкатулка",
+                        route = Routes.MusicBox.route,
+                        gameId = "musicbox",
+                        description = "Слушай, повторяй и угадывай звуки"
+                    ),
+                    GameMenuItem(
+                        emoji = "🧩",
+                        name = "Собери картинку",
+                        route = Routes.MemoryPuzzle.createRoute(1),
+                        gameId = "memorypuzzle",
+                        description = "Запомни и собери пазл"
+                    ),
+                    GameMenuItem(
+                        emoji = "🍎",
+                        name = "Накорми Кузю",
+                        route = Routes.FeedKuzya.createRoute(1),
+                        gameId = "feedkuzya",
+                        description = "Посчитай продукты для Кузи"
+                    ),
+                    GameMenuItem(
+                        emoji = "❄️",
+                        name = "Времена года",
+                        route = Routes.Seasons.createRoute(1),
+                        gameId = "seasons",
+                        description = "Разложи предметы по сезонам"
+                    ),
+                    GameMenuItem(
+                        emoji = "📖",
+                        name = "Караоке-читалка",
+                        route = Routes.Karaoke.createRoute(1),
+                        gameId = "karaoke",
+                        description = "Пой и читай по слогам"
+                    )
                 )
 
-                games.forEach { (emoji, name, route) ->
+                games.forEach { game ->
+                    val progress = gameProgress[game.gameId]
+                    val completedLevels = progress?.first ?: 0
+                    val totalLevels = progress?.second ?: when (game.gameId) {
+                        "coloring" -> GameState.MAX_COLORING_LEVELS
+                        "musicbox" -> GameState.MAX_MUSICBOX_LEVELS
+                        "memorypuzzle" -> GameState.MAX_MEMORYPUZZLE_LEVELS
+                        "feedkuzya" -> GameState.MAX_FEEDKUZYA_LEVELS
+                        "seasons" -> GameState.MAX_SEASONS_LEVELS
+                        "karaoke" -> GameState.MAX_KARAOKE_LEVELS
+                        else -> 5
+                    }
+                    val isCompleted = completedLevels >= totalLevels
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
-                            .clickable { onGameSelected(route) },
+                            .clickable { onGameSelected(game.route) },
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isCompleted) 
+                                FairyGreen.copy(alpha = 0.1f) 
+                            else 
+                                Color.White
+                        ),
                         elevation = CardDefaults.cardElevation(8.dp)
                     ) {
                         Row(
@@ -230,18 +392,118 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Эмодзи игры
                             Text(
-                                text = emoji,
+                                text = game.emoji,
                                 fontSize = 40.sp
                             )
 
                             Spacer(modifier = Modifier.width(16.dp))
 
+                            // Информация об игре
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = game.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isCompleted) FairyGreen else FairyBlue
+                                )
+
+                                Text(
+                                    text = game.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                // Прогресс игры
+                                if (totalLevels > 1) {
+                                    LinearProgressIndicator(
+                                        progress = { 
+                                            if (totalLevels > 0) completedLevels.toFloat() / totalLevels 
+                                            else 0f 
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(6.dp)
+                                            .clip(RoundedCornerShape(3.dp)),
+                                        color = if (isCompleted) FairyGreen else FairyGold,
+                                        trackColor = Color.Gray.copy(alpha = 0.2f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(2.dp))
+
+                                    Text(
+                                        text = "$completedLevels из $totalLevels уровней",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isCompleted) FairyGreen else Color.Gray
+                                    )
+                                }
+                            }
+
+                            // Индикатор завершения
+                            if (isCompleted) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "✅",
+                                    fontSize = 24.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Информация о персонажах
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = FairyGold.copy(alpha = 0.2f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "👧", fontSize = 32.sp)
                             Text(
-                                text = name,
-                                style = MaterialTheme.typography.titleLarge,
+                                text = "Василиса",
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = FairyGreen
+                                color = FairyBlue
+                            )
+                            Text(
+                                text = "Твой учитель",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "🐱", fontSize = 32.sp)
+                            Text(
+                                text = "Кузя",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = FairyPink
+                            )
+                            Text(
+                                text = "Твой друг",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
                             )
                         }
                     }
@@ -250,3 +512,14 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
         }
     }
 }
+
+/**
+ * Модель данных для элемента меню игры
+ */
+private data class GameMenuItem(
+    val emoji: String,
+    val name: String,
+    val route: String,
+    val gameId: String,
+    val description: String
+)
