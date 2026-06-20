@@ -12,13 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +20,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.ui.theme.*
@@ -64,7 +59,6 @@ fun StageProgressIndicator(
         label = "stageProgress"
     )
 
-    // Анимация появления точек
     var dotsVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(maxStages) {
@@ -74,7 +68,6 @@ fun StageProgressIndicator(
     }
 
     if (compact) {
-        // Компактный режим — только прогресс-бар с точками в одну строку
         CompactProgressIndicator(
             currentStage = currentStage,
             maxStages = maxStages,
@@ -84,7 +77,6 @@ fun StageProgressIndicator(
             modifier = modifier
         )
     } else {
-        // Полный режим с текстом
         FullProgressIndicator(
             currentStage = currentStage,
             maxStages = maxStages,
@@ -97,9 +89,8 @@ fun StageProgressIndicator(
     }
 }
 
-/**
- * Полный индикатор прогресса (для вертикального расположения в ландшафте)
- */
+// ==================== FullProgressIndicator ====================
+
 @Composable
 private fun FullProgressIndicator(
     currentStage: Int,
@@ -114,7 +105,6 @@ private fun FullProgressIndicator(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Текст с номером этапа
         Text(
             text = "$label $currentStage из $maxStages",
             style = MaterialTheme.typography.bodySmall,
@@ -125,7 +115,6 @@ private fun FullProgressIndicator(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Прогресс-бар
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
@@ -138,19 +127,18 @@ private fun FullProgressIndicator(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Точки-индикаторы этапов
         StageDots(
             currentStage = currentStage,
             maxStages = maxStages,
             showNumbers = showNumbers,
-            visible = dotsVisible
+            visible = dotsVisible,
+            dotSize = 12.dp
         )
     }
 }
 
-/**
- * Компактный индикатор прогресса (всё в одной строке)
- */
+// ==================== CompactProgressIndicator ====================
+
 @Composable
 private fun CompactProgressIndicator(
     currentStage: Int,
@@ -164,7 +152,6 @@ private fun CompactProgressIndicator(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Прогресс-бар
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
@@ -177,7 +164,6 @@ private fun CompactProgressIndicator(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Точки-индикаторы
         StageDots(
             currentStage = currentStage,
             maxStages = maxStages,
@@ -188,7 +174,6 @@ private fun CompactProgressIndicator(
 
         Spacer(modifier = Modifier.width(4.dp))
 
-        // Краткий текст
         Text(
             text = "$currentStage/$maxStages",
             style = MaterialTheme.typography.labelSmall,
@@ -200,16 +185,15 @@ private fun CompactProgressIndicator(
     }
 }
 
-/**
- * Точки-индикаторы этапов с анимацией
- */
+// ==================== StageDots ====================
+
 @Composable
 private fun StageDots(
     currentStage: Int,
     maxStages: Int,
     showNumbers: Boolean,
     visible: Boolean,
-    dotSize: androidx.compose.ui.unit.Dp = 12.dp
+    dotSize: Dp = 12.dp
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -219,9 +203,7 @@ private fun StageDots(
             val stageNumber = index + 1
             val isCompleted = stageNumber < currentStage
             val isCurrent = stageNumber == currentStage
-            val isFuture = stageNumber > currentStage
 
-            // Анимация появления
             var dotVisible by remember { mutableStateOf(false) }
 
             LaunchedEffect(visible) {
@@ -231,7 +213,6 @@ private fun StageDots(
                 }
             }
 
-            // Анимация цвета
             val dotColor by animateColorAsState(
                 targetValue = when {
                     isCompleted -> FairyGreen
@@ -239,14 +220,13 @@ private fun StageDots(
                     else -> Color.Gray.copy(alpha = 0.3f)
                 },
                 animationSpec = tween(300),
-                label = "dotColor"
+                label = "dotColor_$index"
             )
 
-            // Анимация масштаба для текущей точки
             val dotScale by animateFloatAsState(
                 targetValue = if (isCurrent && dotVisible) 1.4f else 1f,
                 animationSpec = spring(dampingRatio = 0.4f, stiffness = 200f),
-                label = "dotScale"
+                label = "dotScale_$index"
             )
 
             if (dotVisible) {
@@ -274,7 +254,6 @@ private fun StageDots(
                         )
                     }
 
-                    // Галочка для завершённых этапов
                     if (isCompleted && dotSize >= 12.dp) {
                         Text(
                             text = "✓",
@@ -289,9 +268,8 @@ private fun StageDots(
     }
 }
 
-/**
- * Вертикальный индикатор прогресса (для боковой панели в ландшафте)
- */
+// ==================== VerticalStageProgress ====================
+
 @Composable
 fun VerticalStageProgress(
     currentStage: Int,
@@ -314,19 +292,19 @@ fun VerticalStageProgress(
                     else -> Color.Gray.copy(alpha = 0.3f)
                 },
                 animationSpec = tween(300),
-                label = "verticalDotColor"
+                label = "vColor_$i"
             )
 
-            val scale by animateFloatAsState(
+            val dotScale by animateFloatAsState(
                 targetValue = if (isCurrent) 1.3f else 1f,
                 animationSpec = spring(dampingRatio = 0.4f),
-                label = "verticalDotScale"
+                label = "vScale_$i"
             )
 
             Box(
                 modifier = Modifier
                     .size(14.dp)
-                    .scale(scale)
+                    .scale(dotScale)
                     .clip(CircleShape)
                     .background(color)
                     .then(
@@ -335,7 +313,7 @@ fun VerticalStageProgress(
                         } else {
                             Modifier
                         }
-                    },
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
@@ -355,7 +333,6 @@ fun VerticalStageProgress(
                 }
             }
 
-            // Соединительная линия между точками
             if (i > 1) {
                 Box(
                     modifier = Modifier
@@ -371,9 +348,8 @@ fun VerticalStageProgress(
     }
 }
 
-/**
- * Горизонтальный прогресс с иконками этапов
- */
+// ==================== ThemedStageProgress ====================
+
 @Composable
 fun ThemedStageProgress(
     currentStage: Int,
@@ -385,7 +361,6 @@ fun ThemedStageProgress(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Текст
         Text(
             text = "Этап $currentStage из $maxStages",
             style = MaterialTheme.typography.bodySmall,
@@ -395,10 +370,9 @@ fun ThemedStageProgress(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Прогресс-бар
         LinearProgressIndicator(
-            progress = { 
-                if (maxStages > 0) currentStage.toFloat() / maxStages else 0f 
+            progress = {
+                if (maxStages > 0) currentStage.toFloat() / maxStages.toFloat() else 0f
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -410,29 +384,24 @@ fun ThemedStageProgress(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Иконки этапов
         if (stageIcons.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 stageIcons.forEachIndexed { index, icon ->
-                    val stageNumber = index + 1
-                    val isCompleted = stageNumber < currentStage
-                    val isCurrent = stageNumber == currentStage
+                    val isCurrent = (index + 1) == currentStage
 
                     Text(
                         text = icon,
                         fontSize = if (isCurrent) 24.sp else 18.sp,
-                        modifier = Modifier
-                            .then(
-                                if (isCurrent) Modifier.scale(1.2f) else Modifier
-                            )
+                        modifier = Modifier.then(
+                            if (isCurrent) Modifier.scale(1.2f) else Modifier
+                        )
                     )
                 }
             }
         } else {
-            // Точки по умолчанию
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
