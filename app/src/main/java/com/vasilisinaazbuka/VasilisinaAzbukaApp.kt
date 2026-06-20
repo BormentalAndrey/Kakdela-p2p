@@ -1,20 +1,29 @@
 package com.vasilisinaazbuka
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
@@ -27,8 +36,9 @@ import com.vasilisinaazbuka.navigation.Routes
 import com.vasilisinaazbuka.ui.theme.*
 
 /**
- * Корневой композабл приложения с навигацией
+ * Корневой композабл приложения «В гостях у Василисы»
  * Определяет все маршруты и связывает их с экранами игр
+ * Оптимизирован для ландшафтной ориентации
  */
 @Composable
 fun VasilisinaAzbukaApp() {
@@ -129,7 +139,7 @@ fun VasilisinaAzbukaApp() {
             )
         }
 
-        // Игра 4: Накорми Кузю (5 уровней)
+        // Игра 4: Накорми Кнопу (тамагочи, 5 уровней)
         composable(
             route = Routes.FeedKuzya.route,
             arguments = listOf(
@@ -195,7 +205,7 @@ fun VasilisinaAzbukaApp() {
             )
         }
 
-        // Игра 6: Караоке-читалка (20 песен, 5 уровней сложности)
+        // Игра 6: Караоке-читалка (20 песен)
         composable(
             route = Routes.Karaoke.route,
             arguments = listOf(
@@ -211,7 +221,7 @@ fun VasilisinaAzbukaApp() {
         ) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            
+
             KaraokeScreen(
                 songIndex = songIndex,
                 stage = stage,
@@ -250,11 +260,10 @@ fun VasilisinaAzbukaApp() {
 
 /**
  * Экран главного меню с выбором игр
- * Отображает все доступные игры с прогрессом и навигацией
+ * Ландшафтный layout: персонажи слева, сетка игр справа
  */
 @Composable
 fun MainMenuScreen(onGameSelected: (String) -> Unit) {
-    // Получаем прогресс по всем играм
     val gameProgress = remember {
         try {
             GameState.getOverallProgress()
@@ -267,7 +276,13 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(
-                FairyBlue.copy(alpha = 0.1f)
+                Brush.radialGradient(
+                    colors = listOf(
+                        FairyBlue.copy(alpha = 0.15f),
+                        FairyPurple.copy(alpha = 0.05f),
+                        FairyBlue.copy(alpha = 0.1f)
+                    )
+                )
             )
     ) {
         // Фоновое изображение
@@ -276,238 +291,340 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
             contentDescription = "Фон",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            alpha = 0.3f
+            alpha = 0.25f
         )
 
-        // Полупрозрачный белый слой для читаемости
+        // Полупрозрачный слой
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.4f))
+                .background(Color.White.copy(alpha = 0.35f))
         )
 
-        LazyColumn(
+        // Основной горизонтальный layout
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            item {
+            // Левая панель — заголовок и персонажи
+            Column(
+                modifier = Modifier
+                    .weight(0.32f)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 // Заголовок
-                Text(
-                    text = "Василисина азбука",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = FairyGold,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Путешествие по России",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = FairyPurple,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Список игр с прогрессом
-                val games = listOf(
-                    GameMenuItem(
-                        emoji = "🎨",
-                        name = "Раскраска",
-                        route = Routes.Coloring.createRoute(1),
-                        gameId = "coloring",
-                        description = "Раскрась картинки из разных городов"
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = FairyGold.copy(alpha = 0.15f)
                     ),
-                    GameMenuItem(
-                        emoji = "🎵",
-                        name = "Музыкальная шкатулка",
-                        route = Routes.MusicBox.route,
-                        gameId = "musicbox",
-                        description = "Слушай, повторяй и угадывай звуки"
-                    ),
-                    GameMenuItem(
-                        emoji = "🧩",
-                        name = "Собери картинку",
-                        route = Routes.MemoryPuzzle.createRoute(1),
-                        gameId = "memorypuzzle",
-                        description = "Запомни и собери пазл"
-                    ),
-                    GameMenuItem(
-                        emoji = "🍎",
-                        name = "Накорми Кузю",
-                        route = Routes.FeedKuzya.createRoute(1),
-                        gameId = "feedkuzya",
-                        description = "Посчитай продукты для Кузи"
-                    ),
-                    GameMenuItem(
-                        emoji = "❄️",
-                        name = "Времена года",
-                        route = Routes.Seasons.createRoute(1),
-                        gameId = "seasons",
-                        description = "Разложи предметы по сезонам"
-                    ),
-                    GameMenuItem(
-                        emoji = "📖",
-                        name = "Караоке-читалка",
-                        route = Routes.Karaoke.createRoute(1),
-                        gameId = "karaoke",
-                        description = "Пой и читай по слогам"
-                    )
-                )
-
-                games.forEach { game ->
-                    val progress = gameProgress[game.gameId]
-                    val completedLevels = progress?.first ?: 0
-                    val totalLevels = progress?.second ?: when (game.gameId) {
-                        "coloring" -> GameState.MAX_COLORING_LEVELS
-                        "musicbox" -> GameState.MAX_MUSICBOX_LEVELS
-                        "memorypuzzle" -> GameState.MAX_MEMORYPUZZLE_LEVELS
-                        "feedkuzya" -> GameState.MAX_FEEDKUZYA_LEVELS
-                        "seasons" -> GameState.MAX_SEASONS_LEVELS
-                        "karaoke" -> GameState.MAX_KARAOKE_LEVELS
-                        else -> 5
-                    }
-                    val isCompleted = completedLevels >= totalLevels
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable { onGameSelected(game.route) },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isCompleted) 
-                                FairyGreen.copy(alpha = 0.1f) 
-                            else 
-                                Color.White
-                        ),
-                        elevation = CardDefaults.cardElevation(8.dp)
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Text(
+                            text = "В гостях у Василисы",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = FairyGold,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 28.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Путешествие по России",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = FairyPurple,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Персонажи
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Василиса
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(6.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Эмодзи игры
-                            Text(
-                                text = game.emoji,
-                                fontSize = 40.sp
-                            )
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            // Информация об игре
-                            Column(
-                                modifier = Modifier.weight(1f)
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.radialGradient(
+                                            colors = listOf(
+                                                FairyBlue.copy(alpha = 0.3f),
+                                                FairyBlue.copy(alpha = 0.1f)
+                                            )
+                                        )
+                                    )
+                                    .border(3.dp, FairyBlue, CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = game.name,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isCompleted) FairyGreen else FairyBlue
-                                )
-
-                                Text(
-                                    text = game.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Gray
-                                )
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
-                                // Прогресс игры
-                                if (totalLevels > 1) {
-                                    LinearProgressIndicator(
-                                        progress = { 
-                                            if (totalLevels > 0) completedLevels.toFloat() / totalLevels 
-                                            else 0f 
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(6.dp)
-                                            .clip(RoundedCornerShape(3.dp)),
-                                        color = if (isCompleted) FairyGreen else FairyGold,
-                                        trackColor = Color.Gray.copy(alpha = 0.2f)
-                                    )
-
-                                    Spacer(modifier = Modifier.height(2.dp))
-
-                                    Text(
-                                        text = "$completedLevels из $totalLevels уровней",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (isCompleted) FairyGreen else Color.Gray
-                                    )
-                                }
+                                Text(text = "👧", fontSize = 36.sp)
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Василиса",
+                                fontWeight = FontWeight.Bold,
+                                color = FairyBlue,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Твой учитель",
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
 
-                            // Индикатор завершения
-                            if (isCompleted) {
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "✅",
-                                    fontSize = 24.sp
-                                )
+                    // Кнопа
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(6.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.radialGradient(
+                                            colors = listOf(
+                                                FairyPink.copy(alpha = 0.3f),
+                                                FairyPink.copy(alpha = 0.1f)
+                                            )
+                                        )
+                                    )
+                                    .border(3.dp, FairyPink, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🐱", fontSize = 36.sp)
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Кнопа",
+                                fontWeight = FontWeight.Bold,
+                                color = FairyPink,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Твой друг",
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Информация о персонажах
+                // Общий прогресс
+                val totalStars = GameState.getOverallStars()
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = FairyGold.copy(alpha = 0.2f)
+                        containerColor = FairyGold.copy(alpha = 0.1f)
                     )
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "👧", fontSize = 32.sp)
-                            Text(
-                                text = "Василиса",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = FairyBlue
-                            )
-                            Text(
-                                text = "Твой учитель",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                        }
+                        Text(text = "⭐", fontSize = 24.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Всего звёзд: $totalStars",
+                            fontWeight = FontWeight.Bold,
+                            color = FairyGold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "🐱", fontSize = 32.sp)
-                            Text(
-                                text = "Кузя",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = FairyPink
-                            )
-                            Text(
-                                text = "Твой друг",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
+            Spacer(modifier = Modifier.width(20.dp))
+
+            // Правая часть — сетка игр 2×3
+            Column(
+                modifier = Modifier
+                    .weight(0.68f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                val games = listOf(
+                    GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки из разных городов России"),
+                    GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай, повторяй и угадывай звуки"),
+                    GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Запомни и собери пазл по памяти"),
+                    GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Ухаживай за котом-тамагочи"),
+                    GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Разложи предметы по сезонам"),
+                    GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай по слогам с Василисой")
+                )
+
+                // Сетка 2 строки × 3 столбца
+                for (row in 0..1) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        for (col in 0..2) {
+                            val index = row * 3 + col
+                            if (index < games.size) {
+                                val game = games[index]
+                                val progress = gameProgress[game.gameId]
+                                val completed = progress?.first ?: 0
+                                val total = progress?.second ?: when (game.gameId) {
+                                    "coloring" -> GameState.MAX_COLORING_LEVELS
+                                    "musicbox" -> GameState.MAX_MUSICBOX_LEVELS
+                                    "memorypuzzle" -> GameState.MAX_MEMORYPUZZLE_LEVELS
+                                    "feedkuzya" -> GameState.MAX_FEEDKUZYA_LEVELS
+                                    "seasons" -> GameState.MAX_SEASONS_LEVELS
+                                    "karaoke" -> GameState.MAX_KARAOKE_LEVELS
+                                    else -> 5
+                                }
+                                val isCompleted = completed >= total
+
+                                GameCard(
+                                    game = game,
+                                    completed = completed,
+                                    total = total,
+                                    isCompleted = isCompleted,
+                                    onClick = { onGameSelected(game.route) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Карточка игры для главного меню
+ */
+@Composable
+private fun GameCard(
+    game: GameMenuItem,
+    completed: Int,
+    total: Int,
+    isCompleted: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isCompleted) 1.03f else 1f,
+        animationSpec = spring(dampingRatio = 0.5f),
+        label = "cardScale"
+    )
+
+    Card(
+        modifier = modifier
+            .aspectRatio(1.1f)
+            .scale(scale)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isCompleted) FairyGreen.copy(alpha = 0.08f) else Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isCompleted) 4.dp else 6.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Иконка игры
+            Text(
+                text = game.emoji,
+                fontSize = 38.sp
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Название игры
+            Text(
+                text = game.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = if (isCompleted) FairyGreen else FairyBlue,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Описание
+            Text(
+                text = game.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                fontSize = 10.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Прогресс
+            if (total > 1) {
+                LinearProgressIndicator(
+                    progress = { completed.toFloat() / total },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = if (isCompleted) FairyGreen else FairyGold,
+                    trackColor = Color.Gray.copy(alpha = 0.15f)
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = "$completed/$total",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isCompleted) FairyGreen else Color.Gray,
+                    fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+
+            // Индикатор завершения
+            if (isCompleted) {
+                Text(
+                    text = "✅",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
         }
     }
