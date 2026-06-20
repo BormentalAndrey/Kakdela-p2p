@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.vasilisinaazbuka.data.GameState
 import com.vasilisinaazbuka.games.*
 import com.vasilisinaazbuka.navigation.Routes
 import com.vasilisinaazbuka.ui.theme.*
@@ -285,7 +286,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                 )
             )
     ) {
-        // Фоновое изображение
         Image(
             painter = painterResource(R.drawable.bg_level_menu),
             contentDescription = "Фон",
@@ -294,21 +294,19 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
             alpha = 0.25f
         )
 
-        // Полупрозрачный слой
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White.copy(alpha = 0.35f))
         )
 
-        // Основной горизонтальный layout
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Левая панель — заголовок и персонажи
+            // Левая панель
             Column(
                 modifier = Modifier
                     .weight(0.32f)
@@ -316,13 +314,10 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Заголовок
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = FairyGold.copy(alpha = 0.15f)
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(
@@ -349,12 +344,10 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Персонажи
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Василиса
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -370,10 +363,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                                     .clip(CircleShape)
                                     .background(
                                         Brush.radialGradient(
-                                            colors = listOf(
-                                                FairyBlue.copy(alpha = 0.3f),
-                                                FairyBlue.copy(alpha = 0.1f)
-                                            )
+                                            colors = listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f))
                                         )
                                     )
                                     .border(3.dp, FairyBlue, CircleShape),
@@ -382,21 +372,11 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                                 Text(text = "👧", fontSize = 36.sp)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Василиса",
-                                fontWeight = FontWeight.Bold,
-                                color = FairyBlue,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = "Твой учитель",
-                                color = Color.Gray,
-                                fontSize = 11.sp
-                            )
+                            Text(text = "Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 14.sp)
+                            Text(text = "Твой учитель", color = Color.Gray, fontSize = 11.sp)
                         }
                     }
 
-                    // Кнопа
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -412,10 +392,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                                     .clip(CircleShape)
                                     .background(
                                         Brush.radialGradient(
-                                            colors = listOf(
-                                                FairyPink.copy(alpha = 0.3f),
-                                                FairyPink.copy(alpha = 0.1f)
-                                            )
+                                            colors = listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f))
                                         )
                                     )
                                     .border(3.dp, FairyPink, CircleShape),
@@ -424,31 +401,19 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                                 Text(text = "🐱", fontSize = 36.sp)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Кнопа",
-                                fontWeight = FontWeight.Bold,
-                                color = FairyPink,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = "Твой друг",
-                                color = Color.Gray,
-                                fontSize = 11.sp
-                            )
+                            Text(text = "Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 14.sp)
+                            Text(text = "Твой друг", color = Color.Gray, fontSize = 11.sp)
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Общий прогресс
                 val totalStars = GameState.getOverallStars()
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = FairyGold.copy(alpha = 0.1f)
-                    )
+                    colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -484,7 +449,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                     GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай по слогам с Василисой")
                 )
 
-                // Сетка 2 строки × 3 столбца
                 for (row in 0..1) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -524,9 +488,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     }
 }
 
-/**
- * Карточка игры для главного меню
- */
 @Composable
 private fun GameCard(
     game: GameMenuItem,
@@ -562,15 +523,8 @@ private fun GameCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Иконка игры
-            Text(
-                text = game.emoji,
-                fontSize = 38.sp
-            )
-
+            Text(text = game.emoji, fontSize = 38.sp)
             Spacer(modifier = Modifier.height(6.dp))
-
-            // Название игры
             Text(
                 text = game.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -580,10 +534,7 @@ private fun GameCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
             Spacer(modifier = Modifier.height(2.dp))
-
-            // Описание
             Text(
                 text = game.description,
                 style = MaterialTheme.typography.bodySmall,
@@ -593,13 +544,11 @@ private fun GameCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Прогресс
             if (total > 1) {
                 LinearProgressIndicator(
-                    progress = { completed.toFloat() / total },
+                    progress = completed.toFloat() / total.toFloat(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(5.dp)
@@ -607,9 +556,7 @@ private fun GameCard(
                     color = if (isCompleted) FairyGreen else FairyGold,
                     trackColor = Color.Gray.copy(alpha = 0.15f)
                 )
-
                 Spacer(modifier = Modifier.height(2.dp))
-
                 Text(
                     text = "$completed/$total",
                     style = MaterialTheme.typography.labelSmall,
@@ -618,21 +565,13 @@ private fun GameCard(
                 )
             }
 
-            // Индикатор завершения
             if (isCompleted) {
-                Text(
-                    text = "✅",
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                Text(text = "✅", fontSize = 16.sp, modifier = Modifier.padding(top = 2.dp))
             }
         }
     }
 }
 
-/**
- * Модель данных для элемента меню игры
- */
 private data class GameMenuItem(
     val emoji: String,
     val name: String,
