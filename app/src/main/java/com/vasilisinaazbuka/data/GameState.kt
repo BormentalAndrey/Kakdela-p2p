@@ -1,4 +1,4 @@
-package com.vasilisinaazbuka
+package com.vasilisinaazbuka.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -30,11 +30,11 @@ object GameState {
 
     // Максимальное количество уровней для каждой игры
     const val MAX_COLORING_LEVELS = 5
-    const val MAX_MUSICBOX_LEVELS = 1      // Один уровень, но с тремя режимами
+    const val MAX_MUSICBOX_LEVELS = 1
     const val MAX_MEMORYPUZZLE_LEVELS = 5
     const val MAX_FEEDKUZYA_LEVELS = 5
     const val MAX_SEASONS_LEVELS = 4
-    const val MAX_KARAOKE_LEVELS = 20      // 20 песен в караоке
+    const val MAX_KARAOKE_LEVELS = 20
 
     // Ключи для SharedPreferences
     private object PrefKeys {
@@ -57,11 +57,7 @@ object GameState {
         if (!isInitialized) {
             prefs = context.getSharedPreferences("vasilisina_azbuka_progress", Context.MODE_PRIVATE)
             isInitialized = true
-            
-            // Проверяем версию данных и выполняем миграцию при необходимости
             checkDataMigration()
-            
-            // Обновляем ежедневный бонус
             updateDailyStreak()
         }
     }
@@ -88,34 +84,27 @@ object GameState {
         checkInitialized()
         val editor = prefs.edit()
 
-        // Сохраняем факт прохождения уровня
         editor.putBoolean("${gameId}_level_$stage", true)
 
-        // Сохраняем количество звёзд за уровень (максимальное из попыток)
         val existingStars = prefs.getInt("${gameId}_stars_level_$stage", 0)
         editor.putInt("${gameId}_stars_level_$stage", maxOf(existingStars, stars))
 
-        // Обновляем общее количество звёзд
         val currentStars = prefs.getInt("${gameId}_stars", 0)
         if (stars > existingStars) {
             editor.putInt("${gameId}_stars", currentStars + (stars - existingStars))
         }
 
-        // Обновляем максимальный пройденный уровень
         val maxLevel = prefs.getInt("${gameId}_max_level", 0)
         if (stage > maxLevel) {
             editor.putInt("${gameId}_max_level", stage)
         }
 
-        // Обновляем общую статистику
         val totalGamesPlayed = prefs.getInt(PrefKeys.TOTAL_GAMES_PLAYED, 0)
         editor.putInt(PrefKeys.TOTAL_GAMES_PLAYED, totalGamesPlayed + 1)
 
-        // Обновляем общее количество звёзд во всех играх
         val totalStars = prefs.getInt(PrefKeys.TOTAL_STARS, 0)
         editor.putInt(PrefKeys.TOTAL_STARS, totalStars + stars - existingStars)
 
-        // Проверяем достижения
         checkAchievements(editor)
 
         editor.apply()
@@ -197,7 +186,6 @@ object GameState {
         editor.remove("${gameId}_stars")
         editor.remove("${gameId}_max_level")
 
-        // Удаляем все записи об уровнях
         val maxLevels = getMaxLevels(gameId)
         for (i in 1..maxLevels) {
             editor.remove("${gameId}_level_$i")
@@ -213,7 +201,6 @@ object GameState {
     fun resetAllProgress() {
         checkInitialized()
         prefs.edit().clear().apply()
-        // Перезаписываем версию данных
         prefs.edit().putInt(PrefKeys.DATA_VERSION, DATA_VERSION).apply()
     }
 
@@ -224,18 +211,12 @@ object GameState {
         checkInitialized()
         val games = listOf("coloring", "musicbox", "memorypuzzle", "feedkuzya", "seasons", "karaoke")
         val maxLevels = listOf(
-            MAX_COLORING_LEVELS,
-            MAX_MUSICBOX_LEVELS,
-            MAX_MEMORYPUZZLE_LEVELS,
-            MAX_FEEDKUZYA_LEVELS,
-            MAX_SEASONS_LEVELS,
-            MAX_KARAOKE_LEVELS
+            MAX_COLORING_LEVELS, MAX_MUSICBOX_LEVELS, MAX_MEMORYPUZZLE_LEVELS,
+            MAX_FEEDKUZYA_LEVELS, MAX_SEASONS_LEVELS, MAX_KARAOKE_LEVELS
         )
 
         return games.zip(maxLevels).associate { (gameId, maxLevel) ->
-            val completed = (1..maxLevel).count { level ->
-                isLevelCompleted(gameId, level)
-            }
+            val completed = (1..maxLevel).count { level -> isLevelCompleted(gameId, level) }
             gameId to Pair(completed, maxLevel)
         }
     }
@@ -249,7 +230,7 @@ object GameState {
         val completed = (1..maxLevels).count { level -> isLevelCompleted(gameId, level) }
         val totalStars = getTotalStars(gameId)
         val maxPossibleStars = maxLevels * 3
-        
+
         return GameStats(
             gameId = gameId,
             completedLevels = completed,
@@ -271,7 +252,7 @@ object GameState {
             totalStars = prefs.getInt(PrefKeys.TOTAL_STARS, 0),
             dailyStreak = prefs.getInt(PrefKeys.DAILY_STREAK, 0),
             gamesCompleted = listOf(
-                "coloring", "musicbox", "memorypuzzle", 
+                "coloring", "musicbox", "memorypuzzle",
                 "feedkuzya", "seasons", "karaoke"
             ).count { isGameCompleted(it) },
             totalGames = 6
@@ -280,33 +261,21 @@ object GameState {
 
     // ==================== Настройки ====================
 
-    /**
-     * Установить громкость музыки
-     */
     fun setMusicEnabled(enabled: Boolean) {
         checkInitialized()
         prefs.edit().putBoolean(PrefKeys.SETTINGS_MUSIC, enabled).apply()
     }
 
-    /**
-     * Проверить, включена ли музыка
-     */
     fun isMusicEnabled(): Boolean {
         checkInitialized()
         return prefs.getBoolean(PrefKeys.SETTINGS_MUSIC, true)
     }
 
-    /**
-     * Установить звуковые эффекты
-     */
     fun setSfxEnabled(enabled: Boolean) {
         checkInitialized()
         prefs.edit().putBoolean(PrefKeys.SETTINGS_SFX, enabled).apply()
     }
 
-    /**
-     * Проверить, включены ли звуковые эффекты
-     */
     fun isSfxEnabled(): Boolean {
         checkInitialized()
         return prefs.getBoolean(PrefKeys.SETTINGS_SFX, true)
@@ -314,9 +283,6 @@ object GameState {
 
     // ==================== Достижения ====================
 
-    /**
-     * Получить список всех достижений
-     */
     fun getAchievements(): List<Achievement> {
         checkInitialized()
         val json = prefs.getString(PrefKeys.ACHIEVEMENTS, null) ?: return Achievement.defaultAchievements
@@ -327,9 +293,6 @@ object GameState {
         }
     }
 
-    /**
-     * Проверить и обновить достижения
-     */
     private fun checkAchievements(editor: SharedPreferences.Editor) {
         val achievements = getAchievements().toMutableList()
         var updated = false
@@ -372,50 +335,38 @@ object GameState {
 
     // ==================== Ежедневные бонусы ====================
 
-    /**
-     * Обновить ежедневную серию
-     */
     private fun updateDailyStreak() {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val lastLogin = prefs.getString(PrefKeys.LAST_LOGIN_DATE, null)
         val currentStreak = prefs.getInt(PrefKeys.DAILY_STREAK, 0)
 
         val editor = prefs.edit()
-        
+
         if (lastLogin == null) {
-            // Первый вход
             editor.putString(PrefKeys.LAST_LOGIN_DATE, today)
             editor.putInt(PrefKeys.DAILY_STREAK, 1)
         } else if (lastLogin != today) {
             val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
                 Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)
             )
-            
+
             if (lastLogin == yesterday) {
-                // Последовательный день
                 editor.putInt(PrefKeys.DAILY_STREAK, currentStreak + 1)
             } else {
-                // Пропущенный день — сброс серии
                 editor.putInt(PrefKeys.DAILY_STREAK, 1)
             }
-            
+
             editor.putString(PrefKeys.LAST_LOGIN_DATE, today)
         }
-        
+
         editor.apply()
     }
 
-    /**
-     * Получить текущую ежедневную серию
-     */
     fun getDailyStreak(): Int {
         checkInitialized()
         return prefs.getInt(PrefKeys.DAILY_STREAK, 0)
     }
 
-    /**
-     * Проверить, можно ли получить ежедневный бонус
-     */
     fun canClaimDailyBonus(): Boolean {
         checkInitialized()
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -423,24 +374,19 @@ object GameState {
         return lastClaimDate != today
     }
 
-    /**
-     * Получить ежедневный бонус
-     */
     fun claimDailyBonus(): DailyBonus {
         checkInitialized()
         val streak = getDailyStreak()
-        val bonusStars = minOf(streak, 7) // Максимум 7 звёзд за 7-дневную серию
-        
-        // Добавляем звёзды
+        val bonusStars = minOf(streak, 7)
+
         val editor = prefs.edit()
         val totalStars = prefs.getInt(PrefKeys.TOTAL_STARS, 0)
         editor.putInt(PrefKeys.TOTAL_STARS, totalStars + bonusStars)
-        
-        // Отмечаем получение бонуса
+
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         editor.putString("daily_bonus_claim_date", today)
         editor.apply()
-        
+
         return DailyBonus(
             stars = bonusStars,
             streak = streak,
@@ -450,35 +396,21 @@ object GameState {
 
     // ==================== Миграция данных ====================
 
-    /**
-     * Проверка и выполнение миграции данных при обновлении версии
-     */
     private fun checkDataMigration() {
         val currentVersion = prefs.getInt(PrefKeys.DATA_VERSION, 0)
-        
+
         if (currentVersion < DATA_VERSION) {
-            // Выполняем миграцию с версии currentVersion до DATA_VERSION
             when {
-                currentVersion < 1 -> {
-                    // Миграция на версию 1: добавляем поддержку 20 песен в караоке
-                    migrateToV1()
-                }
+                currentVersion < 1 -> migrateToV1()
             }
-            
-            // Обновляем версию данных
             prefs.edit().putInt(PrefKeys.DATA_VERSION, DATA_VERSION).apply()
         }
     }
 
-    /**
-     * Миграция на версию 1 данных
-     */
     private fun migrateToV1() {
-        // Если есть старые данные караоке (5 уровней), конвертируем в новые (20 песен)
         val oldKaraokeMaxLevel = prefs.getInt("karaoke_max_level", 0)
         if (oldKaraokeMaxLevel > 0) {
             val editor = prefs.edit()
-            // Переносим старые уровни как пройденные песни
             for (i in 1..oldKaraokeMaxLevel) {
                 val wasCompleted = prefs.getBoolean("karaoke_level_$i", false)
                 if (wasCompleted) {
@@ -494,9 +426,6 @@ object GameState {
 
     // ==================== Вспомогательные методы ====================
 
-    /**
-     * Проверить, первый ли это запуск приложения
-     */
     fun isFirstLaunch(): Boolean {
         checkInitialized()
         val isFirst = prefs.getBoolean(PrefKeys.FIRST_LAUNCH, true)
@@ -506,17 +435,11 @@ object GameState {
         return isFirst
     }
 
-    /**
-     * Сохранить имя игрока
-     */
     fun setPlayerName(name: String) {
         checkInitialized()
         prefs.edit().putString(PrefKeys.PLAYER_NAME, name).apply()
     }
 
-    /**
-     * Получить имя игрока
-     */
     fun getPlayerName(): String {
         checkInitialized()
         return prefs.getString(PrefKeys.PLAYER_NAME, "Игрок") ?: "Игрок"
@@ -532,9 +455,6 @@ object GameState {
 
     // ==================== Модели данных ====================
 
-    /**
-     * Статистика по конкретной игре
-     */
     data class GameStats(
         val gameId: String,
         val completedLevels: Int,
@@ -545,9 +465,6 @@ object GameState {
         val starPercent: Float
     )
 
-    /**
-     * Общая статистика игрока
-     */
     data class PlayerStats(
         val totalGamesPlayed: Int,
         val totalStars: Int,
@@ -556,9 +473,6 @@ object GameState {
         val totalGames: Int
     )
 
-    /**
-     * Достижение
-     */
     data class Achievement(
         val id: String,
         val title: String,
@@ -573,20 +487,17 @@ object GameState {
                 Achievement("all_coloring", "Художник", "Пройти всю раскраску", "🎨"),
                 Achievement("all_music", "Музыкант", "Пройти музыкальную шкатулку", "🎵"),
                 Achievement("all_puzzle", "Пазломастер", "Собрать все пазлы", "🧩"),
-                Achievement("all_feeding", "Повар", "Накормить Кузю во всех уровнях", "👨‍🍳"),
+                Achievement("all_feeding", "Заботливый друг", "Накормить Кнопу во всех уровнях", "🐱"),
                 Achievement("all_seasons", "Натуралист", "Изучить все времена года", "🌍"),
                 Achievement("all_karaoke", "Певец", "Спеть все 20 песен", "🎤"),
                 Achievement("ten_stars", "Звёздный начинающий", "Собрать 10 звёзд", "⭐"),
                 Achievement("fifty_stars", "Звёздный мастер", "Собрать 50 звёзд", "🌟"),
                 Achievement("hundred_stars", "Звёздный чемпион", "Собрать 100 звёзд", "💫"),
-                Achievement("all_games", "Василисин ученик", "Пройти все игры полностью", "👸")
+                Achievement("all_games", "Почётный гость Василисы", "Пройти все игры полностью", "👸")
             )
         }
     }
 
-    /**
-     * Ежедневный бонус
-     */
     data class DailyBonus(
         val stars: Int,
         val streak: Int,
