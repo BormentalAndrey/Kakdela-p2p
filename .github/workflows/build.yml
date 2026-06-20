@@ -24,6 +24,17 @@ jobs:
       - name: Setup Gradle
         run: chmod +x gradlew
 
+      - name: Debug - показать все иконки
+        run: |
+          echo "=== Все ic_launcher файлы ==="
+          find . -name "ic_launcher*" -type f 2>/dev/null || echo "НЕ НАЙДЕНЫ!"
+          echo ""
+          echo "=== Все mipmap папки ==="
+          find . -path "*/mipmap*" -type d 2>/dev/null || echo "НЕТ ПАПОК mipmap!"
+          echo ""
+          echo "=== Содержимое res ==="
+          ls -R app/src/main/res/ 2>/dev/null || echo "НЕТ ПАПКИ res!"
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
