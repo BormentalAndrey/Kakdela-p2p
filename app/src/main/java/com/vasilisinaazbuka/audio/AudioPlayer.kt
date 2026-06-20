@@ -1,4 +1,4 @@
-package com.vasilisinaazbuka
+package com.vasilisinaazbuka.audio
 
 import android.content.Context
 import android.media.AudioAttributes
@@ -15,7 +15,7 @@ object AudioPlayer {
 
     private var soundPool: SoundPool? = null
     private var mediaPlayer: MediaPlayer? = null
-    private var context: Context? = null
+    private var appContext: Context? = null
     private val soundCache = ConcurrentHashMap<Int, Int>()
     private var isInitialized = false
     private var musicVolume = 0.7f
@@ -27,7 +27,9 @@ object AudioPlayer {
      * Инициализация аудиоплеера
      */
     fun init(context: Context) {
-        this.context = context.applicationContext
+        if (isInitialized) return
+        
+        this.appContext = context.applicationContext
 
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
@@ -50,9 +52,8 @@ object AudioPlayer {
         if (!isInitialized || !isSfxEnabled) return
 
         try {
-            // Кешируем звук, если он ещё не загружен
             val soundId = soundCache.getOrPut(soundResId) {
-                context?.let { ctx ->
+                appContext?.let { ctx ->
                     soundPool?.load(ctx, soundResId, 1) ?: 0
                 } ?: 0
             }
@@ -73,7 +74,7 @@ object AudioPlayer {
 
         try {
             stopMusic()
-            mediaPlayer = MediaPlayer.create(context, musicResId)?.apply {
+            mediaPlayer = MediaPlayer.create(appContext, musicResId)?.apply {
                 isLooping = true
                 setVolume(musicVolume, musicVolume)
                 start()
