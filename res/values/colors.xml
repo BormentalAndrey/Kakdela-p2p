@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fairy_blue">#FF4A90D9</color>
+    <color name="fairy_gold">#FFFFB74D</color>
+    <color name="fairy_green">#FF66BB6A</color>
+    <color name="fairy_purple">#FF9C27B0</color>
+    <color name="fairy_pink">#FFE91E63</color>
+    <color name="fairy_white">#FFFAFAFA</color>
+</resources>
