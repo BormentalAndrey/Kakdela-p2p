@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Василисина азбука</string>
+    <string name="game_coloring">Раскраска</string>
+    <string name="game_music_box">Музыкальная шкатулка</string>
+    <string name="game_memory_puzzle">Собери картинку</string>
+    <string name="game_feed_kuzya">Накорми Кузю</string>
+    <string name="game_seasons">Времена года</string>
+    <string name="game_karaoke">Караоке-читалка</string>
+</resources>
