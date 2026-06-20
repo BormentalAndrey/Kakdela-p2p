@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Android
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Generated
+app/build/
+app/release/
+*/build/
+
+# Keystore
+*.jks
+*.keystore
+*.p12
+*.key
+*.cer
+
+# Secrets
+secrets.properties
+google-services.json
