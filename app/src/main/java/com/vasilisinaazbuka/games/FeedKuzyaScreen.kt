@@ -543,7 +543,7 @@ fun FeedKuzyaScreen(
         if (showLevelComplete) {
             LevelComplete(
                 stars = calculateStars(kuzyaState),
-                message = "Кузя счастлив и здоров!\nУровень: ${kuzyaState.level}",
+                message = "Кнопа счастлив и здоров!\nУровень: ${kuzyaState.level}",
                 onNext = {
                     if (stage < 5) {
                         onNextStage()
@@ -575,7 +575,7 @@ private fun KuzyaHeader(kuzyaState: KuzyaState, stage: Int, coins: Int) {
         ) {
             Column {
                 Text(
-                    text = "Кузя ❤️",
+                    text = "Кнопа ❤️",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = FairyPink
@@ -731,7 +731,7 @@ private fun FoodTab(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Покорми Кузю",
+                text = "Покорми Кнопа",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = FairyPurple
@@ -768,7 +768,7 @@ private fun FoodTab(
                 colors = ButtonDefaults.buttonColors(containerColor = FairyGreen),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("🎮 Мини-игра: Накорми Кузю", fontSize = 16.sp, color = Color.White)
+                Text("🎮 Мини-игра: Накорми Кнопу", fontSize = 16.sp, color = Color.White)
             }
         }
     }
@@ -805,7 +805,7 @@ private fun GamesTab(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Игры с Кузей",
+                text = "Игры с Кнопой",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = FairyPurple
@@ -814,9 +814,9 @@ private fun GamesTab(
             Spacer(modifier = Modifier.height(8.dp))
             
             listOf(
-                Triple(MiniGameType.FISHING, "🎣 Рыбалка", "Поймай рыбку для Кузи"),
-                Triple(MiniGameType.CATCH_MOUSE, "🐭 Поймай мышку", "Помоги Кузе поймать мышей"),
-                Triple(MiniGameType.PUZZLE, "🧩 Пазл", "Собери картинку с Кузей")
+                Triple(MiniGameType.FISHING, "🎣 Рыбалка", "Поймай рыбку для Кнопы"),
+                Triple(MiniGameType.CATCH_MOUSE, "🐭 Поймай мышку", "Помоги Кнопе поймать мышей"),
+                Triple(MiniGameType.PUZZLE, "🧩 Пазл", "Собери картинку с Кнопой")
             ).forEach { (type, title, desc) ->
                 Card(
                     modifier = Modifier
@@ -854,7 +854,7 @@ private fun CareTab(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Уход за Кузей",
+                text = "Уход за Кнопой",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = FairyPurple
@@ -943,7 +943,7 @@ private fun MiniGameDialog(
         title = {
             Text(
                 text = when (gameType) {
-                    MiniGameType.FEEDING -> "Накорми Кузю"
+                    MiniGameType.FEEDING -> "Накорми Кнопу"
                     MiniGameType.FISHING -> "Рыбалка"
                     MiniGameType.CATCH_MOUSE -> "Поймай мышку"
                     MiniGameType.PUZZLE -> "Пазл"
@@ -987,7 +987,7 @@ private fun FeedingMiniGame(
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "Дай Кузе $targetFood кусочков еды!",
+            text = "Дай Кнопе $targetFood кусочков еды!",
             style = MaterialTheme.typography.titleMedium
         )
         
@@ -1164,7 +1164,7 @@ private fun PuzzleMiniGame(onComplete: (Float) -> Unit) {
     var placedPieces by remember { mutableIntStateOf(0) }
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Собери пазл с Кузей!")
+        Text(text = "Собери пазл с Кнопой!")
         Text(text = "Собрано: $placedPieces из 4")
         
         Spacer(modifier = Modifier.height(12.dp))
