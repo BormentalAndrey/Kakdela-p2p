@@ -1,7 +1,10 @@
 package com.vasilisinaazbuka
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -75,9 +78,6 @@ class MainActivity : ComponentActivity() {
         
         // Обновляем состояние Кнопы после отсутствия
         KnopaStateManager.updateAfterAbsence(applicationContext)
-        
-        // Проверяем ежедневный бонус
-        GameState.checkDailyBonus()
     }
 
     override fun onStop() {
@@ -106,64 +106,75 @@ class MainActivity : ComponentActivity() {
  */
 private object KnopaStateManager {
     
-    fun loadState(context: android.content.Context) {
+    private const val PREFS_NAME = "knopa_state"
+    private const val KEY_FIRST_LAUNCH = "first_launch"
+    private const val KEY_HUNGER = "knopa_hunger"
+    private const val KEY_HAPPINESS = "knopa_happiness"
+    private const val KEY_ENERGY = "knopa_energy"
+    private const val KEY_HEALTH = "knopa_health"
+    private const val KEY_CLEANLINESS = "knopa_cleanliness"
+    private const val KEY_COINS = "knopa_coins"
+    private const val KEY_LEVEL = "knopa_level"
+    private const val KEY_LAST_UPDATE = "knopa_last_update"
+    
+    fun loadState(context: Context) {
         try {
-            val prefs = context.getSharedPreferences("knopa_state", android.content.Context.MODE_PRIVATE)
-            val isFirstLaunch = prefs.getBoolean("first_launch", true)
+            val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val isFirstLaunch = prefs.getBoolean(KEY_FIRST_LAUNCH, true)
             
             if (isFirstLaunch) {
                 // Первый запуск — создаём начальное состояние Кнопы
                 prefs.edit()
-                    .putBoolean("first_launch", false)
-                    .putFloat("knopa_hunger", 100f)
-                    .putFloat("knopa_happiness", 100f)
-                    .putFloat("knopa_energy", 100f)
-                    .putFloat("knopa_health", 100f)
-                    .putFloat("knopa_cleanliness", 100f)
-                    .putInt("knopa_coins", 50)
-                    .putInt("knopa_level", 1)
-                    .putLong("knopa_last_update", System.currentTimeMillis())
+                    .putBoolean(KEY_FIRST_LAUNCH, false)
+                    .putFloat(KEY_HUNGER, 100f)
+                    .putFloat(KEY_HAPPINESS, 100f)
+                    .putFloat(KEY_ENERGY, 100f)
+                    .putFloat(KEY_HEALTH, 100f)
+                    .putFloat(KEY_CLEANLINESS, 100f)
+                    .putInt(KEY_COINS, 50)
+                    .putInt(KEY_LEVEL, 1)
+                    .putLong(KEY_LAST_UPDATE, System.currentTimeMillis())
                     .apply()
             }
         } catch (e: Exception) {
-            android.util.Log.e("KnopaManager", "Ошибка загрузки состояния Кнопы: ${e.message}")
+            Log.e("KnopaManager", "Ошибка загрузки состояния Кнопы: ${e.message}")
         }
     }
     
-    fun saveState(context: android.content.Context) {
+    fun saveState(context: Context) {
         try {
-            val prefs = context.getSharedPreferences("knopa_state", android.content.Context.MODE_PRIVATE)
+            val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit()
-                .putLong("knopa_last_update", System.currentTimeMillis())
+                .putLong(KEY_LAST_UPDATE, System.currentTimeMillis())
                 .apply()
         } catch (e: Exception) {
-            android.util.Log.e("KnopaManager", "Ошибка сохранения состояния Кнопы: ${e.message}")
+            Log.e("KnopaManager", "Ошибка сохранения состояния Кнопы: ${e.message}")
         }
     }
     
-    fun updateAfterAbsence(context: android.content.Context) {
+    fun updateAfterAbsence(context: Context) {
         try {
-            val prefs = context.getSharedPreferences("knopa_state", android.content.Context.MODE_PRIVATE)
-            val lastUpdate = prefs.getLong("knopa_last_update", System.currentTimeMillis())
+            val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val lastUpdate = prefs.getLong(KEY_LAST_UPDATE, System.currentTimeMillis())
             val currentTime = System.currentTimeMillis()
             val absenceMinutes = (currentTime - lastUpdate) / 60_000
             
             if (absenceMinutes > 1) {
                 // Кнопа проголодалась и заскучала за время отсутствия
-                val hungerDecrease = (absenceMinutes * 0.5f).toFloat()
-                val happinessDecrease = (absenceMinutes * 0.3f).toFloat()
+                val hungerDecrease = (absenceMinutes * 0.5f)
+                val happinessDecrease = (absenceMinutes * 0.3f)
                 
-                val currentHunger = prefs.getFloat("knopa_hunger", 100f)
-                val currentHappiness = prefs.getFloat("knopa_happiness", 100f)
+                val currentHunger = prefs.getFloat(KEY_HUNGER, 100f)
+                val currentHappiness = prefs.getFloat(KEY_HAPPINESS, 100f)
                 
                 prefs.edit()
-                    .putFloat("knopa_hunger", maxOf(0f, currentHunger - hungerDecrease))
-                    .putFloat("knopa_happiness", maxOf(0f, currentHappiness - happinessDecrease))
-                    .putLong("knopa_last_update", currentTime)
+                    .putFloat(KEY_HUNGER, maxOf(0f, currentHunger - hungerDecrease))
+                    .putFloat(KEY_HAPPINESS, maxOf(0f, currentHappiness - happinessDecrease))
+                    .putLong(KEY_LAST_UPDATE, currentTime)
                     .apply()
             }
         } catch (e: Exception) {
-            android.util.Log.e("KnopaManager", "Ошибка обновления состояния Кнопы: ${e.message}")
+            Log.e("KnopaManager", "Ошибка обновления состояния Кнопы: ${e.message}")
         }
     }
 }
@@ -177,7 +188,7 @@ private object KarFileManager {
         try {
             com.vasilisinaazbuka.games.KarFileLoader.clearCache()
         } catch (e: Exception) {
-            android.util.Log.e("KarManager", "Ошибка очистки кеша караоке: ${e.message}")
+            Log.e("KarManager", "Ошибка очистки кеша караоке: ${e.message}")
         }
     }
 }
