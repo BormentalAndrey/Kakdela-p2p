@@ -5,18 +5,12 @@
     <!-- Разрешения -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
-    <!-- Для вибрации (тамагочи) -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    
-    <!-- Для фоновой музыки -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="В гостях у Василисы"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.VasilisinaAzbuka"
         android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|navigation"
@@ -39,7 +33,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Поставщик файлов для Android 7+ -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
