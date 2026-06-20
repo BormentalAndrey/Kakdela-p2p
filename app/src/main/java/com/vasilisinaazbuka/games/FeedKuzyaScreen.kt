@@ -731,7 +731,7 @@ private fun FoodTab(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Покорми Кнопа",
+                text = "Покорми Кнопу",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = FairyPurple
