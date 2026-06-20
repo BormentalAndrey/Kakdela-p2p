@@ -1,9 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Василисина азбука</string>
+    <!-- Название приложения -->
+    <string name="app_name">В гостях у Василисы</string>
+    
+    <!-- Названия игр -->
     <string name="game_coloring">Раскраска</string>
     <string name="game_music_box">Музыкальная шкатулка</string>
     <string name="game_memory_puzzle">Собери картинку</string>
-    <string name="game_feed_kuzya">Накорми Кузю</string>
+    <string name="game_feed_kuzya">Накорми Кнопу</string>
     <string name="game_seasons">Времена года</string>
     <string name="game_karaoke">Караоке-читалка</string>
+    
+    <!-- Описания игр для меню -->
+    <string name="game_coloring_desc">Раскрась картинки из разных городов России</string>
+    <string name="game_music_box_desc">Слушай, повторяй и угадывай звуки</string>
+    <string name="game_memory_puzzle_desc">Запомни и собери пазл по памяти</string>
+    <string name="game_feed_kuzya_desc">Ухаживай за котом Кнопой — весёлый тамагочи</string>
+    <string name="game_seasons_desc">Разложи предметы по временам года</string>
+    <string name="game_karaoke_desc">Пой и читай по слогам вместе с Василисой</string>
+    
+    <!-- Персонажи -->
+    <string name="character_vasilisa">Василиса</string>
+    <string name="character_vasilisa_desc">Твой учитель и проводник</string>
+    <string name="character_knopa">Кнопа</string>
+    <string name="character_knopa_desc">Твой пушистый друг</string>
+    
+    <!-- Общие кнопки -->
+    <string name="btn_next">Далее</string>
+    <string name="btn_back">Назад</string>
+    <string name="btn_retry">Попробовать ещё раз</string>
+    <string name="btn_reset">Заново</string>
+    <string name="btn_clear">Очистить</string>
+    <string name="btn_delete">Удалить</string>
+    <string name="btn_listen">Прослушать</string>
+    <string name="btn_play">Играть</string>
+    <string name="btn_pause">Пауза</string>
+    <string name="btn_close">Закрыть</string>
+    <string name="btn_buy">Купить</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_yes">Да</string>
+    <string name="btn_no">Нет</string>
+    
+    <!-- Прогресс -->
+    <string name="progress_stage">Этап %1$d из %2$d</string>
+    <string name="progress_level">Уровень %1$d из %2$d</string>
+    <string name="progress_song">Песня %1$d из %2$d</string>
+    <string name="progress_completed">Пройдено: %1$d из %2$d</string>
+    <string name="progress_stars_total">Всего звёзд: %1$d</string>
+    
+    <!-- Поздравления -->
+    <string name="congratulations">🎉 Поздравляем! 🎉</string>
+    <string name="level_complete">Уровень пройден!</string>
+    <string name="game_complete">Игра пройдена!</string>
+    <string name="all_games_complete">Все игры пройдены! Ты молодец!</string>
+    <string name="perfect_score">Великолепно! Все звёзды собраны!</string>
+    <string name="good_job">Хорошая работа!</string>
+    <string name="try_again">Попробуй ещё раз!</string>
+    
+    <!-- Достижения -->
+    <string name="achievement_unlocked">Достижение открыто!</string>
+    <string name="achievement_first_level">Первый шаг</string>
+    <string name="achievement_all_coloring">Художник</string>
+    <string name="achievement_all_music">Музыкант</string>
+    <string name="achievement_all_puzzle">Пазломастер</string>
+    <string name="achievement_all_feeding">Заботливый друг</string>
+    <string name="achievement_all_seasons">Натуралист</string>
+    <string name="achievement_all_karaoke">Певец</string>
+    <string name="achievement_ten_stars">Звёздный начинающий</string>
+    <string name="achievement_fifty_stars">Звёздный мастер</string>
+    <string name="achievement_hundred_stars">Звёздный чемпион</string>
+    <string name="achievement_all_games">Почётный гость Василисы</string>
+    
+    <!-- Игра «Раскраска» -->
+    <string name="coloring_title">Раскраска</string>
+    <string name="coloring_select_color">Выбери цвет</string>
+    <string name="coloring_eraser">Ластик</string>
+    <string name="coloring_all_done">Все зоны раскрашены!</string>
+    <string name="coloring_vasilisa_message">Раскрась картинку! Выбери цвет и нажми на зону.</string>
+    
+    <!-- Игра «Музыкальная шкатулка» -->
+    <string name="musicbox_title">Музыкальная шкатулка</string>
+    <string name="musicbox_free_play">Свободная игра</string>
+    <string name="musicbox_repeat">Повтори мелодию</string>
+    <string name="musicbox_guess">Угадай звук</string>
+    <string name="musicbox_correct">Правильно: %1$d из %2$d</string>
+    <string name="musicbox_new_melody">Новая мелодия</string>
+    <string name="musicbox_listen_again">Прослушать ещё раз</string>
+    
+    <!-- Игра «Собери картинку» -->
+    <string name="puzzle_title">Собери картинку</string>
+    <string name="puzzle_remember">Запомни картинку!</string>
+    <string name="puzzle_assemble">Собери её из кусочков!</string>
+    <string name="puzzle_look_again">Посмотреть ещё раз</string>
+    <string name="puzzle_shuffle">Перемешать</string>
+    <string name="puzzle_pieces">Доступные кусочки</string>
+    
+    <!-- Игра «Накорми Кнопу» (тамагочи) -->
+    <string name="feed_title">Накорми Кнопу</string>
+    <string name="feed_hunger">Сытость</string>
+    <string name="feed_happiness">Счастье</string>
+    <string name="feed_energy">Энергия</string>
+    <string name="feed_health">Здоровье</string>
+    <string name="feed_cleanliness">Чистота</string>
+    <string name="feed_food_tab">🍽️ Еда</string>
+    <string name="feed_games_tab">🎮 Игры</string>
+    <string name="feed_care_tab">🛁 Уход</string>
+    <string name="feed_shop_tab">🛒 Магазин</string>
+    <string name="feed_minigame_feeding">Накорми Кнопу</string>
+    <string name="feed_minigame_fishing">Рыбалка</string>
+    <string name="feed_minigame_mouse">Поймай мышку</string>
+    <string name="feed_minigame_puzzle">Пазл</string>
+    <string name="feed_knopa_happy">Мяу! Я счастлив!</string>
+    <string name="feed_knopa_hungry">Мяу… Я голоден…</string>
+    <string name="feed_knopa_sad">Мяу… Мне грустно…</string>
+    <string name="feed_knopa_sick">Мяу… Я болею…</string>
+    <string name="feed_knopa_sleepy">Хочу спать…</string>
+    <string name="feed_knopa_dirty">Мяу! Я грязный!</string>
+    <string name="feed_knopa_angry">МЯУ! Я злой!</string>
+    <string name="feed_knopa_ecstatic">Мур-мур-мур!</string>
+    <string name="feed_knopa_playing">Давай играть!</string>
+    <string name="feed_knopa_loved">Я тебя люблю!</string>
+    <string name="feed_bath">Купать</string>
+    <string name="feed_heal">Лечить</string>
+    <string name="feed_sleep">Спать</string>
+    <string name="feed_coins">%1$d ⭐</string>
+    
+    <!-- Игра «Времена года» -->
+    <string name="seasons_title">Времена года</string>
+    <string name="seasons_winter">❄️ Зима</string>
+    <string name="seasons_spring">🌸 Весна</string>
+    <string name="seasons_summer">☀️ Лето</string>
+    <string name="seasons_autumn">🍂 Осень</string>
+    <string name="seasons_place_items">Разложи предметы по временам года!</string>
+    <string name="seasons_available_items">Доступные предметы</string>
+    <string name="seasons_all_placed">Все предметы размещены! Проверяем…</string>
+    
+    <!-- Игра «Караоке-читалка» -->
+    <string name="karaoke_title">Караоке-читалка</string>
+    <string name="karaoke_listen">👂 Слушаю</string>
+    <string name="karaoke_read">📖 Читаю</string>
+    <string name="karaoke_sing">🎤 Пою</string>
+    <string name="karaoke_listen_message">Слушай и следи за слогами!</string>
+    <string name="karaoke_read_message">Составь слово из букв!</string>
+    <string name="karaoke_sing_message">Пой вместе со мной!</string>
+    <string name="karaoke_play_melody">Прослушать мелодию</string>
+    <string name="karaoke_select_letters">Выбери буквы</string>
+    <string name="karaoke_song_complete">Песня спета!</string>
+    
+    <!-- Настройки -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_music">Музыка</string>
+    <string name="settings_sfx">Звуковые эффекты</string>
+    <string name="settings_reset_progress">Сбросить прогресс</string>
+    <string name="settings_reset_confirm">Точно сбросить весь прогресс?</string>
+    <string name="settings_language">Язык</string>
+    
+    <!-- Ежедневный бонус -->
+    <string name="daily_bonus_title">Ежедневный бонус!</string>
+    <string name="daily_bonus_message">%1$d звёзд за %2$d-дневную серию!</string>
+    <string name="daily_bonus_claim">Забрать</string>
+    
+    <!-- Магазин -->
+    <string name="shop_title">Магазин</string>
+    <string name="shop_food">Еда</string>
+    <string name="shop_snacks">Лакомства</string>
+    <string name="shop_toys">Игрушки</string>
+    <string name="shop_medicine">Лекарства</string>
+    <string name="shop_hygiene">Гигиена</string>
+    <string name="shop_decorations">Украшения</string>
+    <string name="shop_special">Особое</string>
+    <string name="shop_price">%1$d ⭐</string>
+    <string name="shop_not_enough_coins">Недостаточно монет</string>
+    
+    <!-- Предметы -->
+    <string name="item_apple">Яблоко</string>
+    <string name="item_pizza">Пицца</string>
+    <string name="item_banana">Банан</string>
+    <string name="item_fish">Рыбка</string>
+    <string name="item_milk">Молоко</string>
+    <string name="item_bread">Хлеб</string>
+    <string name="item_cheese">Сыр</string>
+    <string name="item_soup">Суп</string>
+    <string name="item_porridge">Каша</string>
+    <string name="item_cutlet">Котлета</string>
+    <string name="item_cookie">Печенье</string>
+    <string name="item_candy">Конфета</string>
+    <string name="item_icecream">Мороженое</string>
+    <string name="item_cake">Тортик</string>
+    <string name="item_ball">Мячик</string>
+    <string name="item_mouse">Мышка</string>
+    <string name="item_feather">Пёрышко</string>
+    <string name="item_laser">Лазер</string>
+    <string name="item_bandage">Бинт</string>
+    <string name="item_pill">Таблетка</string>
+    <string name="item_syrup">Сироп</string>
+    <string name="item_soap">Мыло</string>
+    <string name="item_shampoo">Шампунь</string>
+    <string name="item_towel">Полотенце</string>
+    <string name="item_bow">Бантик</string>
+    <string name="item_hat">Шляпа</string>
+    <string name="item_scarf">Шарфик</string>
+    <string name="item_star_treat">Звёздный корм</string>
+    <string name="item_magic_potion">Волшебное зелье</string>
+    
+    <!-- Ошибки -->
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="error_loading_song">Ошибка загрузки песни</string>
+    <string name="error_loading_image">Ошибка загрузки изображения</string>
+    <string name="error_no_sound">Звук не найден</string>
+    <string name="error_generic">Что-то пошло не так</string>
+    
+    <!-- Подсказки -->
+    <string name="hint_tap_to_feed">Нажми на еду, чтобы покормить Кнопу</string>
+    <string name="hint_tap_to_pet">Нажми на Кнопу, чтобы погладить</string>
+    <string name="hint_double_tap">Двойное нажатие — покормить</string>
+    <string name="hint_long_press">Долгое нажатие — уложить спать</string>
+    <string name="hint_drag_drop">Перетащи предмет в нужную зону</string>
+    <string name="hint_select_color">Выбери цвет и раскрась картинку</string>
+    <string name="hint_listen_repeat">Слушай и повторяй мелодию</string>
+    <string name="hint_remember_picture">Запомни картинку, потом собери пазл</string>
 </resources>
