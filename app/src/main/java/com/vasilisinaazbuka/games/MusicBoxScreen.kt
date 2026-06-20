@@ -24,10 +24,10 @@ import com.vasilisinaazbuka.ui.LevelComplete
 import com.vasilisinaazbuka.ui.theme.*
 import kotlinx.coroutines.delay
 
-// Режимы игры (вынесены из функции)
+// Режимы игры вынесены из функции
 private enum class MusicMode { FREE_PLAY, REPEAT_MELODY, GUESS_SOUND }
 
-// Модель звука (вынесена из функции)
+// Модель звука вынесена из функции
 private data class SoundItem(
     val id: Int,
     val name: String,
@@ -74,7 +74,6 @@ fun MusicBoxScreen(
     var currentSound by remember { mutableStateOf<SoundItem?>(null) }
     var options by remember { mutableStateOf(listOf<SoundItem>()) }
 
-    // Сброс при смене режима
     fun resetMode() {
         score = 0
         melodySequence = emptyList()
@@ -84,7 +83,6 @@ fun MusicBoxScreen(
         showLevelComplete = false
     }
 
-    // Генерация мелодии для режима «Повтори»
     fun generateMelody() {
         val pool = soundItems.take(8)
         melodySequence = List(4) { pool.random() }
@@ -92,7 +90,6 @@ fun MusicBoxScreen(
         isShowingMelody = true
     }
 
-    // Показ мелодии с подсветкой
     LaunchedEffect(isShowingMelody) {
         if (isShowingMelody && melodySequence.isNotEmpty()) {
             for (item in melodySequence) {
@@ -106,7 +103,6 @@ fun MusicBoxScreen(
         }
     }
 
-    // Генерация вопроса для режима «Угадай звук»
     fun generateGuessQuestion() {
         val correct = soundItems.random()
         currentSound = correct
@@ -135,7 +131,6 @@ fun MusicBoxScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Выбор режима
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -193,7 +188,6 @@ fun MusicBoxScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Сетка звуков
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier.weight(1f),
@@ -223,7 +217,8 @@ fun MusicBoxScreen(
 
                                             val currentIndex = playerSequence.size - 1
                                             if (currentIndex < melodySequence.size &&
-                                                playerSequence[currentIndex].id == melodySequence[currentIndex].id) {
+                                                playerSequence[currentIndex].id == melodySequence[currentIndex].id
+                                            ) {
                                                 if (playerSequence.size == melodySequence.size) {
                                                     score++
                                                     if (score >= maxScore) {
