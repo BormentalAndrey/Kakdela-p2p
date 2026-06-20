@@ -25,8 +25,8 @@ import com.vasilisinaazbuka.ui.LevelComplete
 import com.vasilisinaazbuka.ui.StageProgressIndicator
 import com.vasilisinaazbuka.ui.theme.*
 
-// Сезоны вынесены из функции
-private enum class Season(val name: String, val emoji: String, val color: Color) {
+// Сезоны вынесены из функции (name → seasonName)
+private enum class Season(val seasonName: String, val emoji: String, val color: Color) {
     WINTER("Зима", "❄️", Color(0xFFB3E5FC)),
     SPRING("Весна", "🌸", Color(0xFFC8E6C9)),
     SUMMER("Лето", "☀️", Color(0xFFFFF9C4)),
@@ -36,7 +36,7 @@ private enum class Season(val name: String, val emoji: String, val color: Color)
 // Модель предмета вынесена из функции
 private data class SeasonItem(
     val id: String,
-    val name: String,
+    val itemName: String,
     val emoji: String,
     val correctSeason: Season
 )
@@ -72,7 +72,6 @@ fun SeasonsScreen(
     var showLevelComplete by remember { mutableStateOf(false) }
     var stars by remember { mutableIntStateOf(0) }
 
-    // Инициализация
     LaunchedEffect(stage) {
         availableItems = allItems.shuffled().take(8)
         placedItems = Season.entries.associateWith { emptyList() }
@@ -80,7 +79,6 @@ fun SeasonsScreen(
         showLevelComplete = false
     }
 
-    // Проверка правильности размещения
     val allPlaced = placedItems.values.sumOf { it.size } == availableItems.size
 
     LaunchedEffect(allPlaced) {
@@ -99,7 +97,6 @@ fun SeasonsScreen(
         }
     }
 
-    // Неразмещённые предметы
     val unplacedItems = availableItems.filter { item ->
         placedItems.values.none { list -> list.contains(item) }
     }
@@ -148,7 +145,6 @@ fun SeasonsScreen(
                             .fillMaxWidth()
                             .aspectRatio(0.8f)
                             .clickable {
-                                // Размещаем выбранный предмет в эту зону
                                 if (selectedItem != null) {
                                     placedItems = placedItems.toMutableMap().apply {
                                         put(season, (get(season) ?: emptyList()) + selectedItem!!)
@@ -158,9 +154,9 @@ fun SeasonsScreen(
                                 }
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = if (selectedItem != null) 
-                                season.color.copy(alpha = 0.7f) 
-                            else 
+                            containerColor = if (selectedItem != null)
+                                season.color.copy(alpha = 0.7f)
+                            else
                                 season.color.copy(alpha = 0.5f)
                         ),
                         shape = RoundedCornerShape(12.dp),
@@ -172,7 +168,7 @@ fun SeasonsScreen(
                         ) {
                             Text(text = season.emoji, fontSize = 28.sp)
                             Text(
-                                text = season.name,
+                                text = season.seasonName,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -189,11 +185,10 @@ fun SeasonsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Подсказка
         Text(
-            text = if (selectedItem != null) 
-                "Выбран: ${selectedItem!!.emoji} ${selectedItem!!.name} — нажми на сезон!" 
-            else 
+            text = if (selectedItem != null)
+                "Выбран: ${selectedItem!!.emoji} ${selectedItem!!.itemName} — нажми на сезон!"
+            else
                 "Выбери предмет, затем нажми на сезон:",
             style = MaterialTheme.typography.bodyMedium,
             color = if (selectedItem != null) FairyGold else FairyPurple,
@@ -202,7 +197,6 @@ fun SeasonsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Доступные предметы
         if (unplacedItems.isNotEmpty()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(5),
@@ -247,7 +241,6 @@ fun SeasonsScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Кнопка сброса
         Button(
             onClick = {
                 placedItems = Season.entries.associateWith { emptyList() }
@@ -261,7 +254,6 @@ fun SeasonsScreen(
         }
     }
 
-    // Окно завершения
     if (showLevelComplete) {
         LevelComplete(
             stars = stars,
