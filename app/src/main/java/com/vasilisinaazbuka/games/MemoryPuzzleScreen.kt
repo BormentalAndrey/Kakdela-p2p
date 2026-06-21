@@ -61,8 +61,7 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     var viewCount by remember { mutableIntStateOf(0) }
 
     val allPieces = remember {
-        val pieces = mutableListOf<PuzzlePiece>()
-        val rows = 2; val cols = 3
+        val pieces = mutableListOf<PuzzlePiece>(); val rows = 2; val cols = 3
         for (row in 0 until rows) for (col in 0 until cols) {
             val id = row * cols + col
             pieces.add(PuzzlePiece(id, id, if (row == 0) 0f else Random.nextFloat() * 2f - 1f, if (row == rows - 1) 0f else Random.nextFloat() * 2f - 1f, if (col == 0) 0f else Random.nextFloat() * 2f - 1f, if (col == cols - 1) 0f else Random.nextFloat() * 2f - 1f, Random.nextInt()))
@@ -75,7 +74,6 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     var selectedPieceId by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(stage) { showImage = true; availablePieces = allPieces.shuffled(); placedPieces = emptyMap(); selectedPieceId = -1; viewCount = 0; delay(3000); showImage = false }
-
     val isComplete = placedPieces.size == 6 && placedPieces.all { (pos, piece) -> piece.correctPosition == pos }
 
     LaunchedEffect(isComplete) {
@@ -86,13 +84,19 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     }
 
     Box(Modifier.fillMaxSize()) {
-        // Фоновое изображение
-        Image(painterResource(R.drawable.bg_level_memory), contentDescription = "Фон", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
+        Image(painterResource(R.drawable.bg_level_memory), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(0.3f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Собери картинку", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center); Spacer(Modifier.height(4.dp)); StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true) }
+            // Левая панель — персонаж и управление (1/3)
+            Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Собери картинку", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(4.dp))
+                    StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true)
+                }
+
                 CharacterView("vasilisa", if (showImage) "teacher" else "thinking", if (showImage) "Запомни картинку!" else "Перетащи кусочки\nна правильные места!", Modifier.fillMaxWidth())
+
                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (!showImage) {
                         Button({ viewCount++; showImage = true; GlobalScope.launch(Dispatchers.Main) { delay(3000); showImage = false } }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue), shape = RoundedCornerShape(12.dp)) { Text("👁️ Посмотреть\nещё раз", fontSize = 13.sp, color = Color.White, textAlign = TextAlign.Center) }
@@ -100,20 +104,20 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                         if (selectedPieceId >= 0) Button({ selectedPieceId = -1 }, Modifier.fillMaxWidth().height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray), shape = RoundedCornerShape(12.dp)) { Text("✕ Отменить выбор", fontSize = 12.sp, color = Color.White) }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
             }
 
             Spacer(Modifier.width(12.dp))
 
+            // Правая часть — пазл (2/3)
             if (showImage) {
-                Card(Modifier.weight(0.7f).fillMaxHeight().aspectRatio(1.5f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
+                Card(Modifier.weight(0.67f).fillMaxHeight().aspectRatio(1.5f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Image(painterResource(currentImage), "Запомни картинку", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         Box(Modifier.align(Alignment.TopCenter).padding(8.dp).background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp)).padding(horizontal = 16.dp, vertical = 8.dp)) { Text("Запоминай! 3 сек...", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
                     }
                 }
             } else {
-                Column(Modifier.weight(0.7f)) {
+                Column(Modifier.weight(0.67f)) {
                     PuzzleGrid(placedPieces, currentImage, selectedPieceId, { position ->
                         if (selectedPieceId >= 0 && !placedPieces.containsKey(position)) {
                             val piece = allPieces.find { it.id == selectedPieceId }
@@ -123,7 +127,7 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                         }
                     }, Modifier.fillMaxWidth().aspectRatio(1.5f))
                     Spacer(Modifier.height(8.dp))
-                    Text("Доступные кусочки (выбери и нажми на ячейку):", style = MaterialTheme.typography.bodySmall, color = FairyPurple, modifier = Modifier.padding(horizontal = 4.dp))
+                    Text("Доступные кусочки:", style = MaterialTheme.typography.bodySmall, color = FairyPurple, modifier = Modifier.padding(horizontal = 4.dp))
                     Spacer(Modifier.height(4.dp))
                     AvailablePiecesRow(availablePieces, currentImage, selectedPieceId, { pieceId -> selectedPieceId = if (selectedPieceId == pieceId) -1 else pieceId; AudioPlayer.playSFX(R.raw.sfx_click) }, Modifier.fillMaxWidth().height(80.dp))
                 }
@@ -133,8 +137,6 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
         if (showLevelComplete) LevelComplete(stars, "Картинка собрана!\nПодсматриваний: $viewCount", character = "vasilisa", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
     }
 }
-
-// ==================== PuzzleGrid ====================
 
 @Composable
 private fun PuzzleGrid(pieces: Map<Int, PuzzlePiece>, currentImage: Int, selectedPieceId: Int, onCellClick: (Int) -> Unit, modifier: Modifier = Modifier) {
@@ -154,10 +156,7 @@ private fun PuzzlePieceView(piece: PuzzlePiece, imageRes: Int) {
     val col = piece.correctPosition % 3; val row = piece.correctPosition / 3
     Box(Modifier.fillMaxSize().clip(PuzzlePieceShape(piece))) {
         Image(painterResource(imageRes), "Кусочек ${piece.id + 1}", Modifier.fillMaxSize().graphicsLayer { translationX = -size.width * col; translationY = -size.height * row; scaleX = 3f; scaleY = 2f }.clipToBounds(), contentScale = ContentScale.FillBounds)
-        Canvas(Modifier.fillMaxSize()) {
-            val outline = PuzzlePieceShape(piece).createOutline(this.size, LayoutDirection.Ltr, Density(1f))
-            if (outline is Outline.Generic) drawPath(outline.path, Color.White.copy(alpha = 0.3f), style = Stroke(2f))
-        }
+        Canvas(Modifier.fillMaxSize()) { val outline = PuzzlePieceShape(piece).createOutline(this.size, LayoutDirection.Ltr, Density(1f)); if (outline is Outline.Generic) drawPath(outline.path, Color.White.copy(alpha = 0.3f), style = Stroke(2f)) }
     }
 }
 
@@ -170,11 +169,7 @@ private class PuzzlePieceShape(private val piece: PuzzlePiece) : Shape {
         path.lineTo(0f, h / 2f + tabSize); addTab(path, 0f, h / 2f, -tabSize * piece.leftTab, h / 2f, tabSize); path.lineTo(0f, 0f)
         path.close(); return Outline.Generic(path)
     }
-    private fun addTab(path: Path, x1: Float, y1: Float, x2: Float, y2: Float, tabSize: Float) {
-        val dx = x2 - x1; val dy = y2 - y1
-        path.cubicTo(x1 + dx * 0.5f, y1, x2, y1 + dy * 0.5f, x2, y2)
-        path.cubicTo(x1 + dx * 0.5f, y2, x1, y1 + dy * 0.5f, x1 + dx, y1 + dy)
-    }
+    private fun addTab(path: Path, x1: Float, y1: Float, x2: Float, y2: Float, tabSize: Float) { val dx = x2 - x1; val dy = y2 - y1; path.cubicTo(x1 + dx * 0.5f, y1, x2, y1 + dy * 0.5f, x2, y2); path.cubicTo(x1 + dx * 0.5f, y2, x1, y1 + dy * 0.5f, x1 + dx, y1 + dy) }
 }
 
 @Composable
@@ -183,8 +178,7 @@ private fun AvailablePiecesRow(pieces: List<PuzzlePiece>, currentImage: Int, sel
     val count = min(pieces.size, 6)
     LazyVerticalGrid(columns = GridCells.Fixed(count), modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         itemsIndexed(items = pieces, key = { _, p -> p.id }) { _, piece ->
-            val isSelected = selectedPieceId == piece.id
-            val scale by animateFloatAsState(targetValue = if (isSelected) 1.15f else 1f, animationSpec = spring(), label = "s_${piece.id}")
+            val isSelected = selectedPieceId == piece.id; val scale by animateFloatAsState(targetValue = if (isSelected) 1.15f else 1f, animationSpec = spring(), label = "s_${piece.id}")
             Box(Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(if (isSelected) FairyGold.copy(alpha = 0.4f) else Color.White).border(if (isSelected) 3.dp else 1.dp, if (isSelected) FairyGold else Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)).clickable { onPieceClick(piece.id) }.zIndex(if (isSelected) 1f else 0f), contentAlignment = Alignment.Center) {
                 val col = piece.correctPosition % 3; val row = piece.correctPosition / 3
                 Box(Modifier.fillMaxSize().clipToBounds()) { Image(painterResource(currentImage), "Кусочек ${piece.id + 1}", Modifier.fillMaxSize().graphicsLayer { translationX = -size.width * col; translationY = -size.height * row; scaleX = 3f; scaleY = 2f }, contentScale = ContentScale.FillBounds) }
