@@ -66,8 +66,7 @@ fun VasilisinaAzbukaApp() {
         }
 
         composable(Routes.Karaoke.route, arguments = listOf(navArgument("songIndex") { type = NavType.IntType; defaultValue = 1 }, navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
-            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
-            val stage = backStackEntry.arguments?.getInt("stage") ?: 1
+            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1; val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             KaraokeScreen(songIndex, stage, { if (stage < 5) navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } }, { if (songIndex < 20) navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
         }
     }
@@ -77,44 +76,96 @@ fun VasilisinaAzbukaApp() {
 fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
+    // Анимированные эмоции персонажей
+    val vasilisaEmotions = listOf("happy", "proud", "teacher")
+    val knopaEmotions = listOf("happy", "playing", "ecstatic", "happy", "sleepy")
+    var vasilisaIndex by remember { mutableIntStateOf(0) }
+    var knopaIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(4000)
+            vasilisaIndex = (vasilisaIndex + 1) % vasilisaEmotions.size
+            knopaIndex = (knopaIndex + 1) % knopaEmotions.size
+        }
+    }
+
     Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.15f), FairyPurple.copy(alpha = 0.05f), FairyBlue.copy(alpha = 0.1f))))) {
-        Image(painterResource(R.drawable.bg_level_menu), contentDescription = "Фон", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.25f)
+        Image(painterResource(R.drawable.bg_level_menu), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.25f)
         Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.35f)))
 
         Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(0.32f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                // Заголовок
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
-                    Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("В гостях у Василисы", style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, lineHeight = 28.sp)
-                        Spacer(Modifier.height(4.dp))
-                        Text("Путешествие по России", style = MaterialTheme.typography.titleSmall, color = FairyPurple, textAlign = TextAlign.Center)
+                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("В гостях у Василисы", style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                     }
                 }
 
                 Spacer(Modifier.height(20.dp))
 
+                // Персонажи с анимированными эмоциями
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     // Василиса
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
-                        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
-                                Image(painterResource(R.drawable.character_vasilisa_happy), contentDescription = "Василиса", modifier = Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
+                                Image(
+                                    painter = painterResource(
+                                        when (vasilisaEmotions[vasilisaIndex]) {
+                                            "proud" -> R.drawable.character_vasilisa_proud
+                                            "teacher" -> R.drawable.character_vasilisa_teacher
+                                            else -> R.drawable.character_vasilisa_happy
+                                        }
+                                    ),
+                                    contentDescription = "Василиса",
+                                    modifier = Modifier.fillMaxSize().padding(8.dp),
+                                    contentScale = ContentScale.Fit
+                                )
                             }
                             Spacer(Modifier.height(8.dp))
                             Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 14.sp)
-                            Text("Твой учитель", color = Color.Gray, fontSize = 11.sp)
+                            Text(
+                                when (vasilisaEmotions[vasilisaIndex]) {
+                                    "proud" -> "Гордится тобой!"
+                                    "teacher" -> "Научит всему"
+                                    else -> "Твой учитель"
+                                },
+                                color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center
+                            )
                         }
                     }
 
                     // Кнопа
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
-                        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
-                                Image(painterResource(R.drawable.character_kuzya_happy), contentDescription = "Кнопа", modifier = Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
+                                Image(
+                                    painter = painterResource(
+                                        when (knopaEmotions[knopaIndex]) {
+                                            "playing" -> R.drawable.character_kuzya_playing
+                                            "ecstatic" -> R.drawable.character_kuzya_ecstatic
+                                            "sleepy" -> R.drawable.character_kuzya_sleeping
+                                            else -> R.drawable.character_kuzya_happy
+                                        }
+                                    ),
+                                    contentDescription = "Кнопа",
+                                    modifier = Modifier.fillMaxSize().padding(8.dp),
+                                    contentScale = ContentScale.Fit
+                                )
                             }
                             Spacer(Modifier.height(8.dp))
                             Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 14.sp)
-                            Text("Твой друг", color = Color.Gray, fontSize = 11.sp)
+                            Text(
+                                when (knopaEmotions[knopaIndex]) {
+                                    "playing" -> "Хочет играть!"
+                                    "ecstatic" -> "Мур-мур!"
+                                    "sleepy" -> "Спит..."
+                                    else -> "Твой друг"
+                                },
+                                color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center
+                            )
                         }
                     }
                 }
@@ -131,12 +182,12 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
             Column(Modifier.weight(0.68f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly) {
                 val games = listOf(
-                    GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки из разных городов России"),
-                    GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай, повторяй и угадывай звуки"),
-                    GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Запомни и собери пазл по памяти"),
-                    GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Ухаживай за котом-тамагочи"),
-                    GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Разложи предметы по сезонам"),
-                    GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай по слогам с Василисой")
+                    GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки"),
+                    GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай и угадывай звуки"),
+                    GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Пазлы по памяти"),
+                    GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Тамагочи с котом"),
+                    GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Изучай сезоны"),
+                    GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай")
                 )
 
                 for (row in 0..1) {
@@ -144,10 +195,9 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                         for (col in 0..2) {
                             val index = row * 3 + col
                             if (index < games.size) {
-                                val game = games[index]
-                                val progress = gameProgress[game.gameId]
+                                val game = games[index]; val progress = gameProgress[game.gameId]
                                 val completed = progress?.first ?: 0
-                                val total = progress?.second ?: when (game.gameId) { "coloring" -> GameState.MAX_COLORING_LEVELS; "musicbox" -> GameState.MAX_MUSICBOX_LEVELS; "memorypuzzle" -> GameState.MAX_MEMORYPUZZLE_LEVELS; "feedkuzya" -> GameState.MAX_FEEDKUZYA_LEVELS; "seasons" -> GameState.MAX_SEASONS_LEVELS; "karaoke" -> GameState.MAX_KARAOKE_LEVELS; else -> 5 }
+                                val total = progress?.second ?: when (game.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 20; else -> 5 }
                                 GameCard(game, completed, total, completed >= total, { onGameSelected(game.route) }, Modifier.weight(1f))
                             }
                         }
@@ -168,11 +218,7 @@ private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted
             Spacer(Modifier.height(2.dp))
             Text(game.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(6.dp))
-            if (total > 1) {
-                LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(3.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f))
-                Spacer(Modifier.height(2.dp))
-                Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal)
-            }
+            if (total > 1) { LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(3.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f)); Spacer(Modifier.height(2.dp)); Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal) }
             if (isCompleted) Text("✅", fontSize = 16.sp, modifier = Modifier.padding(top = 2.dp))
         }
     }
