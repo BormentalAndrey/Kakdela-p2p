@@ -1,19 +1,22 @@
 package com.vasilisinaazbuka.games
 
+import android.content.Context
+import android.util.Log
+
 /**
  * Менеджер загрузки и кеширования .kar файлов
  * Используется в KaraokeScreen для загрузки караоке-песен
  */
 object KarFileLoader {
 
-    private val cache = mutableMapOf<String, Any>()
+    private val cache = mutableMapOf<String, KarFile>()
 
     /**
      * Загружает .kar файл из assets/kar/
      * @param context Контекст приложения
      * @param fileName Имя файла без расширения (например, "song_01")
      */
-    fun loadKarFile(context: android.content.Context, fileName: String): Any? {
+    fun loadKarFile(context: Context, fileName: String): KarFile? {
         // Проверяем кеш
         cache[fileName]?.let { return it }
 
@@ -27,7 +30,7 @@ object KarFileLoader {
             cache[fileName] = karFile
             karFile
         } catch (e: Exception) {
-            android.util.Log.e("KarFileLoader", "Ошибка загрузки $fileName: ${e.message}")
+            Log.e("KarFileLoader", "Ошибка загрузки $fileName: ${e.message}")
             null
         }
     }
@@ -35,7 +38,7 @@ object KarFileLoader {
     /**
      * Загружает .kar файл по индексу песни (1-20)
      */
-    fun loadKarFile(context: android.content.Context, songIndex: Int): Any? {
+    fun loadKarFile(context: Context, songIndex: Int): KarFile? {
         val fileName = "song_${songIndex.toString().padStart(2, '0')}"
         return loadKarFile(context, fileName)
     }
@@ -43,7 +46,7 @@ object KarFileLoader {
     /**
      * Получает список доступных песен
      */
-    fun getAvailableSongs(context: android.content.Context): List<String> {
+    fun getAvailableSongs(context: Context): List<String> {
         return try {
             context.assets.list("kar/")
                 ?.filter { it.endsWith(".kar") }
@@ -60,7 +63,7 @@ object KarFileLoader {
      */
     fun clearCache() {
         cache.clear()
-        android.util.Log.d("KarFileLoader", "Кеш караоке очищен")
+        Log.d("KarFileLoader", "Кеш караоке очищен")
     }
 
     /**
