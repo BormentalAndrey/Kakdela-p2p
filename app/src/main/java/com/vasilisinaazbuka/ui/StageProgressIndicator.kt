@@ -52,10 +52,7 @@ fun StageProgressIndicator(
 
     val progress by animateFloatAsState(
         targetValue = targetProgress,
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 100f
-        ),
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 100f),
         label = "stageProgress"
     )
 
@@ -68,24 +65,9 @@ fun StageProgressIndicator(
     }
 
     if (compact) {
-        CompactProgressIndicator(
-            currentStage = currentStage,
-            maxStages = maxStages,
-            progress = progress,
-            showNumbers = showNumbers,
-            dotsVisible = dotsVisible,
-            modifier = modifier
-        )
+        CompactProgressIndicator(currentStage, maxStages, progress, showNumbers, dotsVisible, modifier)
     } else {
-        FullProgressIndicator(
-            currentStage = currentStage,
-            maxStages = maxStages,
-            label = label,
-            progress = progress,
-            showNumbers = showNumbers,
-            dotsVisible = dotsVisible,
-            modifier = modifier
-        )
+        FullProgressIndicator(currentStage, maxStages, label, progress, showNumbers, dotsVisible, modifier)
     }
 }
 
@@ -101,39 +83,16 @@ private fun FullProgressIndicator(
     dotsVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "$label $currentStage из $maxStages",
-            style = MaterialTheme.typography.bodySmall,
-            color = FairyPurple,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(90.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text("$label $currentStage из $maxStages", style = MaterialTheme.typography.bodySmall, color = FairyPurple, fontWeight = FontWeight.Bold, modifier = Modifier.width(90.dp))
+        Spacer(Modifier.width(8.dp))
         LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .weight(1f)
-                .height(10.dp)
-                .clip(RoundedCornerShape(5.dp)),
-            color = FairyGold,
-            trackColor = FairyGold.copy(alpha = 0.2f)
+            progress = progress,
+            modifier = Modifier.weight(1f).height(10.dp).clip(RoundedCornerShape(5.dp)),
+            color = FairyGold, trackColor = FairyGold.copy(alpha = 0.2f)
         )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        StageDots(
-            currentStage = currentStage,
-            maxStages = maxStages,
-            showNumbers = showNumbers,
-            visible = dotsVisible,
-            dotSize = 12.dp
-        )
+        Spacer(Modifier.width(12.dp))
+        StageDots(currentStage, maxStages, showNumbers, dotsVisible, 12.dp)
     }
 }
 
@@ -148,40 +107,16 @@ private fun CompactProgressIndicator(
     dotsVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .weight(1f)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = FairyGold,
-            trackColor = FairyGold.copy(alpha = 0.2f)
+            progress = progress,
+            modifier = Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)),
+            color = FairyGold, trackColor = FairyGold.copy(alpha = 0.2f)
         )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        StageDots(
-            currentStage = currentStage,
-            maxStages = maxStages,
-            showNumbers = showNumbers,
-            visible = dotsVisible,
-            dotSize = 8.dp
-        )
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = "$currentStage/$maxStages",
-            style = MaterialTheme.typography.labelSmall,
-            color = FairyPurple,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(28.dp),
-            textAlign = TextAlign.Center
-        )
+        Spacer(Modifier.width(8.dp))
+        StageDots(currentStage, maxStages, showNumbers, dotsVisible, 8.dp)
+        Spacer(Modifier.width(4.dp))
+        Text("$currentStage/$maxStages", style = MaterialTheme.typography.labelSmall, color = FairyPurple, fontWeight = FontWeight.Bold, modifier = Modifier.width(28.dp), textAlign = TextAlign.Center)
     }
 }
 
@@ -195,10 +130,7 @@ private fun StageDots(
     visible: Boolean,
     dotSize: Dp = 12.dp
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         repeat(maxStages) { index ->
             val stageNumber = index + 1
             val isCompleted = stageNumber < currentStage
@@ -207,60 +139,30 @@ private fun StageDots(
             var dotVisible by remember { mutableStateOf(false) }
 
             LaunchedEffect(visible) {
-                if (visible) {
-                    delay(index * 80L)
-                    dotVisible = true
-                }
+                if (visible) { delay(index * 80L); dotVisible = true }
             }
 
             val dotColor by animateColorAsState(
-                targetValue = when {
-                    isCompleted -> FairyGreen
-                    isCurrent -> FairyGold
-                    else -> Color.Gray.copy(alpha = 0.3f)
-                },
-                animationSpec = tween(300),
-                label = "dotColor_$index"
+                targetValue = when { isCompleted -> FairyGreen; isCurrent -> FairyGold; else -> Color.Gray.copy(alpha = 0.3f) },
+                animationSpec = tween(300), label = "dotColor_$index"
             )
 
             val dotScale by animateFloatAsState(
                 targetValue = if (isCurrent && dotVisible) 1.4f else 1f,
-                animationSpec = spring(dampingRatio = 0.4f, stiffness = 200f),
-                label = "dotScale_$index"
+                animationSpec = spring(dampingRatio = 0.4f, stiffness = 200f), label = "dotScale_$index"
             )
 
             if (dotVisible) {
                 Box(
-                    modifier = Modifier
-                        .size(dotSize)
-                        .scale(dotScale)
-                        .clip(CircleShape)
-                        .background(dotColor)
-                        .then(
-                            if (isCurrent) {
-                                Modifier.border(2.dp, FairyGold.copy(alpha = 0.5f), CircleShape)
-                            } else {
-                                Modifier
-                            }
-                        ),
+                    Modifier.size(dotSize).scale(dotScale).clip(CircleShape).background(dotColor)
+                        .then(if (isCurrent) Modifier.border(2.dp, FairyGold.copy(alpha = 0.5f), CircleShape) else Modifier),
                     contentAlignment = Alignment.Center
                 ) {
                     if (showNumbers && dotSize >= 12.dp) {
-                        Text(
-                            text = "$stageNumber",
-                            fontSize = (dotSize.value / 2).sp,
-                            color = if (isCurrent) Color.White else Color.White.copy(alpha = 0.8f),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text("$stageNumber", fontSize = (dotSize.value / 2).sp, color = if (isCurrent) Color.White else Color.White.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
                     }
-
                     if (isCompleted && dotSize >= 12.dp) {
-                        Text(
-                            text = "✓",
-                            fontSize = (dotSize.value / 2).sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text("✓", fontSize = (dotSize.value / 2).sp, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -271,78 +173,33 @@ private fun StageDots(
 // ==================== VerticalStageProgress ====================
 
 @Composable
-fun VerticalStageProgress(
-    currentStage: Int,
-    maxStages: Int,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+fun VerticalStageProgress(currentStage: Int, maxStages: Int, modifier: Modifier = Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         for (i in maxStages downTo 1) {
             val isCompleted = i < currentStage
             val isCurrent = i == currentStage
 
             val color by animateColorAsState(
-                targetValue = when {
-                    isCompleted -> FairyGreen
-                    isCurrent -> FairyGold
-                    else -> Color.Gray.copy(alpha = 0.3f)
-                },
-                animationSpec = tween(300),
-                label = "vColor_$i"
+                targetValue = when { isCompleted -> FairyGreen; isCurrent -> FairyGold; else -> Color.Gray.copy(alpha = 0.3f) },
+                animationSpec = tween(300), label = "vColor_$i"
             )
 
             val dotScale by animateFloatAsState(
                 targetValue = if (isCurrent) 1.3f else 1f,
-                animationSpec = spring(dampingRatio = 0.4f),
-                label = "vScale_$i"
+                animationSpec = spring(dampingRatio = 0.4f), label = "vScale_$i"
             )
 
             Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .scale(dotScale)
-                    .clip(CircleShape)
-                    .background(color)
-                    .then(
-                        if (isCurrent) {
-                            Modifier.border(2.dp, FairyGold, CircleShape)
-                        } else {
-                            Modifier
-                        }
-                    ),
+                Modifier.size(14.dp).scale(dotScale).clip(CircleShape).background(color)
+                    .then(if (isCurrent) Modifier.border(2.dp, FairyGold, CircleShape) else Modifier),
                 contentAlignment = Alignment.Center
             ) {
-                if (isCompleted) {
-                    Text(
-                        text = "✓",
-                        fontSize = 8.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                } else if (isCurrent) {
-                    Text(
-                        text = "$i",
-                        fontSize = 7.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                if (isCompleted) Text("✓", fontSize = 8.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                else if (isCurrent) Text("$i", fontSize = 7.sp, color = Color.White, fontWeight = FontWeight.Bold)
             }
 
             if (i > 1) {
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .height(16.dp)
-                        .background(
-                            if (i <= currentStage) FairyGreen.copy(alpha = 0.5f)
-                            else Color.Gray.copy(alpha = 0.2f)
-                        )
-                )
+                Box(Modifier.width(2.dp).height(16.dp).background(if (i <= currentStage) FairyGreen.copy(alpha = 0.5f) else Color.Gray.copy(alpha = 0.2f)))
             }
         }
     }
@@ -351,78 +208,30 @@ fun VerticalStageProgress(
 // ==================== ThemedStageProgress ====================
 
 @Composable
-fun ThemedStageProgress(
-    currentStage: Int,
-    maxStages: Int,
-    stageIcons: List<String> = emptyList(),
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Этап $currentStage из $maxStages",
-            style = MaterialTheme.typography.bodySmall,
-            color = FairyPurple,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
+fun ThemedStageProgress(currentStage: Int, maxStages: Int, stageIcons: List<String> = emptyList(), modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Этап $currentStage из $maxStages", style = MaterialTheme.typography.bodySmall, color = FairyPurple, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(4.dp))
         LinearProgressIndicator(
-            progress = {
-                if (maxStages > 0) currentStage.toFloat() / maxStages.toFloat() else 0f
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = FairyGold,
-            trackColor = FairyGold.copy(alpha = 0.2f)
+            progress = if (maxStages > 0) currentStage.toFloat() / maxStages.toFloat() else 0f,
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+            color = FairyGold, trackColor = FairyGold.copy(alpha = 0.2f)
         )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
+        Spacer(Modifier.height(6.dp))
         if (stageIcons.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 stageIcons.forEachIndexed { index, icon ->
                     val isCurrent = (index + 1) == currentStage
-
-                    Text(
-                        text = icon,
-                        fontSize = if (isCurrent) 24.sp else 18.sp,
-                        modifier = Modifier.then(
-                            if (isCurrent) Modifier.scale(1.2f) else Modifier
-                        )
-                    )
+                    Text(icon, fontSize = if (isCurrent) 24.sp else 18.sp, modifier = Modifier.then(if (isCurrent) Modifier.scale(1.2f) else Modifier))
                 }
             }
         } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 repeat(maxStages) { index ->
                     val stageNumber = index + 1
-                    val isCompleted = stageNumber < currentStage
-                    val isCurrent = stageNumber == currentStage
-
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(
-                                when {
-                                    isCompleted -> FairyGreen
-                                    isCurrent -> FairyGold
-                                    else -> Color.Gray.copy(alpha = 0.3f)
-                                }
-                            )
-                    )
+                    Box(Modifier.size(10.dp).clip(CircleShape).background(when {
+                        stageNumber < currentStage -> FairyGreen; stageNumber == currentStage -> FairyGold; else -> Color.Gray.copy(alpha = 0.3f)
+                    }))
                 }
             }
         }
