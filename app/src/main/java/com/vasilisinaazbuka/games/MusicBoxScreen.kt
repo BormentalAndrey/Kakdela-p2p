@@ -78,14 +78,18 @@ fun MusicBoxScreen(onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             // Левая панель — персонаж и управление (1/3)
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Text("Музыкальная шкатулка", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                // Кнопка «Назад»
+                Button(onClick = onBack, Modifier.fillMaxWidth().height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp)) { Text("↩ Назад", fontSize = 14.sp, color = Color.White) }
+                Spacer(Modifier.height(8.dp))
+
+                Text("Музыкальная шкатулка", style = MaterialTheme.typography.titleLarge, color = FairyGreen, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
 
                 // Режимы
                 MusicMode.entries.forEach { mode ->
                     FilterChip(selected = currentMode == mode, onClick = { currentMode = mode; resetMode(); when (mode) { MusicMode.REPEAT_MELODY -> generateMelody(); MusicMode.GUESS_SOUND -> generateGuessQuestion(); else -> {} } },
-                        label = { Text(when (mode) { MusicMode.FREE_PLAY -> "🎹 Свободная"; MusicMode.REPEAT_MELODY -> "🔁 Повтори"; MusicMode.GUESS_SOUND -> "❓ Угадай" }, fontSize = 13.sp) },
-                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = FairyPurple),
+                        label = { Text(when (mode) { MusicMode.FREE_PLAY -> "🎹 Свободная"; MusicMode.REPEAT_MELODY -> "🔁 Повтори"; MusicMode.GUESS_SOUND -> "❓ Угадай" }, fontSize = 13.sp, color = if (currentMode == mode) Color.White else FairyGreen) },
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = FairyGreen, selectedLabelColor = Color.White),
                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
                 }
 
@@ -100,7 +104,6 @@ fun MusicBoxScreen(onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
                     Spacer(Modifier.height(8.dp))
                 }
 
-                // Кнопки управления
                 if (currentMode == MusicMode.REPEAT_MELODY && !isShowingMelody) {
                     Button({ playerSequence = emptyList(); generateMelody() }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue)) { Text("🔄 Новая мелодия", fontSize = 14.sp, color = Color.White) }
                 }
@@ -131,6 +134,6 @@ fun MusicBoxScreen(onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
             }
         }
 
-        if (showLevelComplete) LevelComplete(3, "Молодец! Ты отлично справился с музыкой!", onNext = { onGameComplete() })
+        if (showLevelComplete) LevelComplete(3, "Молодец! Ты отлично справился с музыкой!", character = "knopa", onNext = { onGameComplete() })
     }
 }
