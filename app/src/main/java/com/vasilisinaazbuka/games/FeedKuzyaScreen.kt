@@ -52,7 +52,6 @@ data class KuzyaState(
     val isSick: Boolean = false, val achievements: List<String> = emptyList(),
     val inventory: List<InventoryItem> = emptyList(), val stats: KuzyaStats = KuzyaStats()
 )
-
 data class KuzyaStats(val totalFoodEaten: Int = 0, val totalGamesPlayed: Int = 0, val totalBathsTaken: Int = 0, val totalSleeps: Int = 0)
 enum class KuzyaMood { ECSTATIC, HAPPY, NEUTRAL, HUNGRY, SAD, SICK, SLEEPY, DIRTY, ANGRY, PLAYING }
 data class InventoryItem(val id: String, val name: String, val imageRes: Int, val type: ItemType, val quantity: Int = 1, val effect: Int = 10)
@@ -98,218 +97,72 @@ fun FeedKuzyaScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete
     LaunchedEffect(Unit) {
         while (true) {
             delay(5000)
-            kuzyaState = kuzyaState.copy(
-                hunger = max(0f, kuzyaState.hunger - 0.5f), happiness = max(0f, kuzyaState.happiness - 0.3f),
-                energy = if (kuzyaState.isSleeping) min(100f, kuzyaState.energy + 1f) else max(0f, kuzyaState.energy - 0.2f),
-                cleanliness = max(0f, kuzyaState.cleanliness - 0.1f),
-                health = if (kuzyaState.hunger < 10 || kuzyaState.cleanliness < 10) max(0f, kuzyaState.health - 0.5f) else min(100f, kuzyaState.health + 0.1f),
-                mood = calculateMood(kuzyaState)
-            )
+            kuzyaState = kuzyaState.copy(hunger = max(0f, kuzyaState.hunger - 0.5f), happiness = max(0f, kuzyaState.happiness - 0.3f), energy = if (kuzyaState.isSleeping) min(100f, kuzyaState.energy + 1f) else max(0f, kuzyaState.energy - 0.2f), cleanliness = max(0f, kuzyaState.cleanliness - 0.1f), health = if (kuzyaState.hunger < 10 || kuzyaState.cleanliness < 10) max(0f, kuzyaState.health - 0.5f) else min(100f, kuzyaState.health + 0.1f), mood = calculateMood(kuzyaState))
             KuzyaSaveManager.saveState(context, kuzyaState)
         }
     }
 
-    LaunchedEffect(kuzyaState.stats.totalFoodEaten) {
-        if (kuzyaState.stats.totalFoodEaten >= 100 && "gourmet" !in kuzyaState.achievements) { showAchievement = "Гурман"; kuzyaState = kuzyaState.copy(achievements = kuzyaState.achievements + "gourmet", coins = kuzyaState.coins + 50) }
-    }
+    LaunchedEffect(kuzyaState.stats.totalFoodEaten) { if (kuzyaState.stats.totalFoodEaten >= 100 && "gourmet" !in kuzyaState.achievements) { showAchievement = "Гурман"; kuzyaState = kuzyaState.copy(achievements = kuzyaState.achievements + "gourmet", coins = kuzyaState.coins + 50) } }
 
     Box(Modifier.fillMaxSize()) {
         Image(painterResource(R.drawable.bg_level_feed), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
-
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             KuzyaHeader(kuzyaState, kuzyaState.coins)
             Spacer(Modifier.height(12.dp))
-
-            Box(Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(24.dp)).background(when (kuzyaState.mood) { KuzyaMood.ECSTATIC -> FairyGold.copy(alpha = 0.3f); KuzyaMood.HAPPY, KuzyaMood.PLAYING -> FairyGreen.copy(alpha = 0.2f); KuzyaMood.SAD, KuzyaMood.SICK -> Color.Gray.copy(alpha = 0.2f); KuzyaMood.HUNGRY -> FairyPink.copy(alpha = 0.2f); KuzyaMood.DIRTY -> Color(0xFF8B4513).copy(alpha = 0.2f); else -> FairyBlue.copy(alpha = 0.1f) }).border(3.dp, FairyGold, RoundedCornerShape(24.dp)).pointerInput(Unit) { detectTapGestures(
-                onTap = { kuzyaState = kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 5f), mood = if (kuzyaState.mood == KuzyaMood.SAD) KuzyaMood.NEUTRAL else kuzyaState.mood); AudioPlayer.playSFX(R.raw.sfx_purr) },
-                onDoubleTap = { showMiniGame = true; miniGameType = MiniGameType.FEEDING },
-                onLongPress = { kuzyaState = kuzyaState.copy(isSleeping = !kuzyaState.isSleeping); AudioPlayer.playSFX(R.raw.sfx_sleep) }
-            ) }, contentAlignment = Alignment.Center) { AnimatedKuzya(kuzyaState, petScale); if (kuzyaState.isSleeping) SleepingAnimation() }
-
+            Box(Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(24.dp)).background(when (kuzyaState.mood) { KuzyaMood.ECSTATIC -> FairyGold.copy(alpha = 0.3f); KuzyaMood.HAPPY, KuzyaMood.PLAYING -> FairyGreen.copy(alpha = 0.2f); KuzyaMood.SAD, KuzyaMood.SICK -> Color.Gray.copy(alpha = 0.2f); KuzyaMood.HUNGRY -> FairyPink.copy(alpha = 0.2f); KuzyaMood.DIRTY -> Color(0xFF8B4513).copy(alpha = 0.2f); else -> FairyBlue.copy(alpha = 0.1f) }).border(3.dp, FairyGold, RoundedCornerShape(24.dp)).pointerInput(Unit) { detectTapGestures(onTap = { kuzyaState = kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 5f), mood = if (kuzyaState.mood == KuzyaMood.SAD) KuzyaMood.NEUTRAL else kuzyaState.mood); AudioPlayer.playSFX(R.raw.sfx_purr) }, onDoubleTap = { showMiniGame = true; miniGameType = MiniGameType.FEEDING }, onLongPress = { kuzyaState = kuzyaState.copy(isSleeping = !kuzyaState.isSleeping); AudioPlayer.playSFX(R.raw.sfx_sleep) }) }, contentAlignment = Alignment.Center) { AnimatedKuzya(kuzyaState, petScale); if (kuzyaState.isSleeping) SleepingAnimation() }
             Spacer(Modifier.height(12.dp)); StatusBars(kuzyaState); Spacer(Modifier.height(12.dp))
-
-            TabRow(selectedTabIndex = currentTab, containerColor = Color.White, contentColor = FairyPurple) {
-                listOf("🍽️ Еда", "🎮 Игры", "🛁 Уход", "🛒 Магазин").forEachIndexed { i, t -> Tab(selected = currentTab == i, onClick = { currentTab = i; if (i == 3) showShop = true }, text = { Text(t, fontSize = 14.sp) }) }
-            }
-
+            TabRow(selectedTabIndex = currentTab, containerColor = Color.White, contentColor = FairyPurple) { listOf("🍽️ Еда", "🎮 Игры", "🛁 Уход", "🛒 Магазин").forEachIndexed { i, t -> Tab(selected = currentTab == i, onClick = { currentTab = i; if (i == 3) showShop = true }, text = { Text(t, fontSize = 14.sp) }) } }
             Spacer(Modifier.height(8.dp))
-
-            when (currentTab) {
-                0 -> FoodTab({ kuzyaState = feedKuzya(kuzyaState, it); AudioPlayer.playSFX(R.raw.sfx_eat) }, { showMiniGame = true; miniGameType = MiniGameType.FEEDING })
-                1 -> GamesTab({ showMiniGame = true; miniGameType = it }, kuzyaState)
-                2 -> CareTab({ kuzyaState = kuzyaState.copy(cleanliness = 100f, happiness = min(100f, kuzyaState.happiness + 10f), stats = kuzyaState.stats.copy(totalBathsTaken = kuzyaState.stats.totalBathsTaken + 1)); AudioPlayer.playSFX(R.raw.sfx_water) }, { if (kuzyaState.coins >= 20) { kuzyaState = kuzyaState.copy(health = 100f, isSick = false, coins = kuzyaState.coins - 20); AudioPlayer.playSFX(R.raw.sfx_heal) } }, kuzyaState)
-            }
+            when (currentTab) { 0 -> FoodTab({ kuzyaState = feedKuzya(kuzyaState, it); AudioPlayer.playSFX(R.raw.sfx_eat) }, { showMiniGame = true; miniGameType = MiniGameType.FEEDING }); 1 -> GamesTab({ showMiniGame = true; miniGameType = it }, kuzyaState); 2 -> CareTab({ kuzyaState = kuzyaState.copy(cleanliness = 100f, happiness = min(100f, kuzyaState.happiness + 10f), stats = kuzyaState.stats.copy(totalBathsTaken = kuzyaState.stats.totalBathsTaken + 1)); AudioPlayer.playSFX(R.raw.sfx_water) }, { if (kuzyaState.coins >= 20) { kuzyaState = kuzyaState.copy(health = 100f, isSick = false, coins = kuzyaState.coins - 20); AudioPlayer.playSFX(R.raw.sfx_heal) } }, kuzyaState) }
         }
-
-        if (showMiniGame) MiniGameDialog(miniGameType, kuzyaState, { reward ->
-            kuzyaState = when (miniGameType) {
-                MiniGameType.FEEDING -> kuzyaState.copy(hunger = min(100f, kuzyaState.hunger + reward), happiness = min(100f, kuzyaState.happiness + 5f), stats = kuzyaState.stats.copy(totalFoodEaten = kuzyaState.stats.totalFoodEaten + 1), coins = kuzyaState.coins + Random.nextInt(5, 15))
-                MiniGameType.FISHING -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 15f), coins = kuzyaState.coins + reward.toInt(), mood = KuzyaMood.HAPPY)
-                MiniGameType.CATCH_MOUSE -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 20f), stats = kuzyaState.stats.copy(totalGamesPlayed = kuzyaState.stats.totalGamesPlayed + 1), coins = kuzyaState.coins + reward.toInt(), mood = KuzyaMood.PLAYING)
-                MiniGameType.PUZZLE -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 10f), experience = kuzyaState.experience + 25)
-            }
-            showMiniGame = false; KuzyaSaveManager.saveState(context, kuzyaState)
-        }, { showMiniGame = false })
-
+        if (showMiniGame) MiniGameDialog(miniGameType, kuzyaState, { reward -> kuzyaState = when (miniGameType) { MiniGameType.FEEDING -> kuzyaState.copy(hunger = min(100f, kuzyaState.hunger + reward), happiness = min(100f, kuzyaState.happiness + 5f), stats = kuzyaState.stats.copy(totalFoodEaten = kuzyaState.stats.totalFoodEaten + 1), coins = kuzyaState.coins + Random.nextInt(5, 15)); MiniGameType.FISHING -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 15f), coins = kuzyaState.coins + reward.toInt(), mood = KuzyaMood.HAPPY); MiniGameType.CATCH_MOUSE -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 20f), stats = kuzyaState.stats.copy(totalGamesPlayed = kuzyaState.stats.totalGamesPlayed + 1), coins = kuzyaState.coins + reward.toInt(), mood = KuzyaMood.PLAYING); MiniGameType.PUZZLE -> kuzyaState.copy(happiness = min(100f, kuzyaState.happiness + 10f), experience = kuzyaState.experience + 25) }; showMiniGame = false; KuzyaSaveManager.saveState(context, kuzyaState) }, { showMiniGame = false })
         if (showShop) ShopDialog(kuzyaState, { if (kuzyaState.coins >= itemPrice(it)) { kuzyaState = kuzyaState.copy(coins = kuzyaState.coins - itemPrice(it), inventory = addToInventory(kuzyaState.inventory, it)); AudioPlayer.playSFX(R.raw.sfx_coin) } }, { showShop = false })
-
         AnimatedVisibility(showAchievement != null, enter = slideInVertically() + fadeIn(), exit = slideOutVertically() + fadeOut(), modifier = Modifier.align(Alignment.TopCenter)) { AchievementNotification(showAchievement ?: "", onDismiss = { showAchievement = null }) }
         if (showLevelComplete) LevelComplete(calculateStars(kuzyaState), "Кнопа счастлив и здоров!\nУровень: ${kuzyaState.level}", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
     }
 }
 
 // ==================== Компоненты ====================
-@Composable
-private fun KuzyaHeader(state: KuzyaState, coins: Int) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp), shape = RoundedCornerShape(16.dp)) {
-    Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Column { Text("Кнопа ❤️", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = FairyPink); Text("Уровень ${state.level} • День ${state.age}", style = MaterialTheme.typography.bodySmall, color = Color.Gray) }
-        Row(verticalAlignment = Alignment.CenterVertically) { Text("⭐", fontSize = 20.sp); Text("${state.coins}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyGold) }
-    }
-}
+@Composable private fun KuzyaHeader(state: KuzyaState, coins: Int) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp), shape = RoundedCornerShape(16.dp)) { Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column { Text("Кнопа ❤️", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = FairyPink); Text("Уровень ${state.level} • День ${state.age}", style = MaterialTheme.typography.bodySmall, color = Color.Gray) }; Row(verticalAlignment = Alignment.CenterVertically) { Text("⭐", fontSize = 20.sp); Text("${state.coins}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyGold) } } }
 
-@Composable
-private fun AnimatedKuzya(state: KuzyaState, scale: Float) {
-    val img = when {
-        state.isSleeping -> R.drawable.character_kuzya_sleeping
-        state.mood == KuzyaMood.ECSTATIC -> R.drawable.character_kuzya_ecstatic
-        state.mood == KuzyaMood.HAPPY -> R.drawable.character_kuzya_happy
-        state.mood == KuzyaMood.PLAYING -> R.drawable.character_kuzya_playing
-        state.mood == KuzyaMood.HUNGRY -> R.drawable.character_kuzya_hungry
-        state.mood == KuzyaMood.SAD -> R.drawable.character_kuzya_sad
-        state.mood == KuzyaMood.SICK -> R.drawable.character_kuzya_sick
-        state.mood == KuzyaMood.DIRTY -> R.drawable.character_kuzya_dirty
-        state.mood == KuzyaMood.ANGRY -> R.drawable.character_kuzya_angry
-        state.mood == KuzyaMood.SLEEPY -> R.drawable.character_kuzya_sleeping
-        else -> R.drawable.character_kuzya_neutral
-    }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painterResource(img), "Кнопа", Modifier.size(120.dp).scale(scale), contentScale = ContentScale.Fit)
-        Text(when (state.mood) { KuzyaMood.ECSTATIC -> "Мур-мур-мур!"; KuzyaMood.HAPPY -> "Мяу! Я счастлив!"; KuzyaMood.PLAYING -> "Давай играть!"; KuzyaMood.HUNGRY -> "Мяу... Я голоден..."; KuzyaMood.SAD -> "Мяу... Мне грустно..."; KuzyaMood.SICK -> "Мяу... Я болею..."; KuzyaMood.SLEEPY -> "Хочу спать..."; KuzyaMood.DIRTY -> "Мяу! Я грязный!"; KuzyaMood.ANGRY -> "МЯУ! Я злой!"; else -> "Мяу!" }, style = MaterialTheme.typography.bodyMedium, color = FairyPurple, fontWeight = FontWeight.Bold)
-    }
-}
+@Composable private fun AnimatedKuzya(state: KuzyaState, scale: Float) { val img = when { state.isSleeping -> R.drawable.character_kuzya_sleeping; state.mood == KuzyaMood.ECSTATIC -> R.drawable.character_kuzya_ecstatic; state.mood == KuzyaMood.HAPPY -> R.drawable.character_kuzya_happy; state.mood == KuzyaMood.PLAYING -> R.drawable.character_kuzya_playing; state.mood == KuzyaMood.HUNGRY -> R.drawable.character_kuzya_hungry; state.mood == KuzyaMood.SAD -> R.drawable.character_kuzya_sad; state.mood == KuzyaMood.SICK -> R.drawable.character_kuzya_sick; state.mood == KuzyaMood.DIRTY -> R.drawable.character_kuzya_dirty; state.mood == KuzyaMood.ANGRY -> R.drawable.character_kuzya_angry; state.mood == KuzyaMood.SLEEPY -> R.drawable.character_kuzya_sleeping; else -> R.drawable.character_kuzya_neutral }; Column(horizontalAlignment = Alignment.CenterHorizontally) { Image(painterResource(img), "Кнопа", Modifier.size(120.dp).scale(scale), contentScale = ContentScale.Fit); Text(when (state.mood) { KuzyaMood.ECSTATIC -> "Мур-мур-мур!"; KuzyaMood.HAPPY -> "Мяу! Я счастлив!"; KuzyaMood.PLAYING -> "Давай играть!"; KuzyaMood.HUNGRY -> "Мяу... Я голоден..."; KuzyaMood.SAD -> "Мяу... Мне грустно..."; KuzyaMood.SICK -> "Мяу... Я болею..."; KuzyaMood.SLEEPY -> "Хочу спать..."; KuzyaMood.DIRTY -> "Мяу! Я грязный!"; KuzyaMood.ANGRY -> "МЯУ! Я злой!"; else -> "Мяу!" }, style = MaterialTheme.typography.bodyMedium, color = FairyPurple, fontWeight = FontWeight.Bold) } }
 
-@Composable
-private fun SleepingAnimation() { var o by remember { mutableFloatStateOf(0f) }; LaunchedEffect(Unit) { while (true) { delay(2000); o = -20f } }; Text("Z", fontSize = 24.sp, color = FairyBlue, modifier = Modifier.offset(y = o.dp)) }
+@Composable private fun SleepingAnimation() { var o by remember { mutableFloatStateOf(0f) }; LaunchedEffect(Unit) { while (true) { delay(2000); o = -20f } }; Text("Z", fontSize = 24.sp, color = FairyBlue, modifier = Modifier.offset(y = o.dp)) }
 
-@Composable
-private fun StatusBars(s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp)) {
-    Column(Modifier.padding(12.dp)) {
-        StatusBar("🍽️ Сытость", s.hunger, if (s.hunger < 30) FairyPink else FairyGreen)
-        StatusBar("😊 Счастье", s.happiness, FairyGold); StatusBar("⚡ Энергия", s.energy, FairyBlue)
-        StatusBar("❤️ Здоровье", s.health, if (s.health < 30) Color.Red else FairyGreen)
-        StatusBar("🧼 Чистота", s.cleanliness, FairyPurple)
-    }
-}
+@Composable private fun StatusBars(s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp)) { Column(Modifier.padding(12.dp)) { StatusBar("🍽️ Сытость", s.hunger, if (s.hunger < 30) FairyPink else FairyGreen); StatusBar("😊 Счастье", s.happiness, FairyGold); StatusBar("⚡ Энергия", s.energy, FairyBlue); StatusBar("❤️ Здоровье", s.health, if (s.health < 30) Color.Red else FairyGreen); StatusBar("🧼 Чистота", s.cleanliness, FairyPurple) } }
 
-@Composable
-private fun StatusBar(label: String, value: Float, color: Color) = Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-    Text(label, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(100.dp))
-    LinearProgressIndicator(progress = value / 100f, modifier = Modifier.weight(1f).height(10.dp).clip(RoundedCornerShape(5.dp)), color = color, trackColor = color.copy(alpha = 0.2f))
-    Text("${value.toInt()}%", style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(40.dp), textAlign = TextAlign.End)
-}
+@Composable private fun StatusBar(label: String, value: Float, color: Color) = Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) { Text(label, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(100.dp)); LinearProgressIndicator(progress = value / 100f, modifier = Modifier.weight(1f).height(10.dp).clip(RoundedCornerShape(5.dp)), color = color, trackColor = color.copy(alpha = 0.2f)); Text("${value.toInt()}%", style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(40.dp), textAlign = TextAlign.End) }
 
-@Composable
-private fun FoodTab(onFeed: (InventoryItem) -> Unit, onGame: () -> Unit) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) {
-    Column(Modifier.padding(16.dp)) {
-        Text("Покорми Кнопу", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(8.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.height(180.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(ItemCatalog.getItemsByType(ItemType.FOOD).take(8)) { FoodItemButton(it) { onFeed(it) } } }
-        Spacer(Modifier.height(8.dp))
-        Button(onClick = onGame, Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGreen), shape = RoundedCornerShape(16.dp)) { Text("🎮 Мини-игра: Накорми Кнопу", fontSize = 16.sp, color = Color.White) }
-    }
-}
+@Composable private fun FoodTab(onFeed: (InventoryItem) -> Unit, onGame: () -> Unit) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) { Column(Modifier.padding(16.dp)) { Text("Покорми Кнопу", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(8.dp)); LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.height(180.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(ItemCatalog.getItemsByType(ItemType.FOOD).take(8)) { FoodItemButton(it) { onFeed(it) } } }; Spacer(Modifier.height(8.dp)); Button(onClick = onGame, Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGreen), shape = RoundedCornerShape(16.dp)) { Text("🎮 Мини-игра: Накорми Кнопу", fontSize = 16.sp, color = Color.White) } } }
 
-@Composable
-private fun FoodItemButton(item: InventoryItem, onClick: () -> Unit) = Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(FairyGold.copy(alpha = 0.2f)).clickable(onClick = onClick).padding(8.dp)) {
-    Image(painterResource(item.imageRes), item.name, Modifier.size(48.dp), contentScale = ContentScale.Fit); Text(item.name, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
-}
+@Composable private fun FoodItemButton(item: InventoryItem, onClick: () -> Unit) = Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(FairyGold.copy(alpha = 0.2f)).clickable(onClick = onClick).padding(8.dp)) { Image(painterResource(item.imageRes), item.name, Modifier.size(48.dp), contentScale = ContentScale.Fit); Text(item.name, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center) }
 
-@Composable
-private fun GamesTab(onPlay: (MiniGameType) -> Unit, s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) {
-    Column(Modifier.padding(16.dp)) {
-        Text("Игры с Кнопой", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(8.dp))
-        listOf(Triple(MiniGameType.FISHING, "🎣 Рыбалка", "Поймай рыбку"), Triple(MiniGameType.CATCH_MOUSE, "🐭 Поймай мышку", "Помоги Кнопе"), Triple(MiniGameType.PUZZLE, "🧩 Пазл", "Собери картинку")).forEach { (t, title, desc) ->
-            Card(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onPlay(t) }, colors = CardDefaults.cardColors(containerColor = FairyBlue.copy(alpha = 0.1f))) { Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Text(title, fontSize = 20.sp); Spacer(Modifier.weight(1f)); Text(desc, style = MaterialTheme.typography.bodySmall, color = Color.Gray) } }
-        }
-    }
-}
+@Composable private fun GamesTab(onPlay: (MiniGameType) -> Unit, s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) { Column(Modifier.padding(16.dp)) { Text("Игры с Кнопой", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(8.dp)); listOf(Triple(MiniGameType.FISHING, "🎣 Рыбалка", "Поймай рыбку"), Triple(MiniGameType.CATCH_MOUSE, "🐭 Поймай мышку", "Помоги Кнопе"), Triple(MiniGameType.PUZZLE, "🧩 Пазл", "Собери картинку")).forEach { (t, title, desc) -> Card(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onPlay(t) }, colors = CardDefaults.cardColors(containerColor = FairyBlue.copy(alpha = 0.1f))) { Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Text(title, fontSize = 20.sp); Spacer(Modifier.weight(1f)); Text(desc, style = MaterialTheme.typography.bodySmall, color = Color.Gray) } } } } }
 
-@Composable
-private fun CareTab(onBath: () -> Unit, onHeal: () -> Unit, s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) {
-    Column(Modifier.padding(16.dp)) {
-        Text("Уход за Кнопой", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(onClick = onBath, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue), shape = RoundedCornerShape(16.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("🛁", fontSize = 28.sp); Text("Купать", fontSize = 14.sp, color = Color.White) } }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = onHeal, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink), shape = RoundedCornerShape(16.dp), enabled = s.health < 100 && s.coins >= 20) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("💊", fontSize = 28.sp); Text("Лечить (20⭐)", fontSize = 12.sp, color = Color.White) } }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = {}, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPurple), shape = RoundedCornerShape(16.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("😴", fontSize = 28.sp); Text("Спать", fontSize = 14.sp, color = Color.White) } }
-        }
-    }
-}
+@Composable private fun CareTab(onBath: () -> Unit, onHeal: () -> Unit, s: KuzyaState) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) { Column(Modifier.padding(16.dp)) { Text("Уход за Кнопой", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = FairyPurple); Spacer(Modifier.height(12.dp)); Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { Button(onClick = onBath, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue), shape = RoundedCornerShape(16.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("🛁", fontSize = 28.sp); Text("Купать", fontSize = 14.sp, color = Color.White) } }; Spacer(Modifier.width(8.dp)); Button(onClick = onHeal, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink), shape = RoundedCornerShape(16.dp), enabled = s.health < 100 && s.coins >= 20) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("💊", fontSize = 28.sp); Text("Лечить (20⭐)", fontSize = 12.sp, color = Color.White) } }; Spacer(Modifier.width(8.dp)); Button(onClick = {}, Modifier.weight(1f).height(80.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPurple), shape = RoundedCornerShape(16.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("😴", fontSize = 28.sp); Text("Спать", fontSize = 14.sp, color = Color.White) } } } } }
 
 // ==================== Мини-игры ====================
 enum class MiniGameType { FEEDING, FISHING, CATCH_MOUSE, PUZZLE }
 
-@Composable
-private fun MiniGameDialog(gameType: MiniGameType, kuzyaState: KuzyaState, onComplete: (Float) -> Unit, onDismiss: () -> Unit) = AlertDialog(onDismissRequest = onDismiss, title = { Text(when (gameType) { MiniGameType.FEEDING -> "Накорми Кнопу"; MiniGameType.FISHING -> "Рыбалка"; MiniGameType.CATCH_MOUSE -> "Поймай мышку"; MiniGameType.PUZZLE -> "Пазл" }, fontWeight = FontWeight.Bold) }, text = { when (gameType) { MiniGameType.FEEDING -> FeedingMiniGame(kuzyaState, onComplete); MiniGameType.FISHING -> FishingMiniGame(onComplete); MiniGameType.CATCH_MOUSE -> CatchMouseMiniGame(onComplete); MiniGameType.PUZZLE -> PuzzleMiniGame(onComplete) } }, confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
+@Composable private fun MiniGameDialog(gameType: MiniGameType, kuzyaState: KuzyaState, onComplete: (Float) -> Unit, onDismiss: () -> Unit) = AlertDialog(onDismissRequest = onDismiss, title = { Text(when (gameType) { MiniGameType.FEEDING -> "Накорми Кнопу"; MiniGameType.FISHING -> "Рыбалка"; MiniGameType.CATCH_MOUSE -> "Поймай мышку"; MiniGameType.PUZZLE -> "Пазл" }, fontWeight = FontWeight.Bold) }, text = { when (gameType) { MiniGameType.FEEDING -> FeedingMiniGame(kuzyaState, onComplete); MiniGameType.FISHING -> FishingMiniGame(onComplete); MiniGameType.CATCH_MOUSE -> CatchMouseMiniGame(onComplete); MiniGameType.PUZZLE -> PuzzleMiniGame(onComplete) } }, confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
 
-@Composable
-private fun FeedingMiniGame(kuzyaState: KuzyaState, onComplete: (Float) -> Unit) {
-    var foodCount by remember { mutableIntStateOf(0) }; val targetFood = remember { Random.nextInt(3, 8) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Дай Кнопе $targetFood кусочков еды!", style = MaterialTheme.typography.titleMedium); Spacer(Modifier.height(8.dp))
-        Text("Собрано: $foodCount из $targetFood", style = MaterialTheme.typography.bodyLarge, color = if (foodCount >= targetFood) FairyGreen else FairyGold); Spacer(Modifier.height(12.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(200.dp)) {
-            items(List(maxOf(targetFood, foodCount + 2)) { it }) { index ->
-                if (index < foodCount) Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(FairyGreen.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) { Text("✅", fontSize = 32.sp) }
-                else {
-                    val foods = listOf(R.drawable.item_apple, R.drawable.item_pizza, R.drawable.item_banana, R.drawable.item_fish, R.drawable.item_milk, R.drawable.item_cheese)
-                    Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(FairyGold.copy(alpha = 0.3f)).clickable { foodCount++; AudioPlayer.playSFX(R.raw.sfx_eat); if (foodCount >= targetFood) onComplete(30f) }, contentAlignment = Alignment.Center) { Image(painterResource(foods[index % foods.size]), null, Modifier.size(40.dp), contentScale = ContentScale.Fit) }
-                }
-            }
-        }
-    }
-}
+@Composable private fun FeedingMiniGame(kuzyaState: KuzyaState, onComplete: (Float) -> Unit) { var foodCount by remember { mutableIntStateOf(0) }; val targetFood = remember { Random.nextInt(3, 8) }; Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Дай Кнопе $targetFood кусочков еды!", style = MaterialTheme.typography.titleMedium); Spacer(Modifier.height(8.dp)); Text("Собрано: $foodCount из $targetFood", style = MaterialTheme.typography.bodyLarge, color = if (foodCount >= targetFood) FairyGreen else FairyGold); Spacer(Modifier.height(12.dp)); LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(200.dp)) { items(List(maxOf(targetFood, foodCount + 2)) { it }) { index -> if (index < foodCount) Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(FairyGreen.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) { Text("✅", fontSize = 32.sp) } else { val foods = listOf(R.drawable.item_apple, R.drawable.item_pizza, R.drawable.item_banana, R.drawable.item_fish, R.drawable.item_milk, R.drawable.item_cheese); Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(FairyGold.copy(alpha = 0.3f)).clickable { foodCount++; AudioPlayer.playSFX(R.raw.sfx_eat); if (foodCount >= targetFood) onComplete(30f) }, contentAlignment = Alignment.Center) { Image(painterResource(foods[index % foods.size]), null, Modifier.size(40.dp), contentScale = ContentScale.Fit) } } } } } }
 
-@Composable
-private fun FishingMiniGame(onComplete: (Float) -> Unit) {
-    var fishPosition by remember { mutableFloatStateOf(Random.nextFloat()) }; var score by remember { mutableIntStateOf(0) }; var timeLeft by remember { mutableIntStateOf(15) }; var isGameOver by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { while (timeLeft > 0 && !isGameOver) { delay(1000); timeLeft--; fishPosition = Random.nextFloat() }; if (!isGameOver) { isGameOver = true; onComplete(score.toFloat() * 5f) } }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Поймай рыбку! Время: $timeLeft сек"); Text("Счёт: $score", color = FairyGold); Spacer(Modifier.height(12.dp)); Box(Modifier.fillMaxWidth().height(150.dp).background(FairyBlue.copy(alpha = 0.2f)).clickable { if (fishPosition in 0.4f..0.6f) { score++; fishPosition = Random.nextFloat(); AudioPlayer.playSFX(R.raw.sfx_splash) } }, contentAlignment = Alignment.Center) { Image(painterResource(R.drawable.item_fish), null, Modifier.size(48.dp).offset(x = ((fishPosition - 0.5f) * 200).dp), contentScale = ContentScale.Fit) } }
-}
+@Composable private fun FishingMiniGame(onComplete: (Float) -> Unit) { var fishPosition by remember { mutableFloatStateOf(Random.nextFloat()) }; var score by remember { mutableIntStateOf(0) }; var timeLeft by remember { mutableIntStateOf(15) }; var isGameOver by remember { mutableStateOf(false) }; LaunchedEffect(Unit) { while (timeLeft > 0 && !isGameOver) { delay(1000); timeLeft--; fishPosition = Random.nextFloat() }; if (!isGameOver) { isGameOver = true; onComplete(score.toFloat() * 5f) } }; Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Поймай рыбку! Время: $timeLeft сек"); Text("Счёт: $score", color = FairyGold); Spacer(Modifier.height(12.dp)); Box(Modifier.fillMaxWidth().height(150.dp).background(FairyBlue.copy(alpha = 0.2f)).clickable { if (fishPosition in 0.4f..0.6f) { score++; fishPosition = Random.nextFloat(); AudioPlayer.playSFX(R.raw.sfx_splash) } }, contentAlignment = Alignment.Center) { Image(painterResource(R.drawable.item_fish), null, Modifier.size(48.dp).offset(x = ((fishPosition - 0.5f) * 200).dp), contentScale = ContentScale.Fit) } } }
 
-@Composable
-private fun CatchMouseMiniGame(onComplete: (Float) -> Unit) {
-    var mouseVisible by remember { mutableStateOf(true) }; var mousePosition by remember { mutableStateOf(Pair(Random.nextFloat(), Random.nextFloat())) }; var score by remember { mutableIntStateOf(0) }; var timeLeft by remember { mutableIntStateOf(20) }
-    LaunchedEffect(Unit) { while (timeLeft > 0) { delay(1000); timeLeft--; if (Random.nextFloat() > 0.5f) { mouseVisible = true; mousePosition = Pair(Random.nextFloat(), Random.nextFloat()) } else mouseVisible = false }; onComplete(score.toFloat() * 3f) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Поймай мышек! Время: $timeLeft сек"); Text("Поймано: $score", color = FairyGold); Spacer(Modifier.height(12.dp)); Box(Modifier.fillMaxWidth().height(200.dp).background(Color.Gray.copy(alpha = 0.1f))) { if (mouseVisible) Text("🐭", fontSize = 40.sp, modifier = Modifier.offset(x = (mousePosition.first * 250).dp, y = (mousePosition.second * 150).dp).clickable { score++; mouseVisible = false; AudioPlayer.playSFX(R.raw.sfx_squeak) }); Image(painterResource(R.drawable.character_kuzya_playing), null, Modifier.size(60.dp).align(Alignment.BottomCenter), contentScale = ContentScale.Fit) } }
-}
+@Composable private fun CatchMouseMiniGame(onComplete: (Float) -> Unit) { var mouseVisible by remember { mutableStateOf(true) }; var mousePosition by remember { mutableStateOf(Pair(Random.nextFloat(), Random.nextFloat())) }; var score by remember { mutableIntStateOf(0) }; var timeLeft by remember { mutableIntStateOf(20) }; LaunchedEffect(Unit) { while (timeLeft > 0) { delay(1000); timeLeft--; if (Random.nextFloat() > 0.5f) { mouseVisible = true; mousePosition = Pair(Random.nextFloat(), Random.nextFloat()) } else mouseVisible = false }; onComplete(score.toFloat() * 3f) }; Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Поймай мышек! Время: $timeLeft сек"); Text("Поймано: $score", color = FairyGold); Spacer(Modifier.height(12.dp)); Box(Modifier.fillMaxWidth().height(200.dp).background(Color.Gray.copy(alpha = 0.1f))) { if (mouseVisible) Text("🐭", fontSize = 40.sp, modifier = Modifier.offset(x = (mousePosition.first * 250).dp, y = (mousePosition.second * 150).dp).clickable { score++; mouseVisible = false; AudioPlayer.playSFX(R.raw.sfx_squeak) }); Image(painterResource(R.drawable.character_kuzya_playing), null, Modifier.size(60.dp).align(Alignment.BottomCenter), contentScale = ContentScale.Fit) } } }
 
-@Composable
-private fun PuzzleMiniGame(onComplete: (Float) -> Unit) {
-    var pieces by remember { mutableStateOf(List(4) { it }.shuffled()) }; var placedPieces by remember { mutableIntStateOf(0) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Собери пазл с Кнопой!"); Text("Собрано: $placedPieces из 4"); Spacer(Modifier.height(12.dp)); LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth().height(200.dp)) { items(4) { index -> Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(if (pieces[index] == index) FairyGreen.copy(alpha = 0.5f) else FairyGold.copy(alpha = 0.3f)).clickable { if (pieces[index] == index) { placedPieces++; if (placedPieces >= 4) onComplete(20f) } }, contentAlignment = Alignment.Center) { Image(painterResource(when (pieces[index]) { 0 -> R.drawable.character_kuzya_happy; 1 -> R.drawable.item_fish; 2 -> R.drawable.item_apple; else -> R.drawable.character_kuzya_playing }), null, Modifier.size(40.dp), contentScale = ContentScale.Fit) } } }
-}
+@Composable private fun PuzzleMiniGame(onComplete: (Float) -> Unit) { var pieces by remember { mutableStateOf(List(4) { it }.shuffled()) }; var placedPieces by remember { mutableIntStateOf(0) }; Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("Собери пазл с Кнопой!"); Text("Собрано: $placedPieces из 4"); Spacer(Modifier.height(12.dp)); LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth().height(200.dp)) { items(4) { index -> Box(Modifier.padding(4.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(if (pieces[index] == index) FairyGreen.copy(alpha = 0.5f) else FairyGold.copy(alpha = 0.3f)).clickable { if (pieces[index] == index) { placedPieces++; if (placedPieces >= 4) onComplete(20f) } }, contentAlignment = Alignment.Center) { Image(painterResource(when (pieces[index]) { 0 -> R.drawable.character_kuzya_happy; 1 -> R.drawable.item_fish; 2 -> R.drawable.item_apple; else -> R.drawable.character_kuzya_playing }), null, Modifier.size(40.dp), contentScale = ContentScale.Fit) } } } } }
 
 // ==================== Магазин ====================
-@Composable
-private fun ShopDialog(kuzyaState: KuzyaState, onBuy: (InventoryItem) -> Unit, onDismiss: () -> Unit) = AlertDialog(onDismissRequest = onDismiss, title = { Row(verticalAlignment = Alignment.CenterVertically) { Text("🛒 Магазин", fontWeight = FontWeight.Bold); Spacer(Modifier.weight(1f)); Text("⭐${kuzyaState.coins}", color = FairyGold) } }, text = { LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(300.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(ItemCatalog.allItems.take(9)) { ShopItemCard(it, kuzyaState.coins >= itemPrice(it)) { onBuy(it) } } } }, confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
+@Composable private fun ShopDialog(kuzyaState: KuzyaState, onBuy: (InventoryItem) -> Unit, onDismiss: () -> Unit) = AlertDialog(onDismissRequest = onDismiss, title = { Row(verticalAlignment = Alignment.CenterVertically) { Text("🛒 Магазин", fontWeight = FontWeight.Bold); Spacer(Modifier.weight(1f)); Text("⭐${kuzyaState.coins}", color = FairyGold) } }, text = { LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(300.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(ItemCatalog.allItems.take(9)) { ShopItemCard(it, kuzyaState.coins >= itemPrice(it)) { onBuy(it) } } } }, confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss) { Text("Закрыть") } })
 
-@Composable
-private fun ShopItemCard(item: InventoryItem, canBuy: Boolean, onBuy: () -> Unit) = Card(Modifier.aspectRatio(0.8f).clickable(enabled = canBuy, onClick = onBuy), colors = CardDefaults.cardColors(containerColor = if (canBuy) Color.White else Color.Gray.copy(alpha = 0.3f)), elevation = CardDefaults.cardElevation(4.dp)) { Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) { Image(painterResource(item.imageRes), item.name, Modifier.size(40.dp), contentScale = ContentScale.Fit); Text(item.name, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center); Text("⭐${itemPrice(item)}", style = MaterialTheme.typography.bodySmall, color = if (canBuy) FairyGold else Color.Gray) } }
+@Composable private fun ShopItemCard(item: InventoryItem, canBuy: Boolean, onBuy: () -> Unit) = Card(Modifier.aspectRatio(0.8f).clickable(enabled = canBuy, onClick = onBuy), colors = CardDefaults.cardColors(containerColor = if (canBuy) Color.White else Color.Gray.copy(alpha = 0.3f)), elevation = CardDefaults.cardElevation(4.dp)) { Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) { Image(painterResource(item.imageRes), item.name, Modifier.size(40.dp), contentScale = ContentScale.Fit); Text(item.name, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center); Text("⭐${itemPrice(item)}", style = MaterialTheme.typography.bodySmall, color = if (canBuy) FairyGold else Color.Gray) } }
 
-@Composable
-private fun AchievementNotification(title: String, onDismiss: () -> Unit) = Card(Modifier.fillMaxWidth().padding(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold), shape = RoundedCornerShape(16.dp)) { Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text("🏆", fontSize = 32.sp); Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) { Text("Достижение!", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White); Text(title, style = MaterialTheme.typography.bodyMedium, color = Color.White) }; IconButton(onClick = onDismiss) { Text("✕", color = Color.White) } } }
+@Composable private fun AchievementNotification(title: String, onDismiss: () -> Unit) = Card(Modifier.fillMaxWidth().padding(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold), shape = RoundedCornerShape(16.dp)) { Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text("🏆", fontSize = 32.sp); Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) { Text("Достижение!", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White); Text(title, style = MaterialTheme.typography.bodyMedium, color = Color.White) }; IconButton(onClick = onDismiss) { Text("✕", color = Color.White) } } }
 
 // ==================== Вспомогательные функции ====================
-private fun calculateMood(state: KuzyaState): KuzyaMood = when {
-    state.isSleeping -> KuzyaMood.SLEEPY; state.isSick || state.health < 20 -> KuzyaMood.SICK
-    state.hunger < 10 -> KuzyaMood.HUNGRY; state.cleanliness < 15 -> KuzyaMood.DIRTY
-    state.happiness < 10 -> KuzyaMood.SAD; state.energy < 10 -> KuzyaMood.SLEEPY
-    state.happiness > 80 && state.hunger > 80 -> KuzyaMood.ECSTATIC
-    state.happiness > 60 && state.hunger > 50 -> KuzyaMood.HAPPY
-    else -> KuzyaMood.NEUTRAL
-}
+private fun calculateMood(state: KuzyaState): KuzyaMood = when { state.isSleeping -> KuzyaMood.SLEEPY; state.isSick || state.health < 20 -> KuzyaMood.SICK; state.hunger < 10 -> KuzyaMood.HUNGRY; state.cleanliness < 15 -> KuzyaMood.DIRTY; state.happiness < 10 -> KuzyaMood.SAD; state.energy < 10 -> KuzyaMood.SLEEPY; state.happiness > 80 && state.hunger > 80 -> KuzyaMood.ECSTATIC; state.happiness > 60 && state.hunger > 50 -> KuzyaMood.HAPPY; else -> KuzyaMood.NEUTRAL }
 private fun feedKuzya(state: KuzyaState, item: InventoryItem) = state.copy(hunger = min(100f, state.hunger + item.effect), happiness = min(100f, state.happiness + item.effect / 2), stats = state.stats.copy(totalFoodEaten = state.stats.totalFoodEaten + 1), mood = calculateMood(state.copy(hunger = min(100f, state.hunger + item.effect))))
 private fun addToInventory(inv: List<InventoryItem>, item: InventoryItem) = inv.find { it.id == item.id }?.let { inv.map { if (it.id == item.id) it.copy(quantity = it.quantity + 1) else it } } ?: (inv + item.copy(quantity = 1))
 private fun itemPrice(item: InventoryItem) = when (item.type) { ItemType.FOOD -> 10; ItemType.SNACK -> 15; ItemType.TOY -> 25; ItemType.MEDICINE -> 30; ItemType.SOAP -> 20; ItemType.DECORATION -> 35; ItemType.SPECIAL -> 50 }
