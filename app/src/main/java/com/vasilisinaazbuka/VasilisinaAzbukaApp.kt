@@ -33,6 +33,7 @@ import com.vasilisinaazbuka.data.GameState
 import com.vasilisinaazbuka.games.*
 import com.vasilisinaazbuka.navigation.Routes
 import com.vasilisinaazbuka.ui.theme.*
+import kotlinx.coroutines.delay
 
 @Composable
 fun VasilisinaAzbukaApp() {
@@ -76,7 +77,6 @@ fun VasilisinaAzbukaApp() {
 fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
-    // Анимированные эмоции персонажей
     val vasilisaEmotions = listOf("happy", "proud", "teacher")
     val knopaEmotions = listOf("happy", "playing", "ecstatic", "happy", "sleepy")
     var vasilisaIndex by remember { mutableIntStateOf(0) }
@@ -96,7 +96,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
         Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(0.32f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                // Заголовок
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
                     Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("В гостях у Василисы", style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -105,67 +104,26 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
                 Spacer(Modifier.height(20.dp))
 
-                // Персонажи с анимированными эмоциями
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    // Василиса
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
-                                Image(
-                                    painter = painterResource(
-                                        when (vasilisaEmotions[vasilisaIndex]) {
-                                            "proud" -> R.drawable.character_vasilisa_proud
-                                            "teacher" -> R.drawable.character_vasilisa_teacher
-                                            else -> R.drawable.character_vasilisa_happy
-                                        }
-                                    ),
-                                    contentDescription = "Василиса",
-                                    modifier = Modifier.fillMaxSize().padding(8.dp),
-                                    contentScale = ContentScale.Fit
-                                )
+                                Image(painterResource(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> R.drawable.character_vasilisa_proud; "teacher" -> R.drawable.character_vasilisa_teacher; else -> R.drawable.character_vasilisa_happy }), "Василиса", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                             }
                             Spacer(Modifier.height(8.dp))
                             Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 14.sp)
-                            Text(
-                                when (vasilisaEmotions[vasilisaIndex]) {
-                                    "proud" -> "Гордится тобой!"
-                                    "teacher" -> "Научит всему"
-                                    else -> "Твой учитель"
-                                },
-                                color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center
-                            )
+                            Text(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> "Гордится тобой!"; "teacher" -> "Научит всему"; else -> "Твой учитель" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
 
-                    // Кнопа
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
-                                Image(
-                                    painter = painterResource(
-                                        when (knopaEmotions[knopaIndex]) {
-                                            "playing" -> R.drawable.character_kuzya_playing
-                                            "ecstatic" -> R.drawable.character_kuzya_ecstatic
-                                            "sleepy" -> R.drawable.character_kuzya_sleeping
-                                            else -> R.drawable.character_kuzya_happy
-                                        }
-                                    ),
-                                    contentDescription = "Кнопа",
-                                    modifier = Modifier.fillMaxSize().padding(8.dp),
-                                    contentScale = ContentScale.Fit
-                                )
+                                Image(painterResource(when (knopaEmotions[knopaIndex]) { "playing" -> R.drawable.character_kuzya_playing; "ecstatic" -> R.drawable.character_kuzya_ecstatic; "sleepy" -> R.drawable.character_kuzya_sleeping; else -> R.drawable.character_kuzya_happy }), "Кнопа", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                             }
                             Spacer(Modifier.height(8.dp))
                             Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 14.sp)
-                            Text(
-                                when (knopaEmotions[knopaIndex]) {
-                                    "playing" -> "Хочет играть!"
-                                    "ecstatic" -> "Мур-мур!"
-                                    "sleepy" -> "Спит..."
-                                    else -> "Твой друг"
-                                },
-                                color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center
-                            )
+                            Text(when (knopaEmotions[knopaIndex]) { "playing" -> "Хочет играть!"; "ecstatic" -> "Мур-мур!"; "sleepy" -> "Спит..."; else -> "Твой друг" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
                 }
