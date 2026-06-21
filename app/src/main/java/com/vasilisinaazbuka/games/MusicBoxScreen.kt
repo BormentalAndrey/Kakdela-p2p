@@ -39,6 +39,7 @@ private data class SoundItem(
 /**
  * Игра «Музыкальная шкатулка» — 3 режима: свободная игра, повтори мелодию, угадай звук
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicBoxScreen(
     onGameComplete: () -> Unit = {},
