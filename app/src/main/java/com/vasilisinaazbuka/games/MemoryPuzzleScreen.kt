@@ -1,7 +1,6 @@
 package com.vasilisinaazbuka.games
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,12 +50,10 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     var viewCount by remember { mutableIntStateOf(0) }
     var selectedPiece by remember { mutableIntStateOf(-1) }
 
-    // Перемешанные кусочки
     val shuffledPieces = remember { (0..5).shuffled() }
     var placedPieces by remember { mutableStateOf(mapOf<Int, Int>()) }
 
     LaunchedEffect(stage) { showImage = true; placedPieces = emptyMap(); selectedPiece = -1; viewCount = 0; delay(3000); showImage = false }
-
     val isComplete = placedPieces.size == 6 && placedPieces.all { (cell, piece) -> cell == piece }
 
     LaunchedEffect(isComplete) {
@@ -72,13 +69,13 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
         Image(painterResource(R.drawable.bg_level_memory), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Левая панель (1/3) — фиксированная
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Button(onClick = onBack, Modifier.fillMaxWidth().height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp)) { Text("↩ Назад", fontSize = 14.sp, color = Color.White) }
+                Spacer(Modifier.height(8.dp))
                 Text("Собери картинку", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
                 StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true)
                 Spacer(Modifier.height(12.dp))
-
                 CharacterView("vasilisa", if (showImage) "teacher" else "thinking", if (showImage) "Запомни картинку!\nСмотри внимательно." else "Собери картинку!\nНажми на кусочек,\nпотом на ячейку.", Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
 
@@ -92,7 +89,6 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
 
             Spacer(Modifier.width(12.dp))
 
-            // Правая часть (2/3) — с прокруткой
             Column(Modifier.weight(0.67f).fillMaxHeight().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (showImage) {
                     Card(Modifier.fillMaxWidth().aspectRatio(1.5f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
@@ -102,7 +98,6 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                         }
                     }
                 } else {
-                    // Сетка 3×2
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().aspectRatio(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(List(6) { it }) { _, cellIndex ->
                             val pieceInCell = placedPieces[cellIndex]
@@ -119,11 +114,9 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                     }
 
                     Spacer(Modifier.height(12.dp))
-
                     Text("Доступные кусочки:", style = MaterialTheme.typography.bodySmall, color = FairyPurple)
                     Spacer(Modifier.height(4.dp))
 
-                    // Доступные кусочки в 2 ряда по 3
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().height(140.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(availablePieces) { _, pieceIndex ->
                             val isSelected = selectedPiece == pieceIndex
@@ -141,11 +134,38 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     }
 }
 
+/**
+ * Правильный показ фрагмента картинки 600×400 для пазла 3×2
+ * Без scaleX/scaleY — только смещение через translationX/Y
+ */
 @Composable
 private fun PuzzlePieceView(pieceIndex: Int, imageRes: Int) {
-    val cols = 3; val rows = 2
-    val col = pieceIndex % cols; val row = pieceIndex / cols
+    val cols = 3
+    val rows = 2
+    val col = pieceIndex % cols  // 0, 1, 2
+    val row = pieceIndex / cols  // 0, 1
+
     Box(Modifier.fillMaxSize().clipToBounds()) {
-        Image(painterResource(imageRes), "Кусочек ${pieceIndex + 1}", Modifier.fillMaxSize().graphicsLayer { translationX = -size.width * col; translationY = -size.height * row; scaleX = cols.toFloat(); scaleY = rows.toFloat() }, contentScale = ContentScale.FillBounds)
+        Image(
+            painter = painterResource(imageRes),
+            contentDescription = "Кусочек ${pieceIndex + 1}",
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    // Размер одного кусочка в пикселях на экране
+                    val pieceWidth = size.width
+                    val pieceHeight = size.height
+                    
+                    // Смещаем картинку так, чтобы показать только свой фрагмент
+                    // Картинка имеет исходное соотношение 600×400 = 1.5
+                    // Мы показываем 1/3 ширины и 1/2 высоты
+                    translationX = -pieceWidth * col
+                    translationY = -pieceHeight * row
+                    
+                    // НЕ масштабируем! Картинка остаётся как есть
+                    // clipToBounds() обрежет всё лишнее
+                },
+            contentScale = ContentScale.FillWidth  // Заполняем по ширине ячейки
+        )
     }
 }
