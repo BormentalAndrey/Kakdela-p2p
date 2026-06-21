@@ -27,36 +27,12 @@ import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.R
 import com.vasilisinaazbuka.ui.theme.*
 
-/**
- * Компонент для отображения персонажа (Василиса или Кнопа) с эмоцией и сообщением
- * Оптимизирован для ландшафтной ориентации
- *
- * @param character Имя персонажа: "vasilisa" или "knopa"
- * @param emotion Эмоция персонажа: happy, sad, neutral, proud, teacher, hungry, thinking, sleeping, sick
- * @param message Текст сообщения от персонажа
- * @param modifier Модификатор композабла
- */
 @Composable
-fun CharacterView(
-    character: String,
-    emotion: String = "neutral",
-    message: String = "",
-    modifier: Modifier = Modifier
-) {
-    // Анимация пульсации для счастливого персонажа
-    val pulseScale by rememberInfiniteTransition().animateFloat(
-        initialValue = 1f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
+fun CharacterView(character: String, emotion: String = "neutral", message: String = "", modifier: Modifier = Modifier) {
+    val pulseScale by rememberInfiniteTransition().animateFloat(1f, 1.1f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "pulse")
     
-    // Определяем аватар и цвет в зависимости от персонажа и эмоции
     val (avatarRes, bgColor, borderColor, shouldPulse) = when {
-        // Василиса
+        // ==================== ВАСИЛИСА ====================
         character == "vasilisa" && emotion == "happy" -> 
             Quad(R.drawable.character_vasilisa_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "vasilisa" && emotion == "proud" -> 
@@ -68,15 +44,15 @@ fun CharacterView(
         character == "vasilisa" && emotion == "sad" -> 
             Quad(R.drawable.character_vasilisa_sad, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
         character == "vasilisa" && emotion == "surprised" -> 
-            Quad(R.drawable.character_vasilisa_happy, FairyPink.copy(alpha = 0.2f), FairyPink, false)
+            Quad(R.drawable.character_vasilisa_surprised, FairyPink.copy(alpha = 0.2f), FairyPink, false)
         character == "vasilisa" -> 
             Quad(R.drawable.character_vasilisa_happy, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
 
-        // Кнопа (кот)
+        // ==================== КНОПА ====================
         character == "knopa" && emotion == "happy" -> 
             Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "knopa" && emotion == "ecstatic" -> 
-            Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.3f), FairyGold, true)
+            Quad(R.drawable.character_kuzya_ecstatic, FairyGold.copy(alpha = 0.3f), FairyGold, true)
         character == "knopa" && emotion == "hungry" -> 
             Quad(R.drawable.character_kuzya_hungry, FairyPink.copy(alpha = 0.2f), FairyPink, false)
         character == "knopa" && emotion == "neutral" -> 
@@ -86,21 +62,21 @@ fun CharacterView(
         character == "knopa" && emotion == "sleeping" -> 
             Quad(R.drawable.character_kuzya_sleeping, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
         character == "knopa" && emotion == "sick" -> 
-            Quad(R.drawable.character_kuzya_sad, Color.Red.copy(alpha = 0.2f), Color.Red, false)
+            Quad(R.drawable.character_kuzya_sick, Color.Red.copy(alpha = 0.2f), Color.Red, false)
         character == "knopa" && emotion == "dirty" -> 
-            Quad(R.drawable.character_kuzya_neutral, Color(0xFF8B7355).copy(alpha = 0.2f), Color(0xFF8B7355), false)
+            Quad(R.drawable.character_kuzya_dirty, Color(0xFF8B7355).copy(alpha = 0.2f), Color(0xFF8B7355), false)
         character == "knopa" && emotion == "angry" -> 
-            Quad(R.drawable.character_kuzya_hungry, Color.Red.copy(alpha = 0.3f), Color.Red, false)
+            Quad(R.drawable.character_kuzya_angry, Color.Red.copy(alpha = 0.3f), Color.Red, false)
         character == "knopa" && emotion == "sleepy" -> 
             Quad(R.drawable.character_kuzya_sleeping, FairyPurple.copy(alpha = 0.2f), FairyPurple, false)
         character == "knopa" && emotion == "playing" -> 
-            Quad(R.drawable.character_kuzya_happy, FairyGreen.copy(alpha = 0.3f), FairyGreen, true)
+            Quad(R.drawable.character_kuzya_playing, FairyGreen.copy(alpha = 0.3f), FairyGreen, true)
         character == "knopa" && emotion == "loved" -> 
             Quad(R.drawable.character_kuzya_happy, FairyPink.copy(alpha = 0.3f), FairyPink, true)
         character == "knopa" -> 
             Quad(R.drawable.character_kuzya_neutral, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
 
-        // Для обратной совместимости (старое имя "kuzya")
+        // ==================== ОБРАТНАЯ СОВМЕСТИМОСТЬ (kuzya) ====================
         character == "kuzya" && emotion == "happy" -> 
             Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "kuzya" && emotion == "hungry" -> 
@@ -117,81 +93,22 @@ fun CharacterView(
         else -> Quad(R.drawable.character_vasilisa_happy, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
     }
 
-    Card(
-        modifier = modifier.animateContentSize(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(3.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Аватар персонажа с анимацией
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(bgColor)
-                    .border(2.dp, borderColor, CircleShape)
-                    .then(if (shouldPulse) Modifier.scale(pulseScale) else Modifier),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(avatarRes),
-                    contentDescription = "Персонаж",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+    Card(modifier.animateContentSize(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(3.dp)) {
+        Row(Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(44.dp).clip(CircleShape).background(bgColor).border(2.dp, borderColor, CircleShape).then(if (shouldPulse) Modifier.scale(pulseScale) else Modifier), contentAlignment = Alignment.Center) {
+                Image(painterResource(avatarRes), "Персонаж", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Имя персонажа и сообщение
+            Spacer(Modifier.width(8.dp))
             if (message.isNotEmpty()) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = when {
-                            character == "vasilisa" -> "Василиса"
-                            character == "knopa" || character == "kuzya" -> "Кнопа"
-                            else -> ""
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = borderColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = FairyPurple,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Start,
-                        maxLines = 2
-                    )
+                Column(Modifier.weight(1f)) {
+                    Text(when { character == "vasilisa" -> "Василиса"; character == "knopa" || character == "kuzya" -> "Кнопа"; else -> "" }, style = MaterialTheme.typography.labelSmall, color = borderColor, fontWeight = FontWeight.Bold)
+                    Text(message, style = MaterialTheme.typography.bodySmall, color = FairyPurple, fontWeight = FontWeight.Medium, textAlign = TextAlign.Start, maxLines = 2)
                 }
             } else {
-                Text(
-                    text = when {
-                        character == "vasilisa" -> "Василиса"
-                        character == "knopa" || character == "kuzya" -> "Кнопа"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = borderColor,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(when { character == "vasilisa" -> "Василиса"; character == "knopa" || character == "kuzya" -> "Кнопа"; else -> "" }, style = MaterialTheme.typography.bodySmall, color = borderColor, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
 
-/**
- * Вспомогательный класс для хранения 4 значений
- */
-private data class Quad<A, B, C, D>(
-    val first: A,
-    val second: B,
-    val third: C,
-    val fourth: D
-)
+private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
