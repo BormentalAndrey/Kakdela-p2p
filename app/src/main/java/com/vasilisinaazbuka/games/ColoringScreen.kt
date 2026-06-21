@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.R
@@ -29,122 +30,82 @@ import com.vasilisinaazbuka.ui.StageProgressIndicator
 import com.vasilisinaazbuka.ui.theme.*
 
 @Composable
-fun ColoringScreen(
-    stage: Int = 1,
-    onNextStage: () -> Unit = {},
-    onGameComplete: () -> Unit = {},
-    onBack: () -> Unit = {}
-) {
+fun ColoringScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
     var selectedColor by remember { mutableStateOf(Color.Red) }
     var showLevelComplete by remember { mutableStateOf(false) }
     var stars by remember { mutableIntStateOf(0) }
     val zoneCount = 6
     val zoneColors = remember { mutableStateListOf(*Array(zoneCount) { Color.White }) }
 
-    val colorPalette = listOf(
-        Color.Red, Color.Blue, Color.Green, Color.Yellow,
-        Color.Magenta, Color.Cyan, Color(0xFFFFA500), Color(0xFF8B4513)
-    )
-
-    val levelImages = listOf(
-        R.drawable.coloring_matryoshka,
-        R.drawable.coloring_kremlin,
-        R.drawable.coloring_samovar,
-        R.drawable.coloring_birch,
-        R.drawable.coloring_balalaika
-    )
-
+    val colorPalette = listOf(Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Magenta, Color.Cyan, Color(0xFFFFA500), Color(0xFF8B4513))
+    val levelImages = listOf(R.drawable.coloring_matryoshka, R.drawable.coloring_kremlin, R.drawable.coloring_samovar, R.drawable.coloring_birch, R.drawable.coloring_balalaika)
     val allZonesColored = zoneColors.all { it != Color.White }
 
-    LaunchedEffect(stage) {
-        zoneColors.replaceAll { Color.White }
-        selectedColor = Color.Red
-        showLevelComplete = false
-    }
+    LaunchedEffect(stage) { zoneColors.replaceAll { Color.White }; selectedColor = Color.Red; showLevelComplete = false }
 
     Box(Modifier.fillMaxSize()) {
-        // Фоновое изображение
-        Image(
-            painter = painterResource(R.drawable.bg_level_coloring),
-            contentDescription = "Фон",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.3f
-        )
+        Image(painterResource(R.drawable.bg_level_coloring), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Раскраска", style = MaterialTheme.typography.headlineMedium, color = FairyGold, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            StageProgressIndicator(currentStage = stage, maxStages = 5)
-            Spacer(Modifier.height(16.dp))
+        Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            // Левая панель — персонаж и управление (1/3)
+            Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text("Раскраска", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(8.dp))
+                StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true)
+                Spacer(Modifier.height(12.dp))
 
-            CharacterView(character = "vasilisa", emotion = "happy", message = "Раскрась картинку! Выбери цвет и нажми на зону.", modifier = Modifier.height(100.dp))
-            Spacer(Modifier.height(16.dp))
+                CharacterView("vasilisa", "happy", "Раскрась картинку!\nВыбери цвет и нажми на зону.", Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
 
-            // Область раскраски
-            Box(
-                Modifier.size(300.dp).clip(RoundedCornerShape(16.dp)).background(Color.White).border(2.dp, FairyGold, RoundedCornerShape(16.dp))
-            ) {
-                Image(
-                    painter = painterResource(levelImages.getOrElse(stage - 1) { R.drawable.coloring_matryoshka }),
-                    contentDescription = "Раскраска",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit
-                )
-
-                Row(Modifier.fillMaxSize()) {
-                    Column(Modifier.weight(1f)) {
-                        repeat(3) { row ->
-                            Box(Modifier.weight(1f).fillMaxWidth().padding(4.dp).background(zoneColors[row].copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                .clickable { zoneColors[row] = selectedColor; AudioPlayer.playSFX(R.raw.sfx_paint) }
-                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)))
-                        }
+                // Палитра цветов
+                Text("Выбери цвет:", style = MaterialTheme.typography.bodySmall, color = FairyPurple)
+                Spacer(Modifier.height(6.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    colorPalette.take(4).forEach { color ->
+                        Box(Modifier.size(44.dp).clip(CircleShape).background(color).border(if (selectedColor == color) 3.dp else 1.dp, if (selectedColor == color) Color.Black else Color.Gray, CircleShape).clickable { selectedColor = color; AudioPlayer.playSFX(R.raw.sfx_click) })
                     }
-                    Column(Modifier.weight(1f)) {
-                        repeat(3) { row ->
-                            Box(Modifier.weight(1f).fillMaxWidth().padding(4.dp).background(zoneColors[row + 3].copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                .clickable { zoneColors[row + 3] = selectedColor; AudioPlayer.playSFX(R.raw.sfx_paint) }
-                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)))
+                }
+                Spacer(Modifier.height(4.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    colorPalette.drop(4).forEach { color ->
+                        Box(Modifier.size(44.dp).clip(CircleShape).background(color).border(if (selectedColor == color) 3.dp else 1.dp, if (selectedColor == color) Color.Black else Color.Gray, CircleShape).clickable { selectedColor = color; AudioPlayer.playSFX(R.raw.sfx_click) })
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Кнопки управления
+                Button(onClick = { selectedColor = Color.White; AudioPlayer.playSFX(R.raw.sfx_click) }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)) { Text("🧹 Ластик", fontSize = 16.sp) }
+                Spacer(Modifier.height(8.dp))
+                Button(onClick = { zoneColors.replaceAll { Color.White }; AudioPlayer.playSFX(R.raw.sfx_reset) }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink)) { Text("🔄 Заново", fontSize = 16.sp, color = Color.White) }
+
+                if (allZonesColored && !showLevelComplete) {
+                    stars = 3; showLevelComplete = true; GameState.completeLevel("coloring", stage); AudioPlayer.playSFX(R.raw.sfx_success)
+                }
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            // Правая часть — раскраска (2/3)
+            Card(Modifier.weight(0.67f).fillMaxHeight().aspectRatio(1f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
+                Box(Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).background(Color.White).border(2.dp, FairyGold, RoundedCornerShape(16.dp))) {
+                    Image(painterResource(levelImages.getOrElse(stage - 1) { R.drawable.coloring_matryoshka }), "Раскраска", Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                    Row(Modifier.fillMaxSize()) {
+                        Column(Modifier.weight(1f)) {
+                            repeat(3) { row ->
+                                Box(Modifier.weight(1f).fillMaxWidth().padding(3.dp).background(zoneColors[row].copy(alpha = 0.5f), RoundedCornerShape(6.dp)).clickable { zoneColors[row] = selectedColor; AudioPlayer.playSFX(R.raw.sfx_paint) }.border(1.dp, Color.Gray, RoundedCornerShape(6.dp)))
+                            }
+                        }
+                        Column(Modifier.weight(1f)) {
+                            repeat(3) { row ->
+                                Box(Modifier.weight(1f).fillMaxWidth().padding(3.dp).background(zoneColors[row + 3].copy(alpha = 0.5f), RoundedCornerShape(6.dp)).clickable { zoneColors[row + 3] = selectedColor; AudioPlayer.playSFX(R.raw.sfx_paint) }.border(1.dp, Color.Gray, RoundedCornerShape(6.dp)))
+                            }
                         }
                     }
                 }
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            Text("Выбери цвет:", style = MaterialTheme.typography.titleMedium, color = FairyPurple)
-            Spacer(Modifier.height(8.dp))
-
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                colorPalette.forEach { color ->
-                    Box(Modifier.size(60.dp).clip(CircleShape).background(color)
-                        .border(width = if (selectedColor == color) 4.dp else 2.dp, color = if (selectedColor == color) Color.Black else Color.Gray, shape = CircleShape)
-                        .clickable { selectedColor = color; AudioPlayer.playSFX(R.raw.sfx_click) })
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(onClick = { selectedColor = Color.White; AudioPlayer.playSFX(R.raw.sfx_click) }, Modifier.height(60.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)) { Text("🧹 Ластик", fontSize = 18.sp) }
-                Button(onClick = { zoneColors.replaceAll { Color.White }; AudioPlayer.playSFX(R.raw.sfx_reset) }, Modifier.height(60.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink)) { Text("🔄 Заново", fontSize = 18.sp, color = Color.White) }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            if (allZonesColored && !showLevelComplete) {
-                stars = 3
-                showLevelComplete = true
-                GameState.completeLevel("coloring", stage)
-                AudioPlayer.playSFX(R.raw.sfx_success)
-            }
         }
 
-        if (showLevelComplete) {
-            LevelComplete(stars = stars, message = "Отлично! Картинка раскрашена!", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
-        }
+        if (showLevelComplete) LevelComplete(stars, "Отлично! Картинка раскрашена!", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
     }
 }
