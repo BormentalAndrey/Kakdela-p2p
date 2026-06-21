@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import com.vasilisinaazbuka.ui.theme.VasilisinaAzbukaTheme
  * 
  * Управляет жизненным циклом приложения:
  * - Принудительная ландшафтная ориентация
+ * - Скрытие системных кнопок и статус-бара (свайп сверху/снизу для показа)
  * - Инициализация игрового состояния (GameState)
  * - Инициализация аудиоплеера (AudioPlayer)
  * - Настройка полноэкранного режима
@@ -37,6 +39,9 @@ class MainActivity : ComponentActivity() {
         
         // Полноэкранный режим с отсечением вырезов камеры
         enableEdgeToEdge()
+        
+        // Скрываем системные кнопки и статус-бар
+        hideSystemUI()
         
         // Держим экран включённым во время игры
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -62,47 +67,60 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Скрывает системные кнопки и статус-бар
+     * Появляются только при свайпе сверху вниз или снизу вверх
+     */
+    private fun hideSystemUI() {
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        )
+        
+        // Также скрываем action bar если есть
+        supportActionBar?.hide()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            // Перескрываем при возврате фокуса
+            hideSystemUI()
+        }
+    }
+
     override fun onPause() {
         super.onPause()
-        // Ставим музыку на паузу при сворачивании приложения
         AudioPlayer.pauseMusic()
-        
-        // Сохраняем состояние Кнопы
         KnopaStateManager.saveState(applicationContext)
     }
 
     override fun onResume() {
         super.onResume()
-        // Возобновляем музыку при возврате в приложение
+        hideSystemUI()
         AudioPlayer.resumeMusic()
-        
-        // Обновляем состояние Кнопы после отсутствия
         KnopaStateManager.updateAfterAbsence(applicationContext)
     }
 
     override fun onStop() {
         super.onStop()
-        // Сохраняем состояние при выходе из приложения
         KnopaStateManager.saveState(applicationContext)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        
-        // Финальное сохранение состояния Кнопы
         KnopaStateManager.saveState(applicationContext)
-        
-        // Очистка ресурсов AudioPlayer
         AudioPlayer.release()
-        
-        // Очистка кеша караоке-файлов
         KarFileManager.clearCache()
     }
 }
 
 /**
  * Вспомогательный объект для управления состоянием Кнопы
- * (Сохранение/загрузка/обновление тамагочи)
  */
 private object KnopaStateManager {
     
@@ -123,7 +141,6 @@ private object KnopaStateManager {
             val isFirstLaunch = prefs.getBoolean(KEY_FIRST_LAUNCH, true)
             
             if (isFirstLaunch) {
-                // Первый запуск — создаём начальное состояние Кнопы
                 prefs.edit()
                     .putBoolean(KEY_FIRST_LAUNCH, false)
                     .putFloat(KEY_HUNGER, 100f)
@@ -144,9 +161,7 @@ private object KnopaStateManager {
     fun saveState(context: Context) {
         try {
             val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit()
-                .putLong(KEY_LAST_UPDATE, System.currentTimeMillis())
-                .apply()
+            prefs.edit().putLong(KEY_LAST_UPDATE, System.currentTimeMillis()).apply()
         } catch (e: Exception) {
             Log.e("KnopaManager", "Ошибка сохранения состояния Кнопы: ${e.message}")
         }
@@ -160,10 +175,8 @@ private object KnopaStateManager {
             val absenceMinutes = (currentTime - lastUpdate) / 60_000
             
             if (absenceMinutes > 1) {
-                // Кнопа проголодалась и заскучала за время отсутствия
                 val hungerDecrease = (absenceMinutes * 0.5f)
                 val happinessDecrease = (absenceMinutes * 0.3f)
-                
                 val currentHunger = prefs.getFloat(KEY_HUNGER, 100f)
                 val currentHappiness = prefs.getFloat(KEY_HAPPINESS, 100f)
                 
@@ -183,7 +196,6 @@ private object KnopaStateManager {
  * Вспомогательный объект для управления кешем караоке-файлов
  */
 private object KarFileManager {
-    
     fun clearCache() {
         try {
             com.vasilisinaazbuka.games.KarFileLoader.clearCache()
