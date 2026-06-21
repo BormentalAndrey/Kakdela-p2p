@@ -80,15 +80,11 @@ class MainActivity : ComponentActivity() {
             or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         )
-        
-        // Также скрываем action bar если есть
-        supportActionBar?.hide()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            // Перескрываем при возврате фокуса
             hideSystemUI()
         }
     }
