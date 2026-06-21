@@ -44,31 +44,31 @@ fun VasilisinaAzbukaApp() {
 
         composable(Routes.Coloring.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            ColoringScreen(stage, { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            ColoringScreen(stage, { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
 
         composable(Routes.MusicBox.route) {
-            MusicBoxScreen({ navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            MusicBoxScreen({ navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
 
         composable(Routes.MemoryPuzzle.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            MemoryPuzzleScreen(stage, { if (stage < GameState.MAX_MEMORYPUZZLE_LEVELS) navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) { popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            MemoryPuzzleScreen(stage, { if (stage < GameState.MAX_MEMORYPUZZLE_LEVELS) navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) { popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
 
         composable(Routes.FeedKuzya.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            FeedKuzyaScreen(stage, { if (stage < GameState.MAX_FEEDKUZYA_LEVELS) navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) { popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            FeedKuzyaScreen(stage, { if (stage < GameState.MAX_FEEDKUZYA_LEVELS) navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) { popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
 
         composable(Routes.Seasons.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            SeasonsScreen(stage, { if (stage < GameState.MAX_SEASONS_LEVELS) navController.navigate(Routes.Seasons.createRoute(stage + 1)) { popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            SeasonsScreen(stage, { if (stage < GameState.MAX_SEASONS_LEVELS) navController.navigate(Routes.Seasons.createRoute(stage + 1)) { popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
 
         composable(Routes.Karaoke.route, arguments = listOf(navArgument("songIndex") { type = NavType.IntType; defaultValue = 1 }, navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1; val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            KaraokeScreen(songIndex, stage, { if (stage < 5) navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } }, { if (songIndex < 20) navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { if (!navController.popBackStack()) navController.navigate(Routes.Menu.route) })
+            KaraokeScreen(songIndex, stage, { if (stage < 5) navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } }, { if (songIndex < 20) navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
     }
 }
@@ -82,13 +82,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     var vasilisaIndex by remember { mutableIntStateOf(0) }
     var knopaIndex by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(4000)
-            vasilisaIndex = (vasilisaIndex + 1) % vasilisaEmotions.size
-            knopaIndex = (knopaIndex + 1) % knopaEmotions.size
-        }
-    }
+    LaunchedEffect(Unit) { while (true) { delay(4000); vasilisaIndex = (vasilisaIndex + 1) % vasilisaEmotions.size; knopaIndex = (knopaIndex + 1) % knopaEmotions.size } }
 
     Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.15f), FairyPurple.copy(alpha = 0.05f), FairyBlue.copy(alpha = 0.1f))))) {
         Image(painterResource(R.drawable.bg_level_menu), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.25f)
@@ -97,47 +91,34 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
         Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(0.32f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
-                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("В гостях у Василисы", style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                    }
+                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("В гостях у Василисы", style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
                 }
-
                 Spacer(Modifier.height(20.dp))
-
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
                                 Image(painterResource(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> R.drawable.character_vasilisa_proud; "teacher" -> R.drawable.character_vasilisa_teacher; else -> R.drawable.character_vasilisa_happy }), "Василиса", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                             }
-                            Spacer(Modifier.height(8.dp))
-                            Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 14.sp)
+                            Spacer(Modifier.height(8.dp)); Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 14.sp)
                             Text(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> "Гордится тобой!"; "teacher" -> "Научит всему"; else -> "Твой учитель" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
-
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
                                 Image(painterResource(when (knopaEmotions[knopaIndex]) { "playing" -> R.drawable.character_kuzya_playing; "ecstatic" -> R.drawable.character_kuzya_ecstatic; "sleepy" -> R.drawable.character_kuzya_sleeping; else -> R.drawable.character_kuzya_happy }), "Кнопа", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                             }
-                            Spacer(Modifier.height(8.dp))
-                            Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 14.sp)
+                            Spacer(Modifier.height(8.dp)); Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 14.sp)
                             Text(when (knopaEmotions[knopaIndex]) { "playing" -> "Хочет играть!"; "ecstatic" -> "Мур-мур!"; "sleepy" -> "Спит..."; else -> "Твой друг" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
                 }
-
                 Spacer(Modifier.height(16.dp))
-
                 val totalStars = GameState.getOverallStars()
-                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) {
-                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Text("⭐", fontSize = 24.sp); Spacer(Modifier.width(8.dp)); Text("Всего звёзд: $totalStars", fontWeight = FontWeight.Bold, color = FairyGold, fontSize = 14.sp) }
-                }
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) { Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Text("⭐", fontSize = 24.sp); Spacer(Modifier.width(8.dp)); Text("Всего звёзд: $totalStars", fontWeight = FontWeight.Bold, color = FairyGold, fontSize = 14.sp) } }
             }
-
             Spacer(Modifier.width(20.dp))
-
             Column(Modifier.weight(0.68f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly) {
                 val games = listOf(
                     GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки"),
@@ -147,20 +128,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                     GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Изучай сезоны"),
                     GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай")
                 )
-
-                for (row in 0..1) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        for (col in 0..2) {
-                            val index = row * 3 + col
-                            if (index < games.size) {
-                                val game = games[index]; val progress = gameProgress[game.gameId]
-                                val completed = progress?.first ?: 0
-                                val total = progress?.second ?: when (game.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 20; else -> 5 }
-                                GameCard(game, completed, total, completed >= total, { onGameSelected(game.route) }, Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
+                for (row in 0..1) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { for (col in 0..2) { val i = row * 3 + col; if (i < games.size) { val g = games[i]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0; val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 20; else -> 5 }; GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f)) } } } }
             }
         }
     }
