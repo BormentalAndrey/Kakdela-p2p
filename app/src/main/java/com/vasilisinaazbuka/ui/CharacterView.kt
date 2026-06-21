@@ -2,6 +2,7 @@ package com.vasilisinaazbuka.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -17,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vasilisinaazbuka.R
 import com.vasilisinaazbuka.ui.theme.*
 
 /**
@@ -50,79 +54,77 @@ fun CharacterView(
         label = "pulse"
     )
     
-    // Определяем эмодзи и цвет в зависимости от персонажа и эмоции
-    val (emoji, bgColor, borderColor, shouldPulse) = when {
+    // Определяем аватар и цвет в зависимости от персонажа и эмоции
+    val (avatarRes, bgColor, borderColor, shouldPulse) = when {
         // Василиса
         character == "vasilisa" && emotion == "happy" -> 
-            Quad("👧✨", FairyGold.copy(alpha = 0.2f), FairyGold, true)
+            Quad(R.drawable.character_vasilisa_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "vasilisa" && emotion == "proud" -> 
-            Quad("👧🌟", FairyPurple.copy(alpha = 0.2f), FairyPurple, false)
+            Quad(R.drawable.character_vasilisa_proud, FairyPurple.copy(alpha = 0.2f), FairyPurple, false)
         character == "vasilisa" && emotion == "teacher" -> 
-            Quad("👧📚", FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
+            Quad(R.drawable.character_vasilisa_teacher, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
         character == "vasilisa" && emotion == "thinking" -> 
-            Quad("👧🤔", FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
+            Quad(R.drawable.character_vasilisa_thinking, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
         character == "vasilisa" && emotion == "sad" -> 
-            Quad("👧😢", Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
+            Quad(R.drawable.character_vasilisa_sad, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
         character == "vasilisa" && emotion == "surprised" -> 
-            Quad("👧😮", FairyPink.copy(alpha = 0.2f), FairyPink, false)
+            Quad(R.drawable.character_vasilisa_happy, FairyPink.copy(alpha = 0.2f), FairyPink, false)
         character == "vasilisa" -> 
-            Quad("👧", FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
+            Quad(R.drawable.character_vasilisa_happy, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
 
         // Кнопа (кот)
         character == "knopa" && emotion == "happy" -> 
-            Quad("🐱✨", FairyGold.copy(alpha = 0.2f), FairyGold, true)
+            Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "knopa" && emotion == "ecstatic" -> 
-            Quad("😸💫", FairyGold.copy(alpha = 0.3f), FairyGold, true)
+            Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.3f), FairyGold, true)
         character == "knopa" && emotion == "hungry" -> 
-            Quad("😿🍽️", FairyPink.copy(alpha = 0.2f), FairyPink, false)
+            Quad(R.drawable.character_kuzya_hungry, FairyPink.copy(alpha = 0.2f), FairyPink, false)
         character == "knopa" && emotion == "neutral" -> 
-            Quad("🐱", FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
+            Quad(R.drawable.character_kuzya_neutral, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
         character == "knopa" && emotion == "sad" -> 
-            Quad("😾💧", Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
+            Quad(R.drawable.character_kuzya_sad, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
         character == "knopa" && emotion == "sleeping" -> 
-            Quad("😴💤", FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
+            Quad(R.drawable.character_kuzya_sleeping, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
         character == "knopa" && emotion == "sick" -> 
-            Quad("🤒🤕", Color.Red.copy(alpha = 0.2f), Color.Red, false)
+            Quad(R.drawable.character_kuzya_sad, Color.Red.copy(alpha = 0.2f), Color.Red, false)
         character == "knopa" && emotion == "dirty" -> 
-            Quad("😼💨", Color(0xFF8B7355).copy(alpha = 0.2f), Color(0xFF8B7355), false)
+            Quad(R.drawable.character_kuzya_neutral, Color(0xFF8B7355).copy(alpha = 0.2f), Color(0xFF8B7355), false)
         character == "knopa" && emotion == "angry" -> 
-            Quad("🙀💢", Color.Red.copy(alpha = 0.3f), Color.Red, false)
+            Quad(R.drawable.character_kuzya_hungry, Color.Red.copy(alpha = 0.3f), Color.Red, false)
         character == "knopa" && emotion == "sleepy" -> 
-            Quad("😴", FairyPurple.copy(alpha = 0.2f), FairyPurple, false)
+            Quad(R.drawable.character_kuzya_sleeping, FairyPurple.copy(alpha = 0.2f), FairyPurple, false)
         character == "knopa" && emotion == "playing" -> 
-            Quad("🐱🎾", FairyGreen.copy(alpha = 0.3f), FairyGreen, true)
+            Quad(R.drawable.character_kuzya_happy, FairyGreen.copy(alpha = 0.3f), FairyGreen, true)
         character == "knopa" && emotion == "loved" -> 
-            Quad("😻❤️", FairyPink.copy(alpha = 0.3f), FairyPink, true)
+            Quad(R.drawable.character_kuzya_happy, FairyPink.copy(alpha = 0.3f), FairyPink, true)
         character == "knopa" -> 
-            Quad("🐱", FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
+            Quad(R.drawable.character_kuzya_neutral, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
 
         // Для обратной совместимости (старое имя "kuzya")
         character == "kuzya" && emotion == "happy" -> 
-            Quad("🐱✨", FairyGold.copy(alpha = 0.2f), FairyGold, true)
+            Quad(R.drawable.character_kuzya_happy, FairyGold.copy(alpha = 0.2f), FairyGold, true)
         character == "kuzya" && emotion == "hungry" -> 
-            Quad("😿🍽️", FairyPink.copy(alpha = 0.2f), FairyPink, false)
+            Quad(R.drawable.character_kuzya_hungry, FairyPink.copy(alpha = 0.2f), FairyPink, false)
         character == "kuzya" && emotion == "neutral" -> 
-            Quad("🐱", FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
+            Quad(R.drawable.character_kuzya_neutral, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
         character == "kuzya" && emotion == "sad" -> 
-            Quad("😾💧", Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
+            Quad(R.drawable.character_kuzya_sad, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
         character == "kuzya" && emotion == "sleeping" -> 
-            Quad("😴💤", FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
+            Quad(R.drawable.character_kuzya_sleeping, FairyBlue.copy(alpha = 0.2f), FairyBlue, false)
         character == "kuzya" -> 
-            Quad("🐱", FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
+            Quad(R.drawable.character_kuzya_neutral, FairyGreen.copy(alpha = 0.2f), FairyGreen, false)
 
-        else -> Quad("❓", Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
+        else -> Quad(R.drawable.character_vasilisa_happy, Color.Gray.copy(alpha = 0.2f), Color.Gray, false)
     }
 
     Card(
-        modifier = modifier
-            .animateContentSize(),
+        modifier = modifier.animateContentSize(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(3.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(6.dp),
+            modifier = Modifier.padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Аватар персонажа с анимацией
@@ -132,14 +134,14 @@ fun CharacterView(
                     .clip(CircleShape)
                     .background(bgColor)
                     .border(2.dp, borderColor, CircleShape)
-                    .then(
-                        if (shouldPulse) Modifier.scale(pulseScale) else Modifier
-                    ),
+                    .then(if (shouldPulse) Modifier.scale(pulseScale) else Modifier),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = emoji,
-                    fontSize = 22.sp
+                Image(
+                    painter = painterResource(avatarRes),
+                    contentDescription = "Персонаж",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
 
@@ -148,7 +150,6 @@ fun CharacterView(
             // Имя персонажа и сообщение
             if (message.isNotEmpty()) {
                 Column(modifier = Modifier.weight(1f)) {
-                    // Имя персонажа
                     Text(
                         text = when {
                             character == "vasilisa" -> "Василиса"
@@ -160,7 +161,6 @@ fun CharacterView(
                         fontWeight = FontWeight.Bold
                     )
                     
-                    // Сообщение
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
@@ -171,7 +171,6 @@ fun CharacterView(
                     )
                 }
             } else {
-                // Только имя если нет сообщения
                 Text(
                     text = when {
                         character == "vasilisa" -> "Василиса"
