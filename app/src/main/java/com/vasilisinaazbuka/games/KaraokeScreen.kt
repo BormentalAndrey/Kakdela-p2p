@@ -134,8 +134,12 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
     Box(Modifier.fillMaxSize()) {
         Image(painterResource(R.drawable.bg_level_karaoke), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
+        // Кнопка «Назад» справа вверху
+        Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.TopEnd) {
+            Button(onClick = onBack, Modifier.size(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp)) { Text("↩", fontSize = 18.sp, color = Color.White) }
+        }
+
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Левая панель (1/3)
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 SongHeader(karFile, songIndex)
                 Spacer(Modifier.height(8.dp))
@@ -149,7 +153,6 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
 
             Spacer(Modifier.width(12.dp))
 
-            // Правая часть — караоке (2/3)
             Card(Modifier.weight(0.67f).fillMaxHeight(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(8.dp)) {
                 when (gameMode) {
                     GameMode.LISTEN -> ListenMode(karFile, currentLyricIndex, isPlaying, { isPlaying = !isPlaying }, { currentLyricIndex = 0; isPlaying = false })
@@ -166,115 +169,22 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
 }
 
 // ==================== Компоненты ====================
-@Composable
-private fun SongHeader(karFile: KarFile, songIndex: Int) {
-    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.2f)), shape = RoundedCornerShape(12.dp)) {
-        Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(karFile.metadata.title, style = MaterialTheme.typography.titleMedium, color = FairyPurple, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Text(karFile.metadata.author, style = MaterialTheme.typography.bodySmall, color = FairyBlue)
-        }
-    }
-}
-
-@Composable
-private fun SongProgressBar(currentSong: Int, totalSongs: Int) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text("$currentSong/$totalSongs", style = MaterialTheme.typography.labelSmall, color = FairyPurple, modifier = Modifier.width(36.dp))
-        LinearProgressIndicator(progress = currentSong.toFloat() / totalSongs, modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)), color = FairyGold, trackColor = FairyGold.copy(alpha = 0.2f))
-    }
-}
+@Composable private fun SongHeader(karFile: KarFile, songIndex: Int) = Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.2f)), shape = RoundedCornerShape(12.dp)) { Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text(karFile.metadata.title, style = MaterialTheme.typography.titleMedium, color = FairyPurple, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center); Text(karFile.metadata.author, style = MaterialTheme.typography.bodySmall, color = FairyBlue) } }
+@Composable private fun SongProgressBar(currentSong: Int, totalSongs: Int) = Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Text("$currentSong/$totalSongs", style = MaterialTheme.typography.labelSmall, color = FairyPurple, modifier = Modifier.width(36.dp)); LinearProgressIndicator(progress = currentSong.toFloat() / totalSongs, modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)), color = FairyGold, trackColor = FairyGold.copy(alpha = 0.2f)) }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GameModeSelector(currentMode: GameMode, onModeSelected: (GameMode) -> Unit) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        listOf(GameMode.LISTEN to "👂 Слушаю", GameMode.READ to "📖 Читаю", GameMode.SING to "🎤 Пою").forEach { (mode, label) ->
-            FilterChip(selected = currentMode == mode, onClick = { onModeSelected(mode) }, label = { Text(label, fontSize = 13.sp) },
-                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = when (mode) { GameMode.LISTEN -> FairyGold; GameMode.READ -> FairyGreen; GameMode.SING -> FairyPurple }, selectedLabelColor = Color.White),
-                modifier = Modifier.fillMaxWidth())
-        }
-    }
-}
+@Composable private fun GameModeSelector(currentMode: GameMode, onModeSelected: (GameMode) -> Unit) = Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) { listOf(GameMode.LISTEN to "👂 Слушаю", GameMode.READ to "📖 Читаю", GameMode.SING to "🎤 Пою").forEach { (mode, label) -> FilterChip(selected = currentMode == mode, onClick = { onModeSelected(mode) }, label = { Text(label, fontSize = 13.sp) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = when (mode) { GameMode.LISTEN -> FairyGold; GameMode.READ -> FairyGreen; GameMode.SING -> FairyPurple }, selectedLabelColor = Color.White), modifier = Modifier.fillMaxWidth()) } }
 
-@Composable
-private fun ListenMode(karFile: KarFile, currentLyricIndex: Int, isPlaying: Boolean, onPlayPause: () -> Unit, onReset: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Слушай и следи за слогами:", style = MaterialTheme.typography.titleSmall, color = FairyGold, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            items(karFile.lyrics.chunked(6)) { line ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalArrangement = Arrangement.Center) {
-                    line.forEach { lyric ->
-                        val isCur = karFile.lyrics.indexOf(lyric) == currentLyricIndex; val isPast = karFile.lyrics.indexOf(lyric) < currentLyricIndex
-                        Box(Modifier.padding(1.dp).clip(RoundedCornerShape(6.dp)).background(when { isCur -> FairyGold.copy(alpha = 0.8f); isPast -> FairyGreen.copy(alpha = 0.3f); else -> Color.Transparent }).border(1.dp, if (isCur) FairyGold else Color.Transparent, RoundedCornerShape(6.dp)).then(if (isCur) Modifier.scale(1.1f) else Modifier).padding(horizontal = 6.dp, vertical = 2.dp)) {
-                            Text(lyric.text, fontSize = if (isCur) 24.sp else 18.sp, fontWeight = if (isCur) FontWeight.ExtraBold else FontWeight.Normal, color = when { isCur -> Color.White; isPast -> FairyGreen; else -> FairyBlue })
-                        }
-                    }
-                }
-            }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onReset) { Text("🔄", fontSize = 20.sp) }
-            FloatingActionButton(onClick = onPlayPause, containerColor = if (isPlaying) FairyPink else FairyGreen, modifier = Modifier.size(48.dp)) { Text(if (isPlaying) "⏸" else "▶", fontSize = 22.sp, color = Color.White) }
-            if (karFile.lyrics.isNotEmpty()) Text("${currentLyricIndex+1}/${karFile.lyrics.size}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-        }
-    }
-}
+@Composable private fun ListenMode(karFile: KarFile, currentLyricIndex: Int, isPlaying: Boolean, onPlayPause: () -> Unit, onReset: () -> Unit) = Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("Слушай и следи за слогами:", style = MaterialTheme.typography.titleSmall, color = FairyGold, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)); LazyColumn(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { items(karFile.lyrics.chunked(6)) { line -> Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalArrangement = Arrangement.Center) { line.forEach { lyric -> val isCur = karFile.lyrics.indexOf(lyric) == currentLyricIndex; val isPast = karFile.lyrics.indexOf(lyric) < currentLyricIndex; Box(Modifier.padding(1.dp).clip(RoundedCornerShape(6.dp)).background(when { isCur -> FairyGold.copy(alpha = 0.8f); isPast -> FairyGreen.copy(alpha = 0.3f); else -> Color.Transparent }).border(1.dp, if (isCur) FairyGold else Color.Transparent, RoundedCornerShape(6.dp)).then(if (isCur) Modifier.scale(1.1f) else Modifier).padding(horizontal = 6.dp, vertical = 2.dp)) { Text(lyric.text, fontSize = if (isCur) 24.sp else 18.sp, fontWeight = if (isCur) FontWeight.ExtraBold else FontWeight.Normal, color = when { isCur -> Color.White; isPast -> FairyGreen; else -> FairyBlue }) } } } } }; Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onReset) { Text("🔄", fontSize = 20.sp) }; FloatingActionButton(onClick = onPlayPause, containerColor = if (isPlaying) FairyPink else FairyGreen, modifier = Modifier.size(48.dp)) { Text(if (isPlaying) "⏸" else "▶", fontSize = 22.sp, color = Color.White) }; if (karFile.lyrics.isNotEmpty()) Text("${currentLyricIndex+1}/${karFile.lyrics.size}", style = MaterialTheme.typography.bodySmall, color = Color.Gray) } }
 
-@Composable
-private fun ReadMode(karFile: KarFile, currentWord: KarWord?, constructedWord: String, onLetterPress: (Char) -> Unit, onDelete: () -> Unit, onClear: () -> Unit, onListen: () -> Unit) {
+@Composable private fun ReadMode(karFile: KarFile, currentWord: KarWord?, constructedWord: String, onLetterPress: (Char) -> Unit, onDelete: () -> Unit, onClear: () -> Unit, onListen: () -> Unit) {
     if (currentWord == null) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Все слова пройдены!", color = FairyGreen, fontSize = 24.sp, fontWeight = FontWeight.Bold) }; return }
-    Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("Составь слово:", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.Center) { currentWord.syllables.forEach { Text(it, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = FairyGold, modifier = Modifier.padding(horizontal = 3.dp)) } }
-        Spacer(Modifier.height(12.dp))
-        Box(Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(10.dp)).background(if (constructedWord == currentWord.text.replace(" ","")) FairyGreen.copy(alpha = 0.2f) else FairyBlue.copy(alpha = 0.1f)).border(2.dp, if (constructedWord.isNotEmpty()) FairyGold else Color.Gray, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-            Text(if (constructedWord.isEmpty()) "_ ".repeat(currentWord.text.replace(" ","").length).trim() else constructedWord.toCharArray().joinToString(" "), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = if (constructedWord == currentWord.text.replace(" ","")) FairyGreen else FairyBlue)
-        }
-        Spacer(Modifier.height(12.dp))
-        val letters = remember(currentWord) { val l = currentWord.text.replace(" ","").uppercase().toCharArray().toMutableList(); val ex = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".toCharArray(); ex.filter { it !in l }.shuffled().take(4).forEach { l.add(it) }; l.shuffled() }
-        LazyVerticalGrid(columns = GridCells.Fixed(6), modifier = Modifier.height(100.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(letters) { letter ->
-                val used = constructedWord.count { it == letter } >= currentWord.text.count { it.uppercaseChar() == letter }
-                Box(Modifier.aspectRatio(1f).clip(CircleShape).background(if (used) Color.Gray.copy(alpha = 0.3f) else FairyGold.copy(alpha = 0.2f)).border(2.dp, if (used) Color.Gray else FairyGold, CircleShape).clickable(enabled = !used) { onLetterPress(letter) }, contentAlignment = Alignment.Center) { Text(letter.toString(), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = if (used) Color.Gray else Color.Black) }
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            OutlinedButton(onClick = onListen, Modifier.height(40.dp)) { Text("👂", fontSize = 16.sp) }
-            Button(onClick = onDelete, Modifier.height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink)) { Text("⌫", fontSize = 16.sp) }
-            Button(onClick = onClear, Modifier.height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) { Text("🔄", fontSize = 16.sp) }
-        }
-    }
+    Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) { Text("Составь слово:", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold); Row(horizontalArrangement = Arrangement.Center) { currentWord.syllables.forEach { Text(it, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = FairyGold, modifier = Modifier.padding(horizontal = 3.dp)) } }; Spacer(Modifier.height(12.dp)); Box(Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(10.dp)).background(if (constructedWord == currentWord.text.replace(" ","")) FairyGreen.copy(alpha = 0.2f) else FairyBlue.copy(alpha = 0.1f)).border(2.dp, if (constructedWord.isNotEmpty()) FairyGold else Color.Gray, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) { Text(if (constructedWord.isEmpty()) "_ ".repeat(currentWord.text.replace(" ","").length).trim() else constructedWord.toCharArray().joinToString(" "), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = if (constructedWord == currentWord.text.replace(" ","")) FairyGreen else FairyBlue) }; Spacer(Modifier.height(12.dp)); val letters = remember(currentWord) { val l = currentWord.text.replace(" ","").uppercase().toCharArray().toMutableList(); val ex = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".toCharArray(); ex.filter { it !in l }.shuffled().take(4).forEach { l.add(it) }; l.shuffled() }; LazyVerticalGrid(columns = GridCells.Fixed(6), modifier = Modifier.height(100.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) { items(letters) { letter -> val used = constructedWord.count { it == letter } >= currentWord.text.count { it.uppercaseChar() == letter }; Box(Modifier.aspectRatio(1f).clip(CircleShape).background(if (used) Color.Gray.copy(alpha = 0.3f) else FairyGold.copy(alpha = 0.2f)).border(2.dp, if (used) Color.Gray else FairyGold, CircleShape).clickable(enabled = !used) { onLetterPress(letter) }, contentAlignment = Alignment.Center) { Text(letter.toString(), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = if (used) Color.Gray else Color.Black) } } }; Spacer(Modifier.height(8.dp)); Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { OutlinedButton(onClick = onListen, Modifier.height(40.dp)) { Text("👂", fontSize = 16.sp) }; Button(onClick = onDelete, Modifier.height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink)) { Text("⌫", fontSize = 16.sp) }; Button(onClick = onClear, Modifier.height(40.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) { Text("🔄", fontSize = 16.sp) } } }
 }
 
-@Composable
-private fun SingMode(karFile: KarFile, currentLyricIndex: Int, onPlayMelody: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("🎤 Пой вместе с Василисой!", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            itemsIndexed(karFile.lyrics.chunked(5)) { _, line ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.Center) {
-                    line.forEach { lyric ->
-                        val absIdx = karFile.lyrics.indexOf(lyric); val isCur = absIdx == currentLyricIndex
-                        Text(lyric.text, fontSize = if (isCur) 28.sp else 22.sp, fontWeight = if (isCur) FontWeight.ExtraBold else FontWeight.Bold, color = when { isCur -> FairyPink; absIdx < currentLyricIndex -> FairyGreen; else -> FairyBlue }, modifier = Modifier.padding(horizontal = 3.dp).then(if (isCur) Modifier.scale(1.1f) else Modifier))
-                    }
-                }
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        Button(onClick = onPlayMelody, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGold), shape = RoundedCornerShape(12.dp)) { Text("🎵 Прослушать мелодию", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold) }
-    }
-}
+@Composable private fun SingMode(karFile: KarFile, currentLyricIndex: Int, onPlayMelody: () -> Unit) = Column(Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("🎤 Пой вместе с Василисой!", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)); LazyColumn(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { itemsIndexed(karFile.lyrics.chunked(5)) { _, line -> Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.Center) { line.forEach { lyric -> val absIdx = karFile.lyrics.indexOf(lyric); val isCur = absIdx == currentLyricIndex; Text(lyric.text, fontSize = if (isCur) 28.sp else 22.sp, fontWeight = if (isCur) FontWeight.ExtraBold else FontWeight.Bold, color = when { isCur -> FairyPink; absIdx < currentLyricIndex -> FairyGreen; else -> FairyBlue }, modifier = Modifier.padding(horizontal = 3.dp).then(if (isCur) Modifier.scale(1.1f) else Modifier)) } } } }; Spacer(Modifier.height(8.dp)); Button(onClick = onPlayMelody, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGold), shape = RoundedCornerShape(12.dp)) { Text("🎵 Прослушать мелодию", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold) } }
 
 // ==================== Вспомогательные функции ====================
 data class KarWord(val text: String, val syllables: List<String>, val startIndex: Int, val endIndex: Int)
-
-private fun groupSyllablesIntoWords(lyrics: List<KarLyricEvent>): List<KarWord> {
-    if (lyrics.isEmpty()) return emptyList(); val words = mutableListOf<KarWord>(); var ct = StringBuilder(); var cs = mutableListOf<String>(); var s = 0
-    lyrics.forEachIndexed { i, lyric -> ct.append(lyric.text); cs.add(lyric.text); val last = i == lyrics.size-1; val ns = if (!last) lyrics[i+1].text.startsWith(" ") else false; if (last || ns || ct.length >= 6) { words.add(KarWord(ct.toString().trim().uppercase(), cs.toList(), s, i)); ct = StringBuilder(); cs = mutableListOf(); s = i+1 } }
-    return words
-}
-
+private fun groupSyllablesIntoWords(lyrics: List<KarLyricEvent>): List<KarWord> { if (lyrics.isEmpty()) return emptyList(); val words = mutableListOf<KarWord>(); var ct = StringBuilder(); var cs = mutableListOf<String>(); var s = 0; lyrics.forEachIndexed { i, lyric -> ct.append(lyric.text); cs.add(lyric.text); val last = i == lyrics.size-1; val ns = if (!last) lyrics[i+1].text.startsWith(" ") else false; if (last || ns || ct.length >= 6) { words.add(KarWord(ct.toString().trim().uppercase(), cs.toList(), s, i)); ct = StringBuilder(); cs = mutableListOf(); s = i+1 } }; return words }
 enum class GameMode { LISTEN, READ, SING }
