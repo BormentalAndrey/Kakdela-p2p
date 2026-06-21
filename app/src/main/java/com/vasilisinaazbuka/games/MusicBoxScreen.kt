@@ -2,7 +2,6 @@ package com.vasilisinaazbuka.games
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -17,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vasilisinaazbuka.R
@@ -28,7 +28,6 @@ import com.vasilisinaazbuka.ui.theme.*
 import kotlinx.coroutines.delay
 
 private enum class MusicMode { FREE_PLAY, REPEAT_MELODY, GUESS_SOUND }
-
 private data class SoundItem(val id: Int, val name: String, val emoji: String, val soundRes: Int, val category: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,48 +73,62 @@ fun MusicBoxScreen(onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
     }
 
     Box(Modifier.fillMaxSize()) {
-        // Фоновое изображение
-        Image(painterResource(R.drawable.bg_level_musicbox), contentDescription = "Фон", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
+        Image(painterResource(R.drawable.bg_level_musicbox), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
-        Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Музыкальная шкатулка", style = MaterialTheme.typography.headlineMedium, color = FairyGold, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
+        Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            // Левая панель — персонаж и управление (1/3)
+            Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text("Музыкальная шкатулка", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(12.dp))
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                // Режимы
                 MusicMode.entries.forEach { mode ->
                     FilterChip(selected = currentMode == mode, onClick = { currentMode = mode; resetMode(); when (mode) { MusicMode.REPEAT_MELODY -> generateMelody(); MusicMode.GUESS_SOUND -> generateGuessQuestion(); else -> {} } },
-                        label = { Text(when (mode) { MusicMode.FREE_PLAY -> "🎹 Свободная"; MusicMode.REPEAT_MELODY -> "🔁 Повтори"; MusicMode.GUESS_SOUND -> "❓ Угадай" }) },
-                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = FairyPurple))
+                        label = { Text(when (mode) { MusicMode.FREE_PLAY -> "🎹 Свободная"; MusicMode.REPEAT_MELODY -> "🔁 Повтори"; MusicMode.GUESS_SOUND -> "❓ Угадай" }, fontSize = 13.sp) },
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = FairyPurple),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                CharacterView("knopa", if (score >= maxScore) "happy" else "neutral", when (currentMode) { MusicMode.FREE_PLAY -> "Нажимай на картинки\nи слушай звуки!"; MusicMode.REPEAT_MELODY -> "Повтори мою\nмелодию!"; MusicMode.GUESS_SOUND -> "Угадай, что\nзвучит?" }, Modifier.fillMaxWidth())
+
+                Spacer(Modifier.height(12.dp))
+
+                if (currentMode != MusicMode.FREE_PLAY) {
+                    Text("Правильно: $score из $maxScore", style = MaterialTheme.typography.titleMedium, color = FairyGreen, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                // Кнопки управления
+                if (currentMode == MusicMode.REPEAT_MELODY && !isShowingMelody) {
+                    Button({ playerSequence = emptyList(); generateMelody() }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue)) { Text("🔄 Новая мелодия", fontSize = 14.sp, color = Color.White) }
+                }
+                if (currentMode == MusicMode.GUESS_SOUND && currentSound != null) {
+                    Button({ AudioPlayer.playSFX(currentSound!!.soundRes) }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGold)) { Text("🔊 Прослушать", fontSize = 14.sp, color = Color.White) }
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.width(12.dp))
 
-            CharacterView("knopa", if (score >= maxScore) "happy" else "neutral", when (currentMode) { MusicMode.FREE_PLAY -> "Нажимай на картинки и слушай звуки!"; MusicMode.REPEAT_MELODY -> "Повтори мою мелодию!"; MusicMode.GUESS_SOUND -> "Угадай, что звучит?" }, Modifier.height(80.dp))
-            Spacer(Modifier.height(12.dp))
-
-            if (currentMode != MusicMode.FREE_PLAY) { Text("Правильно: $score из $maxScore", style = MaterialTheme.typography.titleMedium, color = FairyGreen, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)) }
-
-            LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.weight(1f), contentPadding = PaddingValues(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(soundItems) { item ->
-                    val isHighlighted = highlightedItemId == item.id
-                    val bgColor by animateColorAsState(targetValue = if (isHighlighted) FairyGold.copy(alpha = 0.5f) else Color.White, label = "highlight")
-                    Card(Modifier.aspectRatio(1f).clickable {
-                        when (currentMode) {
-                            MusicMode.FREE_PLAY -> AudioPlayer.playSFX(item.soundRes)
-                            MusicMode.REPEAT_MELODY -> if (!isShowingMelody) { playerSequence += item; AudioPlayer.playSFX(item.soundRes); val i = playerSequence.size - 1; if (i < melodySequence.size && playerSequence[i].id == melodySequence[i].id) { if (playerSequence.size == melodySequence.size) { score++; if (score >= maxScore) { showLevelComplete = true; GameState.completeLevel("musicbox", 1) } else generateMelody() } } else { playerSequence = emptyList(); AudioPlayer.playSFX(R.raw.sfx_error) } }
-                            MusicMode.GUESS_SOUND -> if (currentSound != null && item.id == currentSound!!.id) { score++; AudioPlayer.playSFX(R.raw.sfx_success); if (score >= maxScore) { showLevelComplete = true; GameState.completeLevel("musicbox", 1) } else generateGuessQuestion() } else if (currentSound != null) AudioPlayer.playSFX(R.raw.sfx_error)
+            // Правая часть — сетка звуков (2/3)
+            Card(Modifier.weight(0.67f).fillMaxHeight(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(8.dp)) {
+                LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(soundItems) { item ->
+                        val isHighlighted = highlightedItemId == item.id
+                        val bgColor by animateColorAsState(targetValue = if (isHighlighted) FairyGold.copy(alpha = 0.5f) else Color.White, label = "hl_${item.id}")
+                        Card(Modifier.aspectRatio(1f).clickable {
+                            when (currentMode) {
+                                MusicMode.FREE_PLAY -> AudioPlayer.playSFX(item.soundRes)
+                                MusicMode.REPEAT_MELODY -> if (!isShowingMelody) { playerSequence += item; AudioPlayer.playSFX(item.soundRes); val i = playerSequence.size - 1; if (i < melodySequence.size && playerSequence[i].id == melodySequence[i].id) { if (playerSequence.size == melodySequence.size) { score++; if (score >= maxScore) { showLevelComplete = true; GameState.completeLevel("musicbox", 1) } else generateMelody() } } else { playerSequence = emptyList(); AudioPlayer.playSFX(R.raw.sfx_error) } }
+                                MusicMode.GUESS_SOUND -> if (currentSound != null && item.id == currentSound!!.id) { score++; AudioPlayer.playSFX(R.raw.sfx_success); if (score >= maxScore) { showLevelComplete = true; GameState.completeLevel("musicbox", 1) } else generateGuessQuestion() } else if (currentSound != null) AudioPlayer.playSFX(R.raw.sfx_error)
+                            }
+                        }, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = bgColor), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(item.emoji, fontSize = 36.sp) }
                         }
-                    }, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = bgColor), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(item.emoji, fontSize = 36.sp) }
                     }
                 }
             }
-
-            Spacer(Modifier.height(12.dp))
-
-            if (currentMode == MusicMode.REPEAT_MELODY && !isShowingMelody) Button({ playerSequence = emptyList(); generateMelody() }, Modifier.height(60.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue)) { Text("🔄 Новая мелодия", fontSize = 18.sp, color = Color.White) }
-            if (currentMode == MusicMode.GUESS_SOUND && currentSound != null) Button({ AudioPlayer.playSFX(currentSound!!.soundRes) }, Modifier.height(60.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGold)) { Text("🔊 Прослушать ещё раз", fontSize = 18.sp, color = Color.White) }
         }
 
         if (showLevelComplete) LevelComplete(3, "Молодец! Ты отлично справился с музыкой!", onNext = { onGameComplete() })
