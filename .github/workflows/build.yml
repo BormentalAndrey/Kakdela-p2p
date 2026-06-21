@@ -24,16 +24,19 @@ jobs:
       - name: Setup Gradle
         run: chmod +x gradlew
 
-      - name: Debug - показать все иконки
+      - name: Fix resource file names
         run: |
-          echo "=== Все ic_launcher файлы ==="
-          find . -name "ic_launcher*" -type f 2>/dev/null || echo "НЕ НАЙДЕНЫ!"
-          echo ""
-          echo "=== Все mipmap папки ==="
-          find . -path "*/mipmap*" -type d 2>/dev/null || echo "НЕТ ПАПОК mipmap!"
-          echo ""
-          echo "=== Содержимое res ==="
-          ls -R app/src/main/res/ 2>/dev/null || echo "НЕТ ПАПКИ res!"
+          find app/src/main/res -type f -name "*.mp3.mp3" | while read f; do mv "$f" "${f%.mp3.mp3}.mp3" 2>/dev/null; echo "fixed: $f"; done
+          find app/src/main/res -type f -name "*.png.png" | while read f; do mv "$f" "${f%.png.png}.png" 2>/dev/null; echo "fixed: $f"; done
+
+      - name: Create round icons
+        run: |
+          for dir in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            if [ -f "app/src/main/res/mipmap-$dir/ic_launcher.png" ] && [ ! -f "app/src/main/res/mipmap-$dir/ic_launcher_round.png" ]; then
+              cp "app/src/main/res/mipmap-$dir/ic_launcher.png" "app/src/main/res/mipmap-$dir/ic_launcher_round.png"
+              echo "✅ Создана: mipmap-$dir/ic_launcher_round.png"
+            fi
+          done
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
