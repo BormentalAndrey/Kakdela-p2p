@@ -43,31 +43,25 @@ fun VasilisinaAzbukaApp() {
 
     NavHost(navController = navController, startDestination = Routes.Menu.route) {
         composable(Routes.Menu.route) { MainMenuScreen { navController.navigate(it) } }
-
         composable(Routes.Coloring.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             ColoringScreen(stage, { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-
         composable(Routes.MusicBox.route) {
             MusicBoxScreen({ navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-
         composable(Routes.MemoryPuzzle.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             MemoryPuzzleScreen(stage, { if (stage < GameState.MAX_MEMORYPUZZLE_LEVELS) navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) { popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-
         composable(Routes.FeedKuzya.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             FeedKuzyaScreen(stage, { if (stage < GameState.MAX_FEEDKUZYA_LEVELS) navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) { popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-
         composable(Routes.Seasons.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             SeasonsScreen(stage, { if (stage < GameState.MAX_SEASONS_LEVELS) navController.navigate(Routes.Seasons.createRoute(stage + 1)) { popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-
         composable(Routes.Karaoke.route, arguments = listOf(navArgument("songIndex") { type = NavType.IntType; defaultValue = 1 }, navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1; val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             KaraokeScreen(songIndex, stage, { if (stage < 5) navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } }, { if (songIndex < 20) navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
@@ -80,48 +74,41 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val context = LocalContext.current
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
-    // Загружаем реальное состояние Кнопы
-    val knopaState = remember {
-        try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }
+    // Живое состояние Кнопы — обновляется каждые 5 секунд
+    var knopaState by remember { mutableStateOf(try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(5000)
+            knopaState = try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }
+        }
     }
+
     val knopaMood = knopaState?.mood?.name?.lowercase() ?: "neutral"
     val knopaIsSleeping = knopaState?.isSleeping ?: false
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
-    // Определяем что хочет Кнопа
     val knopaWant = when {
-        knopaIsSleeping -> "Спит..."
-        knopaState == null -> "Познакомься!"
-        knopaState.hunger < 30 -> "Хочу есть!"
-        knopaState.cleanliness < 30 -> "Хочу купаться!"
-        knopaState.happiness < 30 -> "Хочу играть!"
-        knopaState.energy < 30 -> "Хочу спать!"
-        knopaState.health < 30 -> "Мне плохо..."
-        hour in 20..21 -> "Пора купаться!"
-        hour in 21..23 || hour in 0..7 -> "Спит..."
-        knopaState.mood == KuzyaMood.ANGRY -> "Ты забыл про меня!"
-        knopaState.mood == KuzyaMood.ECSTATIC -> "Мур-мур-мур!"
-        knopaState.mood == KuzyaMood.HAPPY -> "Я счастлив!"
+        knopaIsSleeping -> "Спит..."; knopaState == null -> "Познакомься!"
+        knopaState!!.hunger < 30 -> "Хочу есть!"; knopaState!!.cleanliness < 30 -> "Хочу купаться!"
+        knopaState!!.happiness < 30 -> "Хочу играть!"; knopaState!!.energy < 30 -> "Хочу спать!"
+        knopaState!!.health < 30 -> "Мне плохо..."; hour in 20..21 -> "Пора купаться!"
+        hour in 21..23 || hour in 0..7 -> "Спит..."; knopaState!!.mood == KuzyaMood.ANGRY -> "Ты забыл про меня!"
+        knopaState!!.mood == KuzyaMood.ECSTATIC -> "Мур-мур-мур!"; knopaState!!.mood == KuzyaMood.HAPPY -> "Я счастлив!"
         else -> "Всё хорошо!"
     }
 
     val knopaImg = when {
-        knopaIsSleeping -> R.drawable.character_kuzya_sleeping
-        knopaMood == "ecstatic" -> R.drawable.character_kuzya_ecstatic
-        knopaMood == "happy" -> R.drawable.character_kuzya_happy
-        knopaMood == "playing" -> R.drawable.character_kuzya_playing
-        knopaMood == "hungry" -> R.drawable.character_kuzya_hungry
-        knopaMood == "sad" -> R.drawable.character_kuzya_sad
-        knopaMood == "sick" -> R.drawable.character_kuzya_sick
-        knopaMood == "dirty" -> R.drawable.character_kuzya_dirty
-        knopaMood == "angry" -> R.drawable.character_kuzya_angry
-        knopaMood == "sleepy" -> R.drawable.character_kuzya_sleeping
+        knopaIsSleeping -> R.drawable.character_kuzya_sleeping; knopaMood == "ecstatic" -> R.drawable.character_kuzya_ecstatic
+        knopaMood == "happy" -> R.drawable.character_kuzya_happy; knopaMood == "playing" -> R.drawable.character_kuzya_playing
+        knopaMood == "hungry" -> R.drawable.character_kuzya_hungry; knopaMood == "sad" -> R.drawable.character_kuzya_sad
+        knopaMood == "sick" -> R.drawable.character_kuzya_sick; knopaMood == "dirty" -> R.drawable.character_kuzya_dirty
+        knopaMood == "angry" -> R.drawable.character_kuzya_angry; knopaMood == "sleepy" -> R.drawable.character_kuzya_sleeping
         else -> R.drawable.character_kuzya_neutral
     }
 
     val vasilisaEmotions = listOf("happy", "proud", "teacher")
     var vasilisaIndex by remember { mutableIntStateOf(0) }
-
     LaunchedEffect(Unit) { while (true) { delay(4000); vasilisaIndex = (vasilisaIndex + 1) % vasilisaEmotions.size } }
 
     Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.15f), FairyPurple.copy(alpha = 0.05f), FairyBlue.copy(alpha = 0.1f))))) {
@@ -135,7 +122,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                 }
                 Spacer(Modifier.height(20.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    // Василиса
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
@@ -145,7 +131,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                             Text(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> "Гордится тобой!"; "teacher" -> "Научит всему"; else -> "Твой учитель" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
-                    // Кнопа с реальным состоянием
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
@@ -191,3 +176,5 @@ private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted
         }
     }
 }
+
+private data class GameMenuItem(val emoji: String, val name: String, val route: String, val gameId: String, val description: String)
