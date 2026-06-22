@@ -111,7 +111,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         KnopaStateManager.saveState(applicationContext)
         AudioPlayer.release()
-        KarFileManager.clearCache()
     }
 }
 
@@ -184,19 +183,6 @@ private object KnopaStateManager {
             }
         } catch (e: Exception) {
             Log.e("KnopaManager", "Ошибка обновления состояния Кнопы: ${e.message}")
-        }
-    }
-}
-
-/**
- * Вспомогательный объект для управления кешем караоке-файлов
- */
-private object KarFileManager {
-    fun clearCache() {
-        try {
-            com.vasilisinaazbuka.games.KarFileLoader.clearCache()
-        } catch (e: Exception) {
-            Log.e("KarManager", "Ошибка очистки кеша караоке: ${e.message}")
         }
     }
 }
