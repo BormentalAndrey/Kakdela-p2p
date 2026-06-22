@@ -30,7 +30,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.vasilisinaazbuka.audio.AudioPlayer
 import com.vasilisinaazbuka.data.GameState
 import com.vasilisinaazbuka.games.*
 import com.vasilisinaazbuka.navigation.Routes
@@ -81,11 +80,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val context = LocalContext.current
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
-    // Включаем фоновую музыку при входе в меню
-    LaunchedEffect(Unit) {
-        AudioPlayer.playMusic(R.raw.menu)
-    }
-
     // Загружаем реальное состояние Кнопы
     val knopaState = remember {
         try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }
@@ -94,6 +88,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val knopaIsSleeping = knopaState?.isSleeping ?: false
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
+    // Определяем что хочет Кнопа
     val knopaWant = when {
         knopaIsSleeping -> "Спит..."
         knopaState == null -> "Познакомься!"
@@ -140,6 +135,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                 }
                 Spacer(Modifier.height(20.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    // Василиса
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
@@ -149,6 +145,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                             Text(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> "Гордится тобой!"; "teacher" -> "Научит всему"; else -> "Твой учитель" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
                         }
                     }
+                    // Кнопа с реальным состоянием
                     Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp)) {
                         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
@@ -194,5 +191,3 @@ private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted
         }
     }
 }
-
-private data class GameMenuItem(val emoji: String, val name: String, val route: String, val gameId: String, val description: String)
