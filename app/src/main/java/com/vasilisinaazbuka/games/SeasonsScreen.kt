@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.vasilisinaazbuka.R
 import com.vasilisinaazbuka.audio.AudioPlayer
 import com.vasilisinaazbuka.data.GameState
@@ -46,18 +47,11 @@ fun SeasonsScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete: 
 
     LaunchedEffect(stage) { availableItems = allItems.shuffled().take(8); placedItems = Season.entries.associateWith { emptyList() }; selectedItem = null; showLevelComplete = false }
     val allPlaced = placedItems.values.sumOf { it.size } == availableItems.size
-
     LaunchedEffect(allPlaced) { if (allPlaced && !showLevelComplete) { val correctCount = placedItems.entries.sumOf { (season, items) -> items.count { it.correctSeason == season } }; stars = when { correctCount == availableItems.size -> 3; correctCount >= availableItems.size - 2 -> 2; else -> 1 }; showLevelComplete = true; AudioPlayer.playSFX(R.raw.sfx_success); GameState.completeLevel("seasons", stage) } }
-
     val unplacedItems = availableItems.filter { item -> placedItems.values.none { list -> list.contains(item) } }
 
     Box(Modifier.fillMaxSize()) {
         Image(painterResource(R.drawable.bg_level_seasons), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
-
-        // Кнопка «Назад» справа вверху
-        Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.TopEnd) {
-            Button(onClick = onBack, Modifier.size(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp)) { Text("↩", fontSize = 18.sp, color = Color.White) }
-        }
 
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -65,16 +59,12 @@ fun SeasonsScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete: 
                 Spacer(Modifier.height(8.dp)); StageProgressIndicator(currentStage = stage, maxStages = 4, compact = true); Spacer(Modifier.height(12.dp))
                 CharacterView("vasilisa", "teacher", "Разложи предметы\nпо временам года!", Modifier.fillMaxWidth()); Spacer(Modifier.height(12.dp))
                 Text(if (selectedItem != null) "Выбран: ${selectedItem!!.emoji} ${selectedItem!!.itemName}\nНажми на сезон!" else "Выбери предмет,\nзатем нажми на сезон:", style = MaterialTheme.typography.bodySmall, color = if (selectedItem != null) FairyGold else FairyPurple, fontWeight = if (selectedItem != null) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.Center); Spacer(Modifier.height(8.dp))
-
                 if (unplacedItems.isNotEmpty()) LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.height(120.dp), verticalArrangement = Arrangement.spacedBy(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { items(unplacedItems) { item -> val isSelected = selectedItem == item; Box(Modifier.size(48.dp).clip(RoundedCornerShape(10.dp)).background(if (isSelected) FairyGold.copy(alpha = 0.5f) else Color.White).border(if (isSelected) 3.dp else 2.dp, if (isSelected) FairyGold else FairyGold.copy(alpha = 0.3f), RoundedCornerShape(10.dp)).clickable { selectedItem = if (isSelected) null else item; AudioPlayer.playSFX(R.raw.sfx_click) }, contentAlignment = Alignment.Center) { Text(item.emoji, fontSize = 24.sp) } } }
                 else if (!showLevelComplete) Text("Все предметы размещены!\nПроверяем...", style = MaterialTheme.typography.bodySmall, color = FairyGreen, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-
                 Spacer(Modifier.height(12.dp))
                 Button({ placedItems = Season.entries.associateWith { emptyList() }; selectedItem = null; AudioPlayer.playSFX(R.raw.sfx_reset) }, Modifier.fillMaxWidth().height(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink)) { Text("🔄 Заново", fontSize = 14.sp, color = Color.White) }
             }
-
             Spacer(Modifier.width(12.dp))
-
             Column(Modifier.weight(0.67f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Season.entries.forEach { season -> val seasonItems = placedItems[season] ?: emptyList()
@@ -84,6 +74,11 @@ fun SeasonsScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete: 
                     }
                 }
             }
+        }
+
+        // Кнопка «Назад» на переднем плане
+        Box(Modifier.fillMaxSize().wrapContentSize(Alignment.TopEnd).padding(8.dp).zIndex(100f)) {
+            Button(onClick = onBack, Modifier.size(48.dp).zIndex(100f), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.85f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp), elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)) { Text("↩", fontSize = 20.sp, color = Color.White) }
         }
     }
 
