@@ -43,28 +43,36 @@ fun VasilisinaAzbukaApp() {
 
     NavHost(navController = navController, startDestination = Routes.Menu.route) {
         composable(Routes.Menu.route) { MainMenuScreen { navController.navigate(it) } }
-        composable(Routes.Coloring.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
+        composable(Routes.Coloring.route, arguments = Routes.Coloring.arguments()) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             ColoringScreen(stage, { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
         composable(Routes.MusicBox.route) {
             MusicBoxScreen({ navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-        composable(Routes.MemoryPuzzle.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
+        composable(Routes.MemoryPuzzle.route, arguments = Routes.MemoryPuzzle.arguments()) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             MemoryPuzzleScreen(stage, { if (stage < GameState.MAX_MEMORYPUZZLE_LEVELS) navController.navigate(Routes.MemoryPuzzle.createRoute(stage + 1)) { popUpTo(Routes.MemoryPuzzle.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-        composable(Routes.FeedKuzya.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
+        composable(Routes.FeedKuzya.route, arguments = Routes.FeedKuzya.arguments()) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             FeedKuzyaScreen(stage, { if (stage < GameState.MAX_FEEDKUZYA_LEVELS) navController.navigate(Routes.FeedKuzya.createRoute(stage + 1)) { popUpTo(Routes.FeedKuzya.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-        composable(Routes.Seasons.route, arguments = listOf(navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
+        composable(Routes.Seasons.route, arguments = Routes.Seasons.arguments()) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
             SeasonsScreen(stage, { if (stage < GameState.MAX_SEASONS_LEVELS) navController.navigate(Routes.Seasons.createRoute(stage + 1)) { popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
-        composable(Routes.Karaoke.route, arguments = listOf(navArgument("songIndex") { type = NavType.IntType; defaultValue = 1 }, navArgument("stage") { type = NavType.IntType; defaultValue = 1 })) { backStackEntry ->
-            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1; val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            KaraokeScreen(songIndex, stage, { if (stage < 5) navController.navigate(Routes.Karaoke.createRoute(songIndex, stage + 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } }, { if (songIndex < 20) navController.navigate(Routes.Karaoke.createRoute(songIndex + 1, 1)) { popUpTo(Routes.Karaoke.createRoute(songIndex, stage)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
+        composable(Routes.Karaoke.route, arguments = Routes.Karaoke.arguments()) { backStackEntry ->
+            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
+            KaraokeScreen(songIndex = songIndex, stage = 1,
+                onNextStage = {}, onNextSong = {}, onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, onBack = { navController.popBackStack() })
+        }
+        composable(Routes.LearningSongs.route, arguments = Routes.LearningSongs.arguments()) { backStackEntry ->
+            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
+            LearningSongsScreen(songIndex = songIndex,
+                onNextSong = { if (songIndex < 10) navController.navigate(Routes.LearningSongs.createRoute(songIndex + 1)) { popUpTo(Routes.LearningSongs.createRoute(songIndex)) { inclusive = true } } else navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } },
+                onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } },
+                onBack = { navController.popBackStack() })
         }
     }
 }
@@ -74,15 +82,9 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val context = LocalContext.current
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
-    // Живое состояние Кнопы — обновляется каждые 5 секунд
     var knopaState by remember { mutableStateOf(try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(5000)
-            knopaState = try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }
-        }
-    }
+    LaunchedEffect(Unit) { while (true) { delay(5000); knopaState = try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null } } }
 
     val knopaMood = knopaState?.mood?.name?.lowercase() ?: "neutral"
     val knopaIsSleeping = knopaState?.isSleeping ?: false
@@ -147,15 +149,32 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
             }
             Spacer(Modifier.width(20.dp))
             Column(Modifier.weight(0.68f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly) {
+                // 7 игр в сетке — 2 строки (4 + 3)
                 val games = listOf(
                     GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки"),
                     GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай и угадывай звуки"),
                     GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Пазлы по памяти"),
                     GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Тамагочи с котом"),
                     GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Изучай сезоны"),
-                    GameMenuItem("📖", "Караоке-читалка", Routes.Karaoke.createRoute(1), "karaoke", "Пой и читай")
+                    GameMenuItem("🎬", "Караоке", Routes.Karaoke.createRoute(1), "karaoke", "Смотри и подпевай"),
+                    GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "10 песен с вопросами")
                 )
-                for (row in 0..1) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { for (col in 0..2) { val i = row * 3 + col; if (i < games.size) { val g = games[i]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0; val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 20; else -> 5 }; GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f)) } } } }
+                // Первая строка — 4 игры
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 0..3) {
+                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
+                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
+                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
+                    }
+                }
+                // Вторая строка — 3 игры
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 4..6) {
+                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
+                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
+                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
