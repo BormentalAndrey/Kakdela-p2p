@@ -1,5 +1,6 @@
 package com.vasilisinaazbuka.games
 
+import android.media.MediaPlayer
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -16,11 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.vasilisinaazbuka.R
 import com.vasilisinaazbuka.audio.AudioPlayer
 import com.vasilisinaazbuka.data.GameState
@@ -46,6 +49,7 @@ val learningSongs = listOf(
 
 @Composable
 fun LearningSongsScreen(songIndex: Int = 1, onNextSong: () -> Unit = {}, onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
+    val context = LocalContext.current
     val currentSong = learningSongs.getOrElse(songIndex - 1) { learningSongs[0] }
 
     var phase by remember { mutableStateOf(SongPhase.LISTEN) }
@@ -54,23 +58,34 @@ fun LearningSongsScreen(songIndex: Int = 1, onNextSong: () -> Unit = {}, onGameC
     var showLevelComplete by remember { mutableStateOf(false) }
     var stars by remember { mutableIntStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+
+    DisposableEffect(Unit) { onDispose { mediaPlayer?.release() } }
 
     val coverScale by animateFloatAsState(targetValue = if (isPlaying) 1.05f else 1f, animationSpec = spring(dampingRatio = 0.3f), label = "cover")
 
     Box(Modifier.fillMaxSize().background(FairyBlue.copy(alpha = 0.05f))) {
         Image(painterResource(R.drawable.bg_level_karaoke), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.2f)
 
-        Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.TopEnd) {
-            Button(onClick = onBack, Modifier.size(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp)) { Text("↩", fontSize = 18.sp, color = Color.White) }
-        }
-
         when (phase) {
-            SongPhase.LISTEN -> ListenPhase(currentSong, songIndex, isPlaying, coverScale, { AudioPlayer.playSFX(currentSong.audioRes); isPlaying = true }, { AudioPlayer.stopMusic(); isPlaying = false }, { phase = SongPhase.QUESTION })
+            SongPhase.LISTEN -> ListenPhase(currentSong, songIndex, isPlaying, coverScale,
+                onPlay = { mediaPlayer?.release(); mediaPlayer = MediaPlayer.create(context, currentSong.audioRes).apply { setOnCompletionListener { isPlaying = false; phase = SongPhase.QUESTION }; start() }; isPlaying = true },
+                onPause = { mediaPlayer?.pause(); isPlaying = false },
+                onContinue = { mediaPlayer?.release(); isPlaying = false; phase = SongPhase.QUESTION }
+            )
             SongPhase.QUESTION -> QuestionPhase(currentSong, selectedAnswer) { index ->
                 selectedAnswer = index; isCorrect = index == currentSong.correctAnswer; stars = if (isCorrect) 3 else 1; phase = SongPhase.RESULT
                 GameState.completeLevel("learningsongs", songIndex, if (isCorrect) 3 else 1); AudioPlayer.playSFX(if (isCorrect) R.raw.sfx_success else R.raw.sfx_error)
             }
-            SongPhase.RESULT -> ResultPhase(currentSong, isCorrect, stars, { if (songIndex < 10) onNextSong() else { showLevelComplete = true } }, { selectedAnswer = -1; phase = SongPhase.LISTEN; isPlaying = false; AudioPlayer.stopMusic() })
+            SongPhase.RESULT -> ResultPhase(currentSong, isCorrect, stars,
+                { if (songIndex < 10) onNextSong() else { showLevelComplete = true } },
+                { selectedAnswer = -1; phase = SongPhase.LISTEN; isPlaying = false; mediaPlayer?.release() }
+            )
+        }
+
+        // Кнопка «Назад» на переднем плане
+        Box(Modifier.fillMaxSize().wrapContentSize(Alignment.TopEnd).padding(8.dp).zIndex(100f)) {
+            Button(onClick = onBack, Modifier.size(48.dp).zIndex(100f), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.85f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp), elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)) { Text("↩", fontSize = 20.sp, color = Color.White) }
         }
 
         if (showLevelComplete) LevelComplete(stars = 3, message = "Все 10 песен прослушаны!\nТы молодец!", character = "vasilisa", onNext = { onGameComplete() })
@@ -90,8 +105,7 @@ private fun ListenPhase(currentSong: LearningSong, songIndex: Int, isPlaying: Bo
             Text(currentSong.title, style = MaterialTheme.typography.titleMedium, color = FairyPurple, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             Spacer(Modifier.height(24.dp))
             Button(onClick = if (isPlaying) onPause else onPlay, Modifier.size(100.dp).clip(CircleShape), colors = ButtonDefaults.buttonColors(containerColor = if (isPlaying) FairyPink else FairyGreen)) { Text(if (isPlaying) "⏸" else "▶", fontSize = 40.sp, color = Color.White) }
-            Spacer(Modifier.height(8.dp))
-            Text(if (isPlaying) "Играет..." else "Нажми чтобы слушать", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Spacer(Modifier.height(8.dp)); Text(if (isPlaying) "Играет..." else "Нажми чтобы слушать", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             Spacer(Modifier.height(24.dp))
             Button(onClick = onContinue, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyGold), shape = RoundedCornerShape(16.dp)) { Text("❓ Ответить на вопрос", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold) }
         }
@@ -105,10 +119,8 @@ private fun ListenPhase(currentSong: LearningSong, songIndex: Int, isPlaying: Bo
 @Composable
 private fun QuestionPhase(currentSong: LearningSong, selectedAnswer: Int, onAnswerSelect: (Int) -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("❓ Вопрос", style = MaterialTheme.typography.headlineMedium, color = FairyGold, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(20.dp))
-        Text(currentSong.question, style = MaterialTheme.typography.titleLarge, color = FairyPurple, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(32.dp))
+        Text("❓ Вопрос", style = MaterialTheme.typography.headlineMedium, color = FairyGold, fontWeight = FontWeight.Bold); Spacer(Modifier.height(20.dp))
+        Text(currentSong.question, style = MaterialTheme.typography.titleLarge, color = FairyPurple, textAlign = TextAlign.Center); Spacer(Modifier.height(32.dp))
         currentSong.answers.forEachIndexed { index, answer ->
             Card(Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable { onAnswerSelect(index) }, shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = if (selectedAnswer == index) FairyGold.copy(alpha = 0.3f) else Color.White), elevation = CardDefaults.cardElevation(if (selectedAnswer == index) 8.dp else 4.dp)) {
                 Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) { Text(listOf("🅰", "🅱", "©")[index], fontSize = 28.sp); Spacer(Modifier.width(12.dp)); Text(answer, style = MaterialTheme.typography.titleMedium, color = if (selectedAnswer == index) FairyGold else FairyBlue) }
@@ -120,11 +132,8 @@ private fun QuestionPhase(currentSong: LearningSong, selectedAnswer: Int, onAnsw
 @Composable
 private fun ResultPhase(currentSong: LearningSong, isCorrect: Boolean, stars: Int, onNext: () -> Unit, onReplay: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(if (isCorrect) "🎉 Правильно!" else "😊 Почти!", style = MaterialTheme.typography.headlineMedium, color = if (isCorrect) FairyGreen else FairyGold, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(16.dp))
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) {
-            Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("📚 Мораль:", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)); Text(currentSong.moral, style = MaterialTheme.typography.bodyLarge, color = FairyBlue, textAlign = TextAlign.Center) }
-        }
+        Text(if (isCorrect) "🎉 Правильно!" else "😊 Почти!", style = MaterialTheme.typography.headlineMedium, color = if (isCorrect) FairyGreen else FairyGold, fontWeight = FontWeight.Bold); Spacer(Modifier.height(16.dp))
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) { Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("📚 Мораль:", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)); Text(currentSong.moral, style = MaterialTheme.typography.bodyLarge, color = FairyBlue, textAlign = TextAlign.Center) } }
         Spacer(Modifier.height(24.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = onReplay, Modifier.weight(1f).height(56.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyPink), shape = RoundedCornerShape(16.dp)) { Text("🔄 Послушать ещё раз", fontSize = 14.sp, color = Color.White) }
