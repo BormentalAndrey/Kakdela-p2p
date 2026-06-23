@@ -43,10 +43,24 @@ fun VasilisinaAzbukaApp() {
 
     NavHost(navController = navController, startDestination = Routes.Menu.route) {
         composable(Routes.Menu.route) { MainMenuScreen { navController.navigate(it) } }
+        
+        // Экран выбора раскраски
+        composable(Routes.ColoringSelect.route) {
+            ColoringSelectScreen(
+                onStageSelected = { stage -> navController.navigate(Routes.Coloring.createRoute(stage)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        
+        // Раскраска
         composable(Routes.Coloring.route, arguments = Routes.Coloring.arguments()) { backStackEntry ->
             val stage = backStackEntry.arguments?.getInt("stage") ?: 1
-            ColoringScreen(stage, { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.Coloring.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
+            ColoringScreen(stage, 
+                onNextStage = { if (stage < GameState.MAX_COLORING_LEVELS) navController.navigate(Routes.Coloring.createRoute(stage + 1)) { popUpTo(Routes.ColoringSelect.route) } }, 
+                onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, 
+                onBack = { navController.popBackStack() })
         }
+        
         composable(Routes.MusicBox.route) {
             MusicBoxScreen({ navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
@@ -64,8 +78,7 @@ fun VasilisinaAzbukaApp() {
         }
         composable(Routes.Karaoke.route, arguments = Routes.Karaoke.arguments()) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
-            KaraokeScreen(songIndex = songIndex, stage = 1,
-                onNextStage = {}, onNextSong = {}, onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, onBack = { navController.popBackStack() })
+            KaraokeScreen(songIndex = songIndex, stage = 1, onNextStage = {}, onNextSong = {}, onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, onBack = { navController.popBackStack() })
         }
         composable(Routes.LearningSongs.route, arguments = Routes.LearningSongs.arguments()) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
@@ -83,34 +96,20 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
     val gameProgress = remember { try { GameState.getOverallProgress() } catch (e: IllegalStateException) { emptyMap() } }
 
     var knopaState by remember { mutableStateOf(try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null }) }
-
     LaunchedEffect(Unit) { while (true) { delay(5000); knopaState = try { KuzyaSaveManager.loadState(context) } catch (e: Exception) { null } } }
 
-    val knopaMood = knopaState?.mood?.name?.lowercase() ?: "neutral"
-    val knopaIsSleeping = knopaState?.isSleeping ?: false
+    val knopaMood = knopaState?.mood?.name?.lowercase() ?: "neutral"; val knopaIsSleeping = knopaState?.isSleeping ?: false
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
     val knopaWant = when {
-        knopaIsSleeping -> "Спит..."; knopaState == null -> "Познакомься!"
-        knopaState!!.hunger < 30 -> "Хочу есть!"; knopaState!!.cleanliness < 30 -> "Хочу купаться!"
-        knopaState!!.happiness < 30 -> "Хочу играть!"; knopaState!!.energy < 30 -> "Хочу спать!"
-        knopaState!!.health < 30 -> "Мне плохо..."; hour in 20..21 -> "Пора купаться!"
-        hour in 21..23 || hour in 0..7 -> "Спит..."; knopaState!!.mood == KuzyaMood.ANGRY -> "Ты забыл про меня!"
-        knopaState!!.mood == KuzyaMood.ECSTATIC -> "Мур-мур-мур!"; knopaState!!.mood == KuzyaMood.HAPPY -> "Я счастлив!"
-        else -> "Всё хорошо!"
+        knopaIsSleeping -> "Спит..."; knopaState == null -> "Познакомься!"; knopaState!!.hunger < 30 -> "Хочу есть!"; knopaState!!.cleanliness < 30 -> "Хочу купаться!"; knopaState!!.happiness < 30 -> "Хочу играть!"; knopaState!!.energy < 30 -> "Хочу спать!"; knopaState!!.health < 30 -> "Мне плохо..."; hour in 20..21 -> "Пора купаться!"; hour in 21..23 || hour in 0..7 -> "Спит..."; knopaState!!.mood == KuzyaMood.ANGRY -> "Ты забыл про меня!"; knopaState!!.mood == KuzyaMood.ECSTATIC -> "Мур-мур-мур!"; knopaState!!.mood == KuzyaMood.HAPPY -> "Я счастлив!"; else -> "Всё хорошо!"
     }
 
     val knopaImg = when {
-        knopaIsSleeping -> R.drawable.character_kuzya_sleeping; knopaMood == "ecstatic" -> R.drawable.character_kuzya_ecstatic
-        knopaMood == "happy" -> R.drawable.character_kuzya_happy; knopaMood == "playing" -> R.drawable.character_kuzya_playing
-        knopaMood == "hungry" -> R.drawable.character_kuzya_hungry; knopaMood == "sad" -> R.drawable.character_kuzya_sad
-        knopaMood == "sick" -> R.drawable.character_kuzya_sick; knopaMood == "dirty" -> R.drawable.character_kuzya_dirty
-        knopaMood == "angry" -> R.drawable.character_kuzya_angry; knopaMood == "sleepy" -> R.drawable.character_kuzya_sleeping
-        else -> R.drawable.character_kuzya_neutral
+        knopaIsSleeping -> R.drawable.character_kuzya_sleeping; knopaMood == "ecstatic" -> R.drawable.character_kuzya_ecstatic; knopaMood == "happy" -> R.drawable.character_kuzya_happy; knopaMood == "playing" -> R.drawable.character_kuzya_playing; knopaMood == "hungry" -> R.drawable.character_kuzya_hungry; knopaMood == "sad" -> R.drawable.character_kuzya_sad; knopaMood == "sick" -> R.drawable.character_kuzya_sick; knopaMood == "dirty" -> R.drawable.character_kuzya_dirty; knopaMood == "angry" -> R.drawable.character_kuzya_angry; knopaMood == "sleepy" -> R.drawable.character_kuzya_sleeping; else -> R.drawable.character_kuzya_neutral
     }
 
-    val vasilisaEmotions = listOf("happy", "proud", "teacher")
-    var vasilisaIndex by remember { mutableIntStateOf(0) }
+    val vasilisaEmotions = listOf("happy", "proud", "teacher"); var vasilisaIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) { while (true) { delay(4000); vasilisaIndex = (vasilisaIndex + 1) % vasilisaEmotions.size } }
 
     Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.15f), FairyPurple.copy(alpha = 0.05f), FairyBlue.copy(alpha = 0.1f))))) {
@@ -149,9 +148,8 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
             }
             Spacer(Modifier.width(20.dp))
             Column(Modifier.weight(0.68f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceEvenly) {
-                // 7 игр в сетке — 2 строки (4 + 3)
                 val games = listOf(
-                    GameMenuItem("🎨", "Раскраска", Routes.Coloring.createRoute(1), "coloring", "Раскрась картинки"),
+                    GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Раскрась картинки"),
                     GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай и угадывай звуки"),
                     GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Пазлы по памяти"),
                     GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Тамагочи с котом"),
@@ -159,22 +157,8 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                     GameMenuItem("🎬", "Караоке", Routes.Karaoke.createRoute(1), "karaoke", "Смотри и подпевай"),
                     GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "10 песен с вопросами")
                 )
-                // Первая строка — 4 игры
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (col in 0..3) {
-                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
-                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
-                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
-                    }
-                }
-                // Вторая строка — 3 игры
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (col in 4..6) {
-                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
-                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
-                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
-                    }
-                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) { for (col in 0..3) { val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0; val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }; GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f)) } }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) { for (col in 4..6) { val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0; val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }; GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f)) } }
             }
         }
     }
