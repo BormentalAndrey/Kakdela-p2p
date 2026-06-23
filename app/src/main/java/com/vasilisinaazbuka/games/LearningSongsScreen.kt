@@ -7,8 +7,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -83,7 +85,6 @@ fun LearningSongsScreen(songIndex: Int = 1, onNextSong: () -> Unit = {}, onGameC
             )
         }
 
-        // Кнопка «Назад» на переднем плане
         Box(Modifier.fillMaxSize().wrapContentSize(Alignment.TopEnd).padding(8.dp).zIndex(100f)) {
             Button(onClick = onBack, Modifier.size(48.dp).zIndex(100f), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.85f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp), elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)) { Text("↩", fontSize = 20.sp, color = Color.White) }
         }
@@ -118,7 +119,7 @@ private fun ListenPhase(currentSong: LearningSong, songIndex: Int, isPlaying: Bo
 
 @Composable
 private fun QuestionPhase(currentSong: LearningSong, selectedAnswer: Int, onAnswerSelect: (Int) -> Unit) {
-    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text("❓ Вопрос", style = MaterialTheme.typography.headlineMedium, color = FairyGold, fontWeight = FontWeight.Bold); Spacer(Modifier.height(20.dp))
         Text(currentSong.question, style = MaterialTheme.typography.titleLarge, color = FairyPurple, textAlign = TextAlign.Center); Spacer(Modifier.height(32.dp))
         currentSong.answers.forEachIndexed { index, answer ->
@@ -131,7 +132,7 @@ private fun QuestionPhase(currentSong: LearningSong, selectedAnswer: Int, onAnsw
 
 @Composable
 private fun ResultPhase(currentSong: LearningSong, isCorrect: Boolean, stars: Int, onNext: () -> Unit, onReplay: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(if (isCorrect) "🎉 Правильно!" else "😊 Почти!", style = MaterialTheme.typography.headlineMedium, color = if (isCorrect) FairyGreen else FairyGold, fontWeight = FontWeight.Bold); Spacer(Modifier.height(16.dp))
         Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) { Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("📚 Мораль:", style = MaterialTheme.typography.titleSmall, color = FairyPurple, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp)); Text(currentSong.moral, style = MaterialTheme.typography.bodyLarge, color = FairyBlue, textAlign = TextAlign.Center) } }
         Spacer(Modifier.height(24.dp))
