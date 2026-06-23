@@ -18,9 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,10 +37,28 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// Карты кусочков для каждого уровня (1-6)
+private val puzzlePiecesMap = mapOf(
+    "kremlin" to listOf(R.drawable.puzzle_kremlin1, R.drawable.puzzle_kremlin2, R.drawable.puzzle_kremlin3,
+                         R.drawable.puzzle_kremlin4, R.drawable.puzzle_kremlin5, R.drawable.puzzle_kremlin6),
+    "baikal" to listOf(R.drawable.puzzle_baikal1, R.drawable.puzzle_baikal2, R.drawable.puzzle_baikal3,
+                        R.drawable.puzzle_baikal4, R.drawable.puzzle_baikal5, R.drawable.puzzle_baikal6),
+    "matryoshka" to listOf(R.drawable.puzzle_matryoshka1, R.drawable.puzzle_matryoshka2, R.drawable.puzzle_matryoshka3,
+                            R.drawable.puzzle_matryoshka4, R.drawable.puzzle_matryoshka5, R.drawable.puzzle_matryoshka6),
+    "birch" to listOf(R.drawable.puzzle_birch1, R.drawable.puzzle_birch2, R.drawable.puzzle_birch3,
+                       R.drawable.puzzle_birch4, R.drawable.puzzle_birch5, R.drawable.puzzle_birch6),
+    "samovar" to listOf(R.drawable.puzzle_samovar1, R.drawable.puzzle_samovar2, R.drawable.puzzle_samovar3,
+                         R.drawable.puzzle_samovar4, R.drawable.puzzle_samovar5, R.drawable.puzzle_samovar6)
+)
+
+private val levelKeys = listOf("kremlin", "baikal", "matryoshka", "birch", "samovar")
+private val levelFullImages = listOf(R.drawable.puzzle_kremlin, R.drawable.puzzle_baikal, R.drawable.puzzle_matryoshka, R.drawable.puzzle_birch, R.drawable.puzzle_samovar)
+
 @Composable
 fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameComplete: () -> Unit = {}, onBack: () -> Unit = {}) {
-    val levelImages = listOf(R.drawable.puzzle_kremlin, R.drawable.puzzle_baikal, R.drawable.puzzle_matryoshka, R.drawable.puzzle_birch, R.drawable.puzzle_samovar)
-    val currentImage = levelImages.getOrElse(stage - 1) { R.drawable.puzzle_kremlin }
+    val currentKey = levelKeys.getOrElse(stage - 1) { "kremlin" }
+    val currentFullImage = levelFullImages.getOrElse(stage - 1) { R.drawable.puzzle_kremlin }
+    val pieceImages = puzzlePiecesMap[currentKey] ?: puzzlePiecesMap["kremlin"]!!
 
     var showImage by remember { mutableStateOf(true) }
     var showLevelComplete by remember { mutableStateOf(false) }
@@ -74,6 +90,7 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
         }
 
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            // Левая панель (1/3)
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text("Собери картинку", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
@@ -92,16 +109,17 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
 
             Spacer(Modifier.width(12.dp))
 
+            // Правая часть (2/3)
             Column(Modifier.weight(0.67f).fillMaxHeight().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (showImage) {
                     Card(Modifier.fillMaxWidth().aspectRatio(1.5f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Image(painterResource(currentImage), "Запомни!", Modifier.fillMaxSize().padding(16.dp), contentScale = ContentScale.Fit)
+                            Image(painterResource(currentFullImage), "Запомни!", Modifier.fillMaxSize().padding(16.dp), contentScale = ContentScale.Fit)
                             Box(Modifier.align(Alignment.TopCenter).padding(8.dp).background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp)).padding(horizontal = 16.dp, vertical = 8.dp)) { Text("Запоминай! 3 сек...", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
                         }
                     }
                 } else {
-                    // Сетка 3×2 — каждая ячейка показывает свой фрагмент
+                    // Сетка 3×2
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().aspectRatio(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(List(6) { it }) { _, cellIndex ->
                             val pieceInCell = placedPieces[cellIndex]
@@ -113,7 +131,8 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                                 else if (pieceInCell != null && selectedPiece < 0) { placedPieces = placedPieces - cellIndex; AudioPlayer.playSFX(R.raw.sfx_click) }
                             }, contentAlignment = Alignment.Center) {
                                 if (pieceInCell != null) {
-                                    PuzzlePieceView(pieceInCell, currentImage)
+                                    // Показываем готовый кусочек
+                                    Image(painter = painterResource(pieceImages[pieceInCell]), contentDescription = "Кусочек ${pieceInCell + 1}", modifier = Modifier.fillMaxSize().padding(2.dp), contentScale = ContentScale.Fit)
                                 } else {
                                     Text("${cellIndex + 1}", fontSize = 24.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                 }
@@ -125,12 +144,12 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                     Text("Доступные кусочки:", style = MaterialTheme.typography.bodySmall, color = FairyPurple)
                     Spacer(Modifier.height(4.dp))
 
-                    // Кусочки внизу
+                    // Доступные кусочки
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().height(140.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(availablePieces) { _, pieceIndex ->
                             val isSelected = selectedPiece == pieceIndex
                             Box(Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(if (isSelected) FairyGold.copy(alpha = 0.5f) else Color.White).border(if (isSelected) 3.dp else 1.dp, if (isSelected) FairyGold else Color.Gray, RoundedCornerShape(8.dp)).clickable { selectedPiece = if (isSelected) -1 else pieceIndex; AudioPlayer.playSFX(R.raw.sfx_click) }, contentAlignment = Alignment.Center) {
-                                PuzzlePieceView(pieceIndex, currentImage)
+                                Image(painter = painterResource(pieceImages[pieceIndex]), contentDescription = "Кусочек ${pieceIndex + 1}", modifier = Modifier.fillMaxSize().padding(4.dp), contentScale = ContentScale.Fit)
                                 Box(Modifier.align(Alignment.TopStart).padding(2.dp).background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp)).padding(horizontal = 4.dp, vertical = 1.dp)) { Text("${pieceIndex + 1}", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold) }
                             }
                         }
@@ -139,39 +158,5 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
             }
         }
         if (showLevelComplete) LevelComplete(stars, "Картинка собрана!\nПодсматриваний: $viewCount", character = "vasilisa", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
-    }
-}
-
-/**
- * Правильный показ фрагмента картинки для пазла 3×2
- * Используем МАСШТАБИРОВАНИЕ чтобы картинка занимала 3×2 ячейки
- */
-@Composable
-private fun PuzzlePieceView(pieceIndex: Int, imageRes: Int) {
-    val cols = 3
-    val rows = 2
-    val col = pieceIndex % cols
-    val row = pieceIndex / cols
-
-    Box(Modifier.fillMaxSize().clipToBounds()) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = "Кусочек ${pieceIndex + 1}",
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    // Увеличиваем картинку в 3 раза по ширине и в 2 раза по высоте
-                    // чтобы она занимала всю сетку 3×2
-                    scaleX = cols.toFloat()  // ×3
-                    scaleY = rows.toFloat()  // ×2
-                    
-                    // Смещаем так, чтобы был виден только нужный кусочек
-                    // После масштабирования размер картинки = size * scale
-                    // Смещение = позиция кусочка * размер одной ячейки
-                    translationX = -size.width * col
-                    translationY = -size.height * row
-                },
-            contentScale = ContentScale.FillBounds
-        )
     }
 }
