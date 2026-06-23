@@ -8,6 +8,7 @@ import androidx.navigation.navArgument
  * Все маршруты определены как sealed class для типобезопасности
  * 
  * Поддерживает:
+ * - Экран выбора раскраски
  * - Игра 1: Раскраска (5 уровней)
  * - Игра 2: Музыкальная шкатулка (1 уровень, 3 режима)
  * - Игра 3: Собери картинку по памяти (5 уровней)
@@ -20,6 +21,9 @@ sealed class Routes(val route: String) {
 
     // Главное меню
     data object Menu : Routes("menu")
+
+    // Экран выбора раскраски
+    data object ColoringSelect : Routes("coloringselect")
 
     // Игра 1: Раскраска (5 уровней)
     data object Coloring : Routes("coloring/{stage}") {
@@ -61,16 +65,16 @@ sealed class Routes(val route: String) {
     }
 
     companion object {
-        val allRoutes = listOf(Menu, Coloring, MusicBox, MemoryPuzzle, FeedKuzya, Seasons, Karaoke, LearningSongs)
+        val allRoutes = listOf(Menu, ColoringSelect, Coloring, MusicBox, MemoryPuzzle, FeedKuzya, Seasons, Karaoke, LearningSongs)
 
         val gameItems = listOf(
-            GameInfo("coloring", "🎨", "Раскраска", "Раскрась картинки из разных городов", 5, Coloring.createRoute(1)),
+            GameInfo("coloring", "🎨", "Раскраска", "Раскрась картинки из разных городов", 5, ColoringSelect.route),
             GameInfo("musicbox", "🎵", "Музыкальная шкатулка", "Слушай, повторяй и угадывай звуки", 1, MusicBox.route),
             GameInfo("memorypuzzle", "🧩", "Собери картинку", "Запомни и собери пазл по памяти", 5, MemoryPuzzle.createRoute(1)),
             GameInfo("feedkuzya", "🐱", "Накорми Кнопу", "Ухаживай за котом-тамагочи", 5, FeedKuzya.createRoute(1)),
             GameInfo("seasons", "❄️", "Времена года", "Разложи предметы по сезонам", 4, Seasons.createRoute(1)),
             GameInfo("karaoke", "🎬", "Караоке-читалка", "Смотри и подпевай!", 1, Karaoke.createRoute(1)),
-            GameInfo("learningsongs", "🎵", "Поучительные песни", "10 песен с вопросами", 10, LearningSongs.createRoute(1))
+            GameInfo("learningsongs", "🎶", "Поучительные песни", "10 песен с вопросами", 10, LearningSongs.createRoute(1))
         )
 
         fun getMaxLevels(gameId: String) = gameItems.find { it.id == gameId }?.maxLevels ?: 5
