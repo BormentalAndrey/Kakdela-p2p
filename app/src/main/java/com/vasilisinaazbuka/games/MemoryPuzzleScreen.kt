@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.vasilisinaazbuka.R
 import com.vasilisinaazbuka.audio.AudioPlayer
 import com.vasilisinaazbuka.data.GameState
@@ -84,18 +85,10 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
     Box(Modifier.fillMaxSize()) {
         Image(painterResource(R.drawable.bg_level_memory), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
 
-        // Кнопка «Назад» справа вверху
-        Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.TopEnd) {
-            Button(onClick = onBack, Modifier.size(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.7f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp)) { Text("↩", fontSize = 18.sp, color = Color.White) }
-        }
-
         Row(Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Левая панель (1/3)
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text("Собери картинку", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(8.dp))
-                StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp)); StageProgressIndicator(currentStage = stage, maxStages = 5, compact = true); Spacer(Modifier.height(12.dp))
                 CharacterView("vasilisa", if (showImage) "teacher" else "thinking", if (showImage) "Запомни картинку!\nСмотри внимательно." else "Собери картинку!\nНажми на кусочек,\nпотом на ячейку.", Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
 
@@ -109,7 +102,6 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
 
             Spacer(Modifier.width(12.dp))
 
-            // Правая часть (2/3)
             Column(Modifier.weight(0.67f).fillMaxHeight().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (showImage) {
                     Card(Modifier.fillMaxWidth().aspectRatio(1.5f), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
@@ -119,32 +111,20 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                         }
                     }
                 } else {
-                    // Сетка 3×2
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().aspectRatio(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(List(6) { it }) { _, cellIndex ->
-                            val pieceInCell = placedPieces[cellIndex]
-                            val isCorrect = pieceInCell != null && pieceInCell == cellIndex
+                            val pieceInCell = placedPieces[cellIndex]; val isCorrect = pieceInCell != null && pieceInCell == cellIndex
                             val bgColor by animateColorAsState(targetValue = when { pieceInCell != null && isCorrect -> FairyGreen.copy(alpha = 0.3f); pieceInCell != null && !isCorrect -> FairyPink.copy(alpha = 0.3f); selectedPiece >= 0 -> FairyGold.copy(alpha = 0.2f); else -> Color.Gray.copy(alpha = 0.2f) }, animationSpec = spring(), label = "bg_$cellIndex")
-
                             Box(Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(bgColor).border(2.dp, when { pieceInCell != null && isCorrect -> FairyGreen; pieceInCell != null -> FairyPink; else -> FairyGold.copy(alpha = 0.5f) }, RoundedCornerShape(8.dp)).clickable {
                                 if (selectedPiece >= 0 && !placedPieces.containsKey(cellIndex)) { placedPieces = placedPieces + (cellIndex to selectedPiece); selectedPiece = -1; AudioPlayer.playSFX(R.raw.sfx_drop) }
                                 else if (pieceInCell != null && selectedPiece < 0) { placedPieces = placedPieces - cellIndex; AudioPlayer.playSFX(R.raw.sfx_click) }
                             }, contentAlignment = Alignment.Center) {
-                                if (pieceInCell != null) {
-                                    // Показываем готовый кусочек
-                                    Image(painter = painterResource(pieceImages[pieceInCell]), contentDescription = "Кусочек ${pieceInCell + 1}", modifier = Modifier.fillMaxSize().padding(2.dp), contentScale = ContentScale.Fit)
-                                } else {
-                                    Text("${cellIndex + 1}", fontSize = 24.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-                                }
+                                if (pieceInCell != null) Image(painter = painterResource(pieceImages[pieceInCell]), contentDescription = "Кусочек ${pieceInCell + 1}", modifier = Modifier.fillMaxSize().padding(2.dp), contentScale = ContentScale.Fit)
+                                else Text("${cellIndex + 1}", fontSize = 24.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
-
-                    Spacer(Modifier.height(12.dp))
-                    Text("Доступные кусочки:", style = MaterialTheme.typography.bodySmall, color = FairyPurple)
-                    Spacer(Modifier.height(4.dp))
-
-                    // Доступные кусочки
+                    Spacer(Modifier.height(12.dp)); Text("Доступные кусочки:", style = MaterialTheme.typography.bodySmall, color = FairyPurple); Spacer(Modifier.height(4.dp))
                     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().height(140.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), userScrollEnabled = false) {
                         itemsIndexed(availablePieces) { _, pieceIndex ->
                             val isSelected = selectedPiece == pieceIndex
@@ -157,6 +137,12 @@ fun MemoryPuzzleScreen(stage: Int = 1, onNextStage: () -> Unit = {}, onGameCompl
                 }
             }
         }
+
+        // Кнопка «Назад» на переднем плане
+        Box(Modifier.fillMaxSize().wrapContentSize(Alignment.TopEnd).padding(8.dp).zIndex(100f)) {
+            Button(onClick = onBack, Modifier.size(48.dp).zIndex(100f), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.85f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp), elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)) { Text("↩", fontSize = 20.sp, color = Color.White) }
+        }
+
         if (showLevelComplete) LevelComplete(stars, "Картинка собрана!\nПодсматриваний: $viewCount", character = "vasilisa", onNext = { if (stage < 5) onNextStage() else onGameComplete() })
     }
 }
