@@ -66,7 +66,7 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
             Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text("🎤 Караоке", style = MaterialTheme.typography.titleLarge, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
-                StageProgressIndicator(currentStage = stage, maxStages = 1, compact = true)
+                StageProgressIndicator(currentStage = 1, maxStages = 1, compact = true)
                 Spacer(Modifier.height(12.dp))
                 CharacterView("vasilisa", if (isPlaying) "happy" else if (playbackCompleted) "proud" else "teacher",
                     if (isPlaying) "Смотри и подпевай!" else if (playbackCompleted) "Молодец! Спой ещё раз!" else "Смотри караоке\nи подпевай!", Modifier.fillMaxWidth())
@@ -80,7 +80,7 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = { exoPlayer.seekTo(0); exoPlayer.play(); playbackCompleted = false; isPlaying = true }, Modifier.fillMaxWidth().height(44.dp), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue), shape = RoundedCornerShape(12.dp)) { Text("🔄 Заново", fontSize = 14.sp, color = Color.White) }
                 Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = { showLevelComplete = true; stars = 3; GameState.completeLevel("karaoke", songIndex, 3); exoPlayer.release() }, Modifier.fillMaxWidth().height(44.dp)) { Text("✅ Завершить", fontSize = 14.sp, color = FairyGreen) }
+                OutlinedButton(onClick = { showLevelComplete = true; stars = 3; GameState.completeLevel("karaoke", 1, 3); exoPlayer.release() }, Modifier.fillMaxWidth().height(44.dp)) { Text("✅ Завершить", fontSize = 14.sp, color = FairyGreen) }
             }
 
             Spacer(Modifier.width(12.dp))
@@ -90,11 +90,10 @@ fun KaraokeScreen(songIndex: Int = 1, stage: Int = 1, onNextStage: () -> Unit = 
             }
         }
 
-        // Кнопка «Назад» на переднем плане
         Box(Modifier.fillMaxSize().wrapContentSize(Alignment.TopEnd).padding(8.dp).zIndex(100f)) {
             Button(onClick = onBack, Modifier.size(48.dp).zIndex(100f), colors = ButtonDefaults.buttonColors(containerColor = FairyBlue.copy(alpha = 0.85f)), shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(0.dp), elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)) { Text("↩", fontSize = 20.sp, color = Color.White) }
         }
 
-        if (showLevelComplete) LevelComplete(stars = stars, message = "Караоке просмотрено!\nМолодец!", character = "vasilisa", onNext = { if (songIndex < 1) onNextSong() else onGameComplete() })
+        if (showLevelComplete) LevelComplete(stars = stars, message = "Караоке просмотрено!\nМолодец!", character = "vasilisa", onNext = onGameComplete)
     }
 }
