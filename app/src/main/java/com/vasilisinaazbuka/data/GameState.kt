@@ -8,33 +8,20 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Управление состоянием игры и сохранение прогресса
- * Использует SharedPreferences для хранения данных между сессиями
- * 
- * Поддерживает:
- * - Сохранение прогресса по уровням и песням
- * - Систему достижений
- * - Ежедневные бонусы
- * - Статистику игрока
- * - Миграцию данных при обновлении версии
- */
 object GameState {
 
     private lateinit var prefs: SharedPreferences
     private var isInitialized = false
     private val gson = Gson()
-
     private const val DATA_VERSION = 1
 
-    // Максимальное количество уровней для каждой игры
     const val MAX_COLORING_LEVELS = 5
     const val MAX_MUSICBOX_LEVELS = 1
     const val MAX_MEMORYPUZZLE_LEVELS = 5
     const val MAX_FEEDKUZYA_LEVELS = 5
     const val MAX_SEASONS_LEVELS = 4
-    const val MAX_KARAOKE_LEVELS = 1       // Одно видео
-    const val MAX_LEARNINGSONGS_LEVELS = 10 // 10 поучительных песен
+    const val MAX_KARAOKE_LEVELS = 1
+    const val MAX_LEARNINGSONGS_LEVELS = 10
 
     private object PrefKeys {
         const val DATA_VERSION = "data_version"
@@ -73,10 +60,8 @@ object GameState {
         if (stars > existingStars) editor.putInt("${gameId}_stars", currentStars + (stars - existingStars))
         val maxLevel = prefs.getInt("${gameId}_max_level", 0)
         if (stage > maxLevel) editor.putInt("${gameId}_max_level", stage)
-        val totalGamesPlayed = prefs.getInt(PrefKeys.TOTAL_GAMES_PLAYED, 0)
-        editor.putInt(PrefKeys.TOTAL_GAMES_PLAYED, totalGamesPlayed + 1)
-        val totalStars = prefs.getInt(PrefKeys.TOTAL_STARS, 0)
-        editor.putInt(PrefKeys.TOTAL_STARS, totalStars + stars - existingStars)
+        editor.putInt(PrefKeys.TOTAL_GAMES_PLAYED, prefs.getInt(PrefKeys.TOTAL_GAMES_PLAYED, 0) + 1)
+        editor.putInt(PrefKeys.TOTAL_STARS, prefs.getInt(PrefKeys.TOTAL_STARS, 0) + stars - existingStars)
         checkAchievements(editor)
         editor.apply()
     }
@@ -94,44 +79,29 @@ object GameState {
 
     fun isGameCompleted(gameId: String): Boolean {
         checkInitialized()
-        val maxLevels = getMaxLevels(gameId)
-        return (1..maxLevels).all { level -> isLevelCompleted(gameId, level) }
+        return (1..getMaxLevels(gameId)).all { isLevelCompleted(gameId, it) }
     }
 
     fun resetGame(gameId: String) {
         checkInitialized()
         val editor = prefs.edit()
         editor.remove("${gameId}_stars"); editor.remove("${gameId}_max_level")
-        val maxLevels = getMaxLevels(gameId)
-        for (i in 1..maxLevels) { editor.remove("${gameId}_level_$i"); editor.remove("${gameId}_stars_level_$i") }
+        for (i in 1..getMaxLevels(gameId)) { editor.remove("${gameId}_level_$i"); editor.remove("${gameId}_stars_level_$i") }
         editor.apply()
     }
 
-    fun resetAllProgress() {
-        checkInitialized()
-        prefs.edit().clear().apply()
-        prefs.edit().putInt(PrefKeys.DATA_VERSION, DATA_VERSION).apply()
-    }
+    fun resetAllProgress() { checkInitialized(); prefs.edit().clear().apply(); prefs.edit().putInt(PrefKeys.DATA_VERSION, DATA_VERSION).apply() }
 
     fun getOverallProgress(): Map<String, Pair<Int, Int>> {
         checkInitialized()
         val games = listOf("coloring", "musicbox", "memorypuzzle", "feedkuzya", "seasons", "karaoke", "learningsongs")
         val maxLevels = listOf(MAX_COLORING_LEVELS, MAX_MUSICBOX_LEVELS, MAX_MEMORYPUZZLE_LEVELS, MAX_FEEDKUZYA_LEVELS, MAX_SEASONS_LEVELS, MAX_KARAOKE_LEVELS, MAX_LEARNINGSONGS_LEVELS)
-        return games.zip(maxLevels).associate { (gameId, maxLevel) ->
-            val completed = (1..maxLevel).count { level -> isLevelCompleted(gameId, level) }
-            gameId to Pair(completed, maxLevel)
-        }
+        return games.zip(maxLevels).associate { (gameId, maxLevel) -> gameId to Pair((1..maxLevel).count { isLevelCompleted(gameId, it) }, maxLevel) }
     }
 
     fun getPlayerStats(): PlayerStats {
         checkInitialized()
-        return PlayerStats(
-            totalGamesPlayed = prefs.getInt(PrefKeys.TOTAL_GAMES_PLAYED, 0),
-            totalStars = prefs.getInt(PrefKeys.TOTAL_STARS, 0),
-            dailyStreak = prefs.getInt(PrefKeys.DAILY_STREAK, 0),
-            gamesCompleted = listOf("coloring", "musicbox", "memorypuzzle", "feedkuzya", "seasons", "karaoke", "learningsongs").count { isGameCompleted(it) },
-            totalGames = 7
-        )
+        return PlayerStats(prefs.getInt(PrefKeys.TOTAL_GAMES_PLAYED, 0), prefs.getInt(PrefKeys.TOTAL_STARS, 0), prefs.getInt(PrefKeys.DAILY_STREAK, 0), listOf("coloring", "musicbox", "memorypuzzle", "feedkuzya", "seasons", "karaoke", "learningsongs").count { isGameCompleted(it) }, 7)
     }
 
     fun setMusicEnabled(enabled: Boolean) { checkInitialized(); prefs.edit().putBoolean(PrefKeys.SETTINGS_MUSIC, enabled).apply() }
@@ -148,32 +118,32 @@ object GameState {
     private fun checkAchievements(editor: SharedPreferences.Editor) {
         val achievements = getAchievements().toMutableList()
         var updated = false
-        achievements.forEachIndexed { index, achievement ->
-            if (!achievement.isUnlocked) {
-                val shouldUnlock = when (achievement.id) {
+        achievements.forEachIndexed { index, a ->
+            if (!a.isUnlocked) {
+                val unlock = when (a.id) {
                     "first_level" -> true; "all_coloring" -> isGameCompleted("coloring"); "all_music" -> isGameCompleted("musicbox")
                     "all_puzzle" -> isGameCompleted("memorypuzzle"); "all_feeding" -> isGameCompleted("feedkuzya")
                     "all_seasons" -> isGameCompleted("seasons"); "all_karaoke" -> isGameCompleted("karaoke")
                     "all_learningsongs" -> isGameCompleted("learningsongs"); "ten_stars" -> getOverallStars() >= 10
                     "fifty_stars" -> getOverallStars() >= 50; "hundred_stars" -> getOverallStars() >= 100
-                    "all_games" -> listOf("coloring", "musicbox", "memorypuzzle", "feedkuzya", "seasons", "karaoke", "learningsongs").all { isGameCompleted(it) }
+                    "all_games" -> listOf("coloring","musicbox","memorypuzzle","feedkuzya","seasons","karaoke","learningsongs").all { isGameCompleted(it) }
                     else -> false
                 }
-                if (shouldUnlock) { achievements[index] = achievement.copy(isUnlocked = true, unlockDate = System.currentTimeMillis()); updated = true }
+                if (unlock) { achievements[index] = a.copy(isUnlocked = true, unlockDate = System.currentTimeMillis()); updated = true }
             }
         }
-        if (updated) { val json = gson.toJson(achievements); editor.putString(PrefKeys.ACHIEVEMENTS, json) }
+        if (updated) editor.putString(PrefKeys.ACHIEVEMENTS, gson.toJson(achievements))
     }
 
     private fun updateDailyStreak() {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val lastLogin = prefs.getString(PrefKeys.LAST_LOGIN_DATE, null)
-        val currentStreak = prefs.getInt(PrefKeys.DAILY_STREAK, 0)
+        val last = prefs.getString(PrefKeys.LAST_LOGIN_DATE, null)
+        val streak = prefs.getInt(PrefKeys.DAILY_STREAK, 0)
         val editor = prefs.edit()
-        if (lastLogin == null) { editor.putString(PrefKeys.LAST_LOGIN_DATE, today); editor.putInt(PrefKeys.DAILY_STREAK, 1) }
-        else if (lastLogin != today) {
-            val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000))
-            editor.putInt(PrefKeys.DAILY_STREAK, if (lastLogin == yesterday) currentStreak + 1 else 1)
+        if (last == null) { editor.putString(PrefKeys.LAST_LOGIN_DATE, today); editor.putInt(PrefKeys.DAILY_STREAK, 1) }
+        else if (last != today) {
+            val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(System.currentTimeMillis() - 86400000))
+            editor.putInt(PrefKeys.DAILY_STREAK, if (last == yesterday) streak + 1 else 1)
             editor.putString(PrefKeys.LAST_LOGIN_DATE, today)
         }
         editor.apply()
@@ -183,13 +153,29 @@ object GameState {
 
     fun isFirstLaunch(): Boolean {
         checkInitialized()
-        val isFirst = prefs.getBoolean(PrefKeys.FIRST_LAUNCH, true)
-        if (isFirst) prefs.edit().putBoolean(PrefKeys.FIRST_LAUNCH, false).apply()
-        return isFirst
+        return if (prefs.getBoolean(PrefKeys.FIRST_LAUNCH, true)) { prefs.edit().putBoolean(PrefKeys.FIRST_LAUNCH, false).apply(); true } else false
     }
 
     fun setPlayerName(name: String) { checkInitialized(); prefs.edit().putString(PrefKeys.PLAYER_NAME, name).apply() }
     fun getPlayerName(): String { checkInitialized(); return prefs.getString(PrefKeys.PLAYER_NAME, "Игрок") ?: "Игрок" }
+
+    // ✅ ВОТ ЭТА ФУНКЦИЯ — добавлена!
+    private fun checkDataMigration() {
+        if (prefs.getInt(PrefKeys.DATA_VERSION, 0) < DATA_VERSION) {
+            val old = prefs.getInt("karaoke_max_level", 0)
+            if (old > 0) {
+                val editor = prefs.edit()
+                for (i in 1..old) {
+                    if (prefs.getBoolean("karaoke_level_$i", false)) {
+                        editor.putBoolean("karaoke_level_$i", true)
+                        editor.putInt("karaoke_stars_level_$i", prefs.getInt("karaoke_stars_level_$i", 3))
+                    }
+                }
+                editor.putInt("karaoke_max_level", old).apply()
+            }
+            prefs.edit().putInt(PrefKeys.DATA_VERSION, DATA_VERSION).apply()
+        }
+    }
 
     private fun checkInitialized() { if (!isInitialized) throw IllegalStateException("GameState не инициализирован!") }
 
@@ -203,14 +189,14 @@ object GameState {
                 Achievement("all_coloring", "Художник", "Пройти всю раскраску", "🎨"),
                 Achievement("all_music", "Музыкант", "Пройти музыкальную шкатулку", "🎵"),
                 Achievement("all_puzzle", "Пазломастер", "Собрать все пазлы", "🧩"),
-                Achievement("all_feeding", "Заботливый друг", "Накормить Кнопу во всех уровнях", "🐱"),
+                Achievement("all_feeding", "Заботливый друг", "Накормить Кнопу", "🐱"),
                 Achievement("all_seasons", "Натуралист", "Изучить все времена года", "🌍"),
                 Achievement("all_karaoke", "Певец", "Посмотреть караоке", "🎤"),
-                Achievement("all_learningsongs", "Мудрец", "Прослушать все поучительные песни", "🎶"),
+                Achievement("all_learningsongs", "Мудрец", "Прослушать все песни", "🎶"),
                 Achievement("ten_stars", "Звёздный начинающий", "Собрать 10 звёзд", "⭐"),
                 Achievement("fifty_stars", "Звёздный мастер", "Собрать 50 звёзд", "🌟"),
                 Achievement("hundred_stars", "Звёздный чемпион", "Собрать 100 звёзд", "💫"),
-                Achievement("all_games", "Почётный гость Василисы", "Пройти все игры полностью", "👸")
+                Achievement("all_games", "Почётный гость Василисы", "Пройти все игры", "👸")
             )
         }
     }
