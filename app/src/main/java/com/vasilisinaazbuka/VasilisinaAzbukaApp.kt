@@ -100,6 +100,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
         Row(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
 
+            // ========== ЛЕВАЯ ПАНЕЛЬ 1/3 ==========
             Column(Modifier.weight(1f).fillMaxHeight().padding(end = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
                     Text("В гостях у\nВасилисы", Modifier.padding(14.dp), style = MaterialTheme.typography.titleMedium, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -131,7 +132,8 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
             Spacer(Modifier.width(12.dp))
 
-            Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // ========== ПРАВАЯ ПАНЕЛЬ 2/3 — КНОПКИ В СТОЛБИК ==========
+            Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 val games = listOf(
                     GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Раскрась картинки"),
                     GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай и угадывай"),
@@ -142,16 +144,10 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                     GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "10 песен")
                 )
 
-                for (row in listOf(0..2, 3..5, 6..6)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        for (col in row) {
-                            if (col < games.size) {
-                                val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
-                                val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
-                                GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
-                            } else { Spacer(Modifier.weight(1f)) }
-                        }
-                    }
+                games.forEach { g ->
+                    val p = gameProgress[g.gameId]; val c = p?.first ?: 0
+                    val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
+                    GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.fillMaxWidth())
                 }
             }
         }
@@ -161,26 +157,26 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 @Composable
 private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val scale by animateFloatAsState(targetValue = if (isCompleted) 1.03f else 1f, animationSpec = spring(dampingRatio = 0.5f), label = "cardScale")
-    val isSmall = game.gameId == "learningsongs"
     Card(
-        modifier
-            .then(if (isSmall) Modifier.aspectRatio(0.35f) else Modifier.aspectRatio(1.5f))
-            .scale(scale).clickable(onClick = onClick),
+        modifier.height(72.dp).scale(scale).clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = if (isCompleted) FairyGreen.copy(alpha = 0.08f) else Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text(game.emoji, fontSize = if (isSmall) 24.sp else 32.sp)
-            Spacer(Modifier.height(4.dp))
-            Text(game.name, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 15.sp, fontSize = if (isSmall) 11.sp else 13.sp)
-            Text(game.description, style = MaterialTheme.typography.labelSmall, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (total > 1) {
-                Spacer(Modifier.height(2.dp))
-                LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f))
-                Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal, fontSize = 9.sp)
+        Row(Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(game.emoji, fontSize = 36.sp)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(game.name, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(game.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            if (isCompleted) Text("✅", fontSize = 14.sp)
+            if (total > 1) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), Modifier.width(60.dp).height(4.dp).clip(RoundedCornerShape(2.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f))
+                    Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal, fontSize = 9.sp)
+                }
+            }
+            if (isCompleted) Text("✅", fontSize = 18.sp)
         }
     }
 }
