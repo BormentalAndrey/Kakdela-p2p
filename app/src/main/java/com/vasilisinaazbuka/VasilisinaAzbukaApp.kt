@@ -100,7 +100,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
         Row(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
 
-            // ========== ЛЕВАЯ ПАНЕЛЬ 1/3 ==========
             Column(Modifier.weight(1f).fillMaxHeight().padding(end = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
                     Text("В гостях у\nВасилисы", Modifier.padding(14.dp), style = MaterialTheme.typography.titleMedium, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -132,7 +131,6 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
             Spacer(Modifier.width(12.dp))
 
-            // ========== ПРАВАЯ ПАНЕЛЬ 2/3 ==========
             Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 val games = listOf(
                     GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Раскрась картинки"),
@@ -163,12 +161,19 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 @Composable
 private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val scale by animateFloatAsState(targetValue = if (isCompleted) 1.03f else 1f, animationSpec = spring(dampingRatio = 0.5f), label = "cardScale")
-    // ПРЯМОУГОЛЬНАЯ кнопка: ширина > высоты (aspectRatio < 1)
-    Card(modifier.aspectRatio(0.7f).scale(scale).clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = if (isCompleted) FairyGreen.copy(alpha = 0.08f) else Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+    val isSmall = game.gameId == "learningsongs"
+    Card(
+        modifier
+            .then(if (isSmall) Modifier.aspectRatio(0.35f) else Modifier.aspectRatio(1.5f))
+            .scale(scale).clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = if (isCompleted) FairyGreen.copy(alpha = 0.08f) else Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
         Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text(game.emoji, fontSize = 32.sp)
+            Text(game.emoji, fontSize = if (isSmall) 24.sp else 32.sp)
             Spacer(Modifier.height(4.dp))
-            Text(game.name, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 15.sp, fontSize = 13.sp)
+            Text(game.name, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 15.sp, fontSize = if (isSmall) 11.sp else 13.sp)
             Text(game.description, style = MaterialTheme.typography.labelSmall, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (total > 1) {
                 Spacer(Modifier.height(2.dp))
