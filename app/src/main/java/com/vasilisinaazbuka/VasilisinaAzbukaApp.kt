@@ -98,20 +98,14 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
         Image(painterResource(R.drawable.bg_level_menu), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.25f)
         Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.35f)))
 
-        // ГОРИЗОНТАЛЬНЫЙ ЛЕЙАУТ С ПРОКРУТКОЙ
         Row(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
 
-            // ========== ЛЕВАЯ ПАНЕЛЬ 1/3 — ПЕРСОНАЖИ ==========
+            // ========== ЛЕВАЯ ПАНЕЛЬ 1/3 ==========
             Column(Modifier.weight(1f).fillMaxHeight().padding(end = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-
-                // Заголовок
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
                     Text("В гостях у\nВасилисы", Modifier.padding(12.dp), style = MaterialTheme.typography.titleMedium, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
-
                 Spacer(Modifier.height(12.dp))
-
-                // Василиса и Кнопа в одной карточке
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp)) {
                     Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -129,9 +123,7 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
                         }
                     }
                 }
-
                 Spacer(Modifier.height(8.dp))
-
                 val totalStars = GameState.getOverallStars()
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) {
                     Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) { Text("⭐", fontSize = 18.sp); Spacer(Modifier.width(4.dp)); Text("Звёзд: $totalStars", fontWeight = FontWeight.Bold, color = FairyGold, fontSize = 12.sp) }
@@ -140,19 +132,18 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 
             Spacer(Modifier.width(8.dp))
 
-            // ========== ПРАВАЯ ПАНЕЛЬ 2/3 — ИГРЫ ==========
+            // ========== ПРАВАЯ ПАНЕЛЬ 2/3 ==========
             Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 val games = listOf(
                     GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Рисуй"),
-                    GameMenuItem("🎵", "Муз. шкатулка", Routes.MusicBox.route, "musicbox", "Слушай"),
+                    GameMenuItem("🎵", "Музыкальная\nшкатулка", Routes.MusicBox.route, "musicbox", "Слушай"),
                     GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Пазлы"),
                     GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Тамагочи"),
                     GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Сезоны"),
                     GameMenuItem("🎬", "Караоке", Routes.Karaoke.createRoute(1), "karaoke", "Подпевай"),
-                    GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "Слушай")
+                    GameMenuItem("🎶", "Поучительные\nпесни", Routes.LearningSongs.createRoute(1), "learningsongs", "Слушай")
                 )
 
-                // 3 строки по 3 игры
                 for (row in listOf(0..2, 3..5, 6..6)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (col in row) {
