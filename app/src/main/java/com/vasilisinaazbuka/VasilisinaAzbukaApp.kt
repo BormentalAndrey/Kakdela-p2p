@@ -63,8 +63,7 @@ fun VasilisinaAzbukaApp() {
             SeasonsScreen(stage, { if (stage < GameState.MAX_SEASONS_LEVELS) navController.navigate(Routes.Seasons.createRoute(stage + 1)) { popUpTo(Routes.Seasons.createRoute(stage)) { inclusive = true } } }, { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, { navController.popBackStack() })
         }
         composable(Routes.Karaoke.route, arguments = Routes.Karaoke.arguments()) { backStackEntry ->
-            val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
-            KaraokeScreen(songIndex = songIndex, stage = 1, onNextStage = {}, onNextSong = {}, onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, onBack = { navController.popBackStack() })
+            KaraokeScreen(songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1, stage = 1, onNextStage = {}, onNextSong = {}, onGameComplete = { navController.navigate(Routes.Menu.route) { popUpTo(Routes.Menu.route) { inclusive = true } } }, onBack = { navController.popBackStack() })
         }
         composable(Routes.LearningSongs.route, arguments = Routes.LearningSongs.arguments()) { backStackEntry ->
             val songIndex = backStackEntry.arguments?.getInt("songIndex") ?: 1
@@ -112,81 +111,81 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
         Image(painterResource(R.drawable.bg_level_menu), "Фон", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.25f)
         Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.35f)))
 
-        // ВЕСЬ ЭКРАН С ПРОКРУТКОЙ
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Заголовок
-            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
-                Text("В гостях у Василисы", Modifier.padding(16.dp), style = MaterialTheme.typography.headlineSmall, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            }
+        Row(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+            // ЛЕВАЯ ПАНЕЛЬ — ПЕРСОНАЖИ (1/3)
+            Column(Modifier.weight(0.33f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.15f)), elevation = CardDefaults.cardElevation(4.dp)) {
+                    Text("В гостях у Василисы", Modifier.padding(14.dp), style = MaterialTheme.typography.titleMedium, color = FairyGold, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                }
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(20.dp))
 
-            // Персонажи в ряд
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp), modifier = Modifier.weight(1f).padding(4.dp)) {
-                    Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.size(60.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(2.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
-                            Image(painterResource(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> R.drawable.character_vasilisa_proud; "teacher" -> R.drawable.character_vasilisa_teacher; else -> R.drawable.character_vasilisa_happy }), "Василиса", Modifier.fillMaxSize().padding(6.dp), contentScale = ContentScale.Fit)
+                // Василиса
+                Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                    Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyBlue.copy(alpha = 0.3f), FairyBlue.copy(alpha = 0.1f)))).border(3.dp, FairyBlue, CircleShape), contentAlignment = Alignment.Center) {
+                            Image(painterResource(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> R.drawable.character_vasilisa_proud; "teacher" -> R.drawable.character_vasilisa_teacher; else -> R.drawable.character_vasilisa_happy }), "Василиса", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                         }
-                        Spacer(Modifier.height(4.dp))
-                        Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 13.sp)
-                        Text(when (vasilisaEmotions[vasilisaIndex]) { "proud" -> "Гордится!"; "teacher" -> "Учит"; else -> "Помогает" }, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Василиса", fontWeight = FontWeight.Bold, color = FairyBlue, fontSize = 16.sp)
+                        Text("Твой учитель и проводник", color = Color.Gray, fontSize = 11.sp, textAlign = TextAlign.Center)
                     }
                 }
-                Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp), modifier = Modifier.weight(1f).padding(4.dp)) {
-                    Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.size(60.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(2.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
-                            Image(painterResource(knopaImg), "Кнопа", Modifier.fillMaxSize().padding(6.dp), contentScale = ContentScale.Fit)
+
+                Spacer(Modifier.height(16.dp))
+
+                // Кнопа
+                Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(6.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                    Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(Modifier.size(70.dp).clip(CircleShape).background(Brush.radialGradient(listOf(FairyPink.copy(alpha = 0.3f), FairyPink.copy(alpha = 0.1f)))).border(3.dp, FairyPink, CircleShape), contentAlignment = Alignment.Center) {
+                            Image(painterResource(knopaImg), "Кнопа", Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
                         }
-                        Spacer(Modifier.height(4.dp))
-                        Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 13.sp)
-                        Text(knopaWant, color = Color.Gray, fontSize = 10.sp, textAlign = TextAlign.Center, maxLines = 2)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Кнопа", fontWeight = FontWeight.Bold, color = FairyPink, fontSize = 16.sp)
+                        Text(knopaWant, color = Color.Gray, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                val totalStars = GameState.getOverallStars()
+                Card(Modifier.fillMaxWidth().padding(horizontal = 8.dp), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) {
+                    Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("⭐", fontSize = 22.sp); Spacer(Modifier.width(6.dp))
+                        Text("Всего звёзд: $totalStars", fontWeight = FontWeight.Bold, color = FairyGold, fontSize = 14.sp)
                     }
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.width(16.dp))
 
-            // Звёзды
-            val totalStars = GameState.getOverallStars()
-            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = FairyGold.copy(alpha = 0.1f))) {
-                Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("⭐", fontSize = 20.sp); Spacer(Modifier.width(6.dp))
-                    Text("Всего звёзд: $totalStars", fontWeight = FontWeight.Bold, color = FairyGold, fontSize = 13.sp)
+            // ПРАВАЯ ПАНЕЛЬ — ИГРЫ (2/3)
+            Column(Modifier.weight(0.67f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                val games = listOf(
+                    GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Раскрась картинки из разных городов"),
+                    GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай, повторяй и угадывай звуки"),
+                    GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Запомни и собери пазл по памяти"),
+                    GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Ухаживай за котом-тамагочи"),
+                    GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "Разложи предметы по сезонам"),
+                    GameMenuItem("🎬", "Караоке", Routes.Karaoke.createRoute(1), "karaoke", "Смотри видео и подпевай"),
+                    GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "Слушай песни и отвечай на вопросы")
+                )
+
+                // Первая строка — 4 игры
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 0..3) {
+                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
+                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
+                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
+                    }
                 }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // СЕТКА ИГР — ВСЕ ОДИНАКОВОГО РАЗМЕРА
-            val games = listOf(
-                GameMenuItem("🎨", "Раскраска", Routes.ColoringSelect.route, "coloring", "Рисуй пальчиком"),
-                GameMenuItem("🎵", "Музыкальная шкатулка", Routes.MusicBox.route, "musicbox", "Слушай звуки"),
-                GameMenuItem("🧩", "Собери картинку", Routes.MemoryPuzzle.createRoute(1), "memorypuzzle", "Пазлы 3×2"),
-                GameMenuItem("🐱", "Накорми Кнопу", Routes.FeedKuzya.createRoute(1), "feedkuzya", "Тамагочи-кот"),
-                GameMenuItem("❄️", "Времена года", Routes.Seasons.createRoute(1), "seasons", "4 сезона"),
-                GameMenuItem("🎬", "Караоке", Routes.Karaoke.createRoute(1), "karaoke", "Смотри видео"),
-                GameMenuItem("🎶", "Поучительные песни", Routes.LearningSongs.createRoute(1), "learningsongs", "10 песен")
-            )
-
-            // 2 строки: 4 + 3
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (col in 0..3) {
-                    val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
-                    val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
-                    GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (col in 4..6) {
-                    val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
-                    val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
-                    GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
+                // Вторая строка — 3 игры
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 4..6) {
+                        val g = games[col]; val p = gameProgress[g.gameId]; val c = p?.first ?: 0
+                        val t = p?.second ?: when (g.gameId) { "coloring" -> 5; "musicbox" -> 1; "memorypuzzle" -> 5; "feedkuzya" -> 5; "seasons" -> 4; "karaoke" -> 1; "learningsongs" -> 10; else -> 5 }
+                        GameCard(g, c, t, c >= t, { onGameSelected(g.route) }, Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -197,21 +196,24 @@ fun MainMenuScreen(onGameSelected: (String) -> Unit) {
 private fun GameCard(game: GameMenuItem, completed: Int, total: Int, isCompleted: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val scale by animateFloatAsState(targetValue = if (isCompleted) 1.03f else 1f, animationSpec = spring(dampingRatio = 0.5f), label = "cardScale")
     Card(
-        modifier.aspectRatio(0.95f).scale(scale).clickable(onClick = onClick),
+        modifier.aspectRatio(1.0f).scale(scale).clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = if (isCompleted) FairyGreen.copy(alpha = 0.08f) else Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text(game.emoji, fontSize = 32.sp)
-            Text(game.name, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 14.sp)
-            Text(game.description, style = MaterialTheme.typography.labelSmall, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Column(Modifier.fillMaxSize().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Text(game.emoji, fontSize = 34.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(game.name, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (isCompleted) FairyGreen else FairyBlue, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 15.sp, fontSize = 13.sp)
+            Spacer(Modifier.height(2.dp))
+            Text(game.description, style = MaterialTheme.typography.labelSmall, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 12.sp)
             if (total > 1) {
+                Spacer(Modifier.height(4.dp))
+                LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f))
                 Spacer(Modifier.height(2.dp))
-                LinearProgressIndicator(progress = completed.toFloat() / total.toFloat(), Modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(2.dp)), color = if (isCompleted) FairyGreen else FairyGold, trackColor = Color.Gray.copy(alpha = 0.15f))
-                Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal, fontSize = 8.sp)
+                Text("$completed/$total", style = MaterialTheme.typography.labelSmall, color = if (isCompleted) FairyGreen else Color.Gray, fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.Normal, fontSize = 10.sp)
             }
-            if (isCompleted) Text("✅", fontSize = 14.sp)
+            if (isCompleted) Text("✅", fontSize = 16.sp)
         }
     }
 }
